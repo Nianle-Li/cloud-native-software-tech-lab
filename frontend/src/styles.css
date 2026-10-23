@@ -1,0 +1,84 @@
+:root {
+  font-family: Inter, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  color: #183047;
+  background: #f3f7fa;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; min-width: 320px; }
+
+button, input, textarea { font: inherit; }
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  color: #fff;
+  background: #176d88;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) { background: #11556a; }
+button:disabled { cursor: not-allowed; opacity: 0.6; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #74bad1; outline-offset: 2px; }
+
+.app-shell { width: min(1080px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 4rem; }
+.page-header { margin-bottom: 1.6rem; }
+.page-header h1 { margin: 0.35rem 0; font-size: clamp(2rem, 4vw, 3rem); }
+.page-header p { margin: 0; color: #4d6678; }
+.eyebrow { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; color: #176d88 !important; }
+
+.panel {
+  margin-top: 1.2rem;
+  padding: 1.4rem;
+  border: 1px solid #dae5eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 16px rgb(26 58 77 / 5%);
+}
+
+.section-heading { margin-bottom: 1rem; }
+.section-heading h2 { margin: 0 0 0.25rem; font-size: 1.35rem; }
+.section-heading p { margin: 0; color: #60798a; }
+.notice { padding: 0.8rem 1rem; border-radius: 8px; }
+.notice.error { color: #87352b; background: #fff0ed; }
+.notice.success { color: #196247; background: #e8f7ef; }
+.empty-state { padding: 1rem; border-radius: 8px; color: #60798a; background: #f5f8fa; }
+
+.venue-list, .reservation-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+.venue-list { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.venue-card, .reservation-card { padding: 1rem; border: 1px solid #d9e4e9; border-radius: 10px; }
+.venue-card.selected { border-color: #176d88; }
+.venue-card h3, .reservation-card h3 { margin: 0; font-size: 1.05rem; }
+.venue-card p { color: #5b7282; }
+.venue-card button { width: 100%; }
+.venue-details { margin-top: 1rem; padding: 1rem; border-radius: 10px; background: #eef6f9; }
+.venue-details h3 { margin-top: 0; }
+.venue-details p { margin: 0.35rem 0; }
+
+.booking-form h3 { margin: 0; }
+.form-context { margin: 0.4rem 0 1rem; color: #5b7282; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; margin-bottom: 1rem; }
+.form-grid label { display: flex; flex-direction: column; gap: 0.35rem; font-weight: 600; }
+.form-grid .full-width { grid-column: 1 / -1; }
+.form-grid input, .form-grid textarea { width: 100%; padding: 0.65rem; border: 1px solid #b8cbd5; border-radius: 8px; background: #fff; color: #183047; }
+
+.reservation-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.status { border-radius: 999px; padding: 0.3rem 0.7rem; font-size: 0.85rem; }
+.status.active { color: #156145; background: #e5f5ed; }
+.status.cancelled { color: #6c7280; background: #edf0f3; }
+.reservation-card dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem 1rem; }
+.reservation-card dl div { display: flex; gap: 0.5rem; }
+.reservation-card dt { color: #61798a; }
+.reservation-card dd { margin: 0; overflow-wrap: anywhere; }
+button.secondary { background: #fff; color: #176d88; border: 1px solid #176d88; }
+button.secondary:hover:not(:disabled) { background: #eef6f9; }
+
+@media (max-width: 640px) {
+  .app-shell { width: min(100% - 1rem, 1080px); padding-top: 1rem; }
+  .panel { padding: 1rem; }
+  .form-grid, .reservation-card dl { grid-template-columns: 1fr; }
+}
