@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { bookingApi } from './api/booking'
 import { ApiError } from './api/client'
-import { ReservationForm } from './components/ReservationForm'
-import { ReservationList } from './components/ReservationList'
-import { VenueList } from './components/VenueList'
+import { useRoute } from './navigation'
+import { BookingPage } from './pages/BookingPage'
+import { HomePage } from './pages/HomePage'
+import { ReservationsPage } from './pages/ReservationsPage'
+import { emptyReservationDraft } from './reservationDraft'
+import type { ReservationDraft } from './reservationDraft'
 import type { CreateReservationInput, Reservation, Venue } from './types'
 import { validateReservation } from './validation/reservation'
 
@@ -18,19 +21,25 @@ function mutationErrorMessage(error: unknown, operation: string): string {
   return messageFor(error)
 }
 
+function scrollToPageTop() {
+  if (window.scrollY > 0) window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+}
+
 export default function App() {
+  const route = useRoute()
   const [venues, setVenues] = useState<Venue[]>([])
   const [reservations, setReservations] = useState<Reservation[]>([])
-  const [selectedVenueId, setSelectedVenueId] = useState<number | null>(null)
-  const [showVenueDetails, setShowVenueDetails] = useState(false)
+  const [draftByVenue, setDraftByVenue] = useState<Record<number, ReservationDraft>>({})
   const [loadingVenues, setLoadingVenues] = useState(true)
   const [loadingReservations, setLoadingReservations] = useState(true)
   const [venueError, setVenueError] = useState('')
   const [reservationError, setReservationError] = useState('')
   const [actionError, setActionError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [actionOrigin, setActionOrigin] = useState<'booking' | 'reservations'>('booking')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [cancellingId, setCancellingId] = useState<number | null>(null)
+  const [feedbackReservationId, setFeedbackReservationId] = useState<number | null>(null)
   const [venueReloadKey, setVenueReloadKey] = useState(0)
   const [reservationReloadKey, setReservationReloadKey] = useState(0)
   // 写入成功后让更早发出的列表响应失效。
@@ -39,6 +48,8 @@ export default function App() {
   const mutationRevision = useRef(0)
   const submittingRef = useRef(false)
   const cancellingRef = useRef(false)
+
+  useLayoutEffect(scrollToPageTop, [route])
 
   useEffect(() => {
     let active = true
@@ -49,10 +60,6 @@ export default function App() {
       .then((items) => {
         if (!active) return
         setVenues(items)
-        setSelectedVenueId((current) => {
-          if (items.some((venue) => venue.id === current)) return current
-          return items.find((venue) => venue.status === 'OPEN')?.id ?? items[0]?.id ?? null
-        })
       })
       .catch((error: unknown) => {
         if (active) setVenueError(messageFor(error))
@@ -87,10 +94,13 @@ export default function App() {
     return () => { active = false }
   }, [reservationReloadKey])
 
-  const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null
+  const bookingVenue = route.kind === 'booking'
+    ? venues.find((venue) => venue.id === route.venueId) ?? null
+    : null
 
   async function createReservation(input: CreateReservationInput): Promise<boolean> {
     if (submittingRef.current) return false
+    setActionOrigin('booking')
     mutationRevision.current += 1
     const venue = venues.find((item) => item.id === input.venue_id)
     const validationError = venue
@@ -126,6 +136,8 @@ export default function App() {
   async function cancelReservation(id: number): Promise<void> {
     if (cancellingRef.current) return
     cancellingRef.current = true
+    setActionOrigin('reservations')
+    setFeedbackReservationId(id)
     mutationRevision.current += 1
     setCancellingId(id)
     setActionError('')
@@ -146,83 +158,68 @@ export default function App() {
   }
 
   return (
-    <main className="app-shell">
-      <header className="page-header">
-        <p className="eyebrow">云原生软件技术 · Lab 1</p>
-        <h1>场地预约系统</h1>
-        <p>查看场地、创建预约并管理预约记录。</p>
+    <div className="page-frame">
+      <header className="site-header">
+        <a className="brand" href="#/" aria-label="场地预约系统，返回场地概览">
+          <span className="brand-mark" aria-hidden="true"><span /><span /><span /><span /></span>
+          <span className="brand-name">场地预约<span>Venue Booking</span></span>
+        </a>
+        <nav className="site-nav" aria-label="页面导航">
+          <a href="#/" aria-current={route.kind === 'home' ? 'page' : undefined} onClick={route.kind === 'home' ? scrollToPageTop : undefined}>场地概览</a>
+          <a href="#/reservations" aria-current={route.kind === 'reservations' ? 'page' : undefined} onClick={route.kind === 'reservations' ? scrollToPageTop : undefined}>预约记录</a>
+        </nav>
       </header>
 
-      {actionError && <p role="alert" className="notice error">{actionError}</p>}
-      {successMessage && <p role="status" className="notice success">{successMessage}</p>}
-
-      <section aria-labelledby="venues-heading" className="panel">
-        <div className="section-heading">
-          <h2 id="venues-heading">场地列表</h2>
-          <p>选择场地查看开放时间和可容纳人数。</p>
-          <button type="button" className="secondary refresh-button" disabled={loadingVenues} onClick={() => setVenueReloadKey((current) => current + 1)}>
-            刷新场地列表
-          </button>
-        </div>
-        {loadingVenues ? <p>正在加载场地…</p> : venueError ? <p role="alert" className="notice error">{venueError}</p> : (
-          <VenueList
+      <main className="app-shell">
+        {route.kind === 'home' && (
+          <HomePage
             venues={venues}
-            selectedVenueId={selectedVenueId}
-            onSelect={(id) => {
-              setSelectedVenueId(id)
-              setShowVenueDetails(true)
-            }}
+            loadingVenues={loadingVenues}
+            venueError={venueError}
+            onRefreshVenues={() => setVenueReloadKey((current) => current + 1)}
           />
         )}
-        {!loadingVenues && !venueError && showVenueDetails && selectedVenue && (
-          <div className="venue-details">
-            <h3>{selectedVenue.name} · 场地详情</h3>
-            <p>{selectedVenue.location}</p>
-            <p>开放时间：{selectedVenue.open_time}–{selectedVenue.close_time}</p>
-            <p>可容纳人数：{selectedVenue.capacity}</p>
-            <p>状态：{selectedVenue.status === 'OPEN' ? '开放中' : '已停用'}</p>
-          </div>
-        )}
-      </section>
 
-      <section aria-labelledby="booking-heading" className="panel">
-        <div className="section-heading">
-          <h2 id="booking-heading">预约场地</h2>
-          <p>最终是否可预约由服务器核验；提交后会显示结果。</p>
-        </div>
-        {selectedVenue?.status === 'OPEN' ? (
-          <>
-            {loadingVenues && <p className="empty-state">正在更新场地信息…</p>}
-            {venueError && <p className="empty-state">场地信息暂不可用，请刷新场地列表。</p>}
-            <ReservationForm
-              key={selectedVenue.id}
-              venue={selectedVenue}
-              isSubmitting={isSubmitting}
-              isUnavailable={loadingVenues || Boolean(venueError)}
-              onCreate={createReservation}
-            />
-          </>
-        ) : loadingVenues ? (
-          <p className="empty-state">{venueReloadKey === 0 ? '正在加载场地信息…' : '正在更新场地信息…'}</p>
-        ) : venueError ? (
-          <p className="empty-state">场地信息暂不可用，请刷新场地列表。</p>
-        ) : (
-          <p className="empty-state">{selectedVenue ? '该场地已停用，无法预约。' : '请先选择一个开放中的场地。'}</p>
+        {route.kind === 'booking' && (
+          <BookingPage
+            venue={bookingVenue}
+            draft={draftByVenue[route.venueId] ?? emptyReservationDraft()}
+            onDraftChange={(draft) => setDraftByVenue((current) => ({ ...current, [route.venueId]: draft }))}
+            loadingVenues={loadingVenues}
+            venueError={venueError}
+            isSubmitting={isSubmitting}
+            actionError={actionOrigin === 'booking' ? actionError : ''}
+            successMessage={actionOrigin === 'booking' ? successMessage : ''}
+            onRefreshVenues={() => setVenueReloadKey((current) => current + 1)}
+            onCreate={createReservation}
+          />
         )}
-      </section>
 
-      <section aria-labelledby="reservations-heading" className="panel">
-        <div className="section-heading">
-          <h2 id="reservations-heading">预约记录</h2>
-          <p>已取消的记录会保留，状态以服务器返回值为准。</p>
-          <button type="button" className="secondary refresh-button" disabled={loadingReservations} onClick={() => setReservationReloadKey((current) => current + 1)}>
-            刷新预约记录
-          </button>
-        </div>
-        {loadingReservations ? <p>正在加载预约记录…</p> : reservationError ? <p role="alert" className="notice error">{reservationError}</p> : (
-          <ReservationList reservations={reservations} venues={venues} cancellingId={cancellingId} onCancel={cancelReservation} />
+        {route.kind === 'reservations' && (
+          <ReservationsPage
+            reservations={reservations}
+            venues={venues}
+            loadingReservations={loadingReservations}
+            reservationError={reservationError}
+            cancellingId={cancellingId}
+            feedbackReservationId={feedbackReservationId}
+            actionError={actionOrigin === 'reservations' ? actionError : ''}
+            successMessage={actionOrigin === 'reservations' ? successMessage : ''}
+            onRefreshReservations={() => setReservationReloadKey((current) => current + 1)}
+            onCancel={cancelReservation}
+          />
         )}
-      </section>
-    </main>
+
+        {route.kind === 'notFound' && (
+          <section className="panel not-found-panel">
+            <p className="section-kicker">页面不存在</p>
+            <h1>无法打开这个页面</h1>
+            <p>请从场地概览重新选择场地。</p>
+            <a className="detail-book-link" href="#/">返回场地概览</a>
+          </section>
+        )}
+        <footer className="site-footer">场地预约系统</footer>
+      </main>
+    </div>
   )
 }
