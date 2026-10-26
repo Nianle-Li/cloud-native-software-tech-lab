@@ -1,6 +1,6 @@
 # 场地预约系统 · 云原生软件技术 Lab 1
 
-本仓库用于实现课程 Lab 1 的前端、Web API、关系数据库及 Docker Compose 三服务部署。前端源码与测试位于 `frontend/`；后端、数据库和完整 Compose 部署仍待实现。
+本仓库用于实现课程 Lab 1 的前端、Web API、关系数据库及 Docker Compose 三服务部署。前端源码与测试位于 `frontend/`；数据库迁移脚本、根目录 Compose 和环境变量模板已编写，独立 PostgreSQL/Flyway 验证已通过；后端及完整系统联调仍待完成。
 
 开发前请阅读：
 
@@ -9,6 +9,8 @@
 - [验收与实验报告清单](docs/acceptance.md)
 
 课程任务书《云原生软件技术-Lab1-场地预约系统开发与Docker容器化.pdf》由课程渠道获取，仅作本地参考，不纳入 Git；任务书要求优先于仓库文档。
+
+独立数据库验证可在 Docker 引擎运行且安装 Python 3.9 或更新版本后执行 `python3 scripts/verify-database.py`（Windows 可用 `python`）。脚本仅启动独立验证项目的数据库，临时运行 Flyway 并检查迁移、种子和约束；结束后停止容器、保留验证卷，不依赖后端，也不代表完整系统已通过验收。环境要求、复现步骤及实际结果见[验收清单第 4 节](docs/acceptance.md#4-c-的分阶段检查与进度)。
 
 ## 前端开发
 
@@ -43,7 +45,7 @@ npm run dev
 
 刷新页面后，当前模拟进程中的记录仍可见；停止模拟进程后数据即丢失。模拟 API 仅实现页面使用的接口，用于前端手动检查；它不是后端、数据库、持久化或完整系统验收证据。
 
-本地 Vite 把 `/api` 代理到 `VITE_API_PROXY_TARGET` 指定的后端；默认目标为 `http://127.0.0.1:8081`，与上述模拟 API 一致。真实后端可用时，在启动 Vite 前将该变量设为实际地址。浏览器代码始终只请求相对路径 `/api`。`frontend/Dockerfile` 使用 Node 构建、Nginx 运行；Nginx 将 `/api/` 原样代理到 Compose 服务 `api:8080`。目前尚无完整 Compose 文件，不能把前端单独启动等同于系统验收。
+本地 Vite 把 `/api` 代理到 `VITE_API_PROXY_TARGET` 指定的后端；默认目标为 `http://127.0.0.1:8081`，与上述模拟 API 一致。真实后端可用时，在启动 Vite 前将该变量设为实际地址。浏览器代码始终只请求相对路径 `/api`。`frontend/Dockerfile` 使用 Node 构建、Nginx 运行；Nginx 将 `/api/` 原样代理到 Compose 服务 `api:8080`。根目录已提供 Compose 配置，但后端及其 Dockerfile 尚未交付，目前不能完整构建运行，也不能把前端单独启动等同于系统验收。
 
 ### 前端容器单独检查
 
