@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 
 const venue = {
@@ -31,6 +31,11 @@ function json(data: unknown, status = 200): Response {
   return Response.json(data, { status })
 }
 
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-10-26T01:30:30Z'))
+})
+
 async function fillReservationForm(user: ReturnType<typeof userEvent.setup>, form: HTMLElement) {
   await user.type(within(form).getByLabelText('预约人或组织'), '软件技术小组')
   await user.type(within(form).getByLabelText('预约日期'), '2030-10-30')
@@ -43,6 +48,7 @@ async function fillReservationForm(user: ReturnType<typeof userEvent.setup>, for
 
 afterEach(() => {
   cleanup()
+  vi.useRealTimers()
   vi.unstubAllGlobals()
 })
 
@@ -126,10 +132,31 @@ describe('场地预约页面', () => {
       if (path === '/api/venues') return json([venue])
       if (path === '/api/reservations' && !init) return json([])
       if (path === '/api/reservations' && init?.method === 'POST') {
-        return json({ error: { code: 'VALIDATION_ERROR', message: '预约日期不能早于今天' } }, 400)
+        return json({ error: { code: 'VALIDATION_ERROR', message: '预约信息不符合服务端规则' } }, 400)
       }
       throw new Error(`Unexpected request: ${path}`)
     }))
+
+    render(<App />)
+    const form = await screen.findByRole('form', { name: '创建预约' })
+    await fillReservationForm(user, form)
+    await user.click(within(form).getByRole('button', { name: '提交预约' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('预约信息不符合服务端规则')
+    expect(within(form).getByLabelText('预约日期')).toHaveValue('2030-10-30')
+    expect(screen.queryByText(/预约成功，编号/)).not.toBeInTheDocument()
+    expect(screen.getByText('暂无预约记录。')).toBeInTheDocument()
+  })
+
+  it('本地拦截过期预约且保留表单内容，不发送创建请求', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input)
+      if (path === '/api/venues') return json([venue])
+      if (path === '/api/reservations') return json([])
+      throw new Error(`Unexpected request: ${path}`)
+    })
+    vi.stubGlobal('fetch', fetchMock)
 
     render(<App />)
     const form = await screen.findByRole('form', { name: '创建预约' })
@@ -140,8 +167,7 @@ describe('场地预约页面', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('预约日期不能早于今天')
     expect(within(form).getByLabelText('预约日期')).toHaveValue('2020-10-30')
-    expect(screen.queryByText(/预约成功，编号/)).not.toBeInTheDocument()
-    expect(screen.getByText('暂无预约记录。')).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalledWith('/api/reservations', expect.objectContaining({ method: 'POST' }))
   })
 
   it('取消预约后显示服务端确认的状态', async () => {

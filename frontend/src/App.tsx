@@ -5,6 +5,7 @@ import { ReservationForm } from './components/ReservationForm'
 import { ReservationList } from './components/ReservationList'
 import { VenueList } from './components/VenueList'
 import type { CreateReservationInput, Reservation, Venue } from './types'
+import { validateReservation } from './validation/reservation'
 
 function messageFor(error: unknown): string {
   return error instanceof Error ? error.message : '操作失败，请稍后重试'
@@ -90,8 +91,18 @@ export default function App() {
 
   async function createReservation(input: CreateReservationInput): Promise<boolean> {
     if (submittingRef.current) return false
-    submittingRef.current = true
     mutationRevision.current += 1
+    const venue = venues.find((item) => item.id === input.venue_id)
+    const validationError = venue
+      ? validateReservation(input, venue)[0]?.message
+      : '场地不可预约，请刷新场地列表'
+    if (validationError) {
+      setActionError(validationError)
+      setSuccessMessage('')
+      return false
+    }
+
+    submittingRef.current = true
     setIsSubmitting(true)
     setActionError('')
     setSuccessMessage('')
