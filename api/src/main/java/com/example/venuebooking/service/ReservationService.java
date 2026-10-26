@@ -68,7 +68,7 @@ public class ReservationService {
             throw validation("start_time", "必须早于 end_time");
         }
 
-        Venue venue = venueRepository.findById(request.venueId())
+        Venue venue = venueRepository.findByIdForUpdate(request.venueId())
                 .orElseThrow(() -> new com.example.venuebooking.api.error.VenueNotFoundException(request.venueId()));
         validateReservationWindow(request, venue);
 
@@ -97,7 +97,12 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse cancel(Long id) {
-        Reservation reservation = reservationRepository.findByIdWithVenue(id)
+        Reservation reservationReference = reservationRepository.findByIdWithVenue(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+        venueRepository.findByIdForUpdate(reservationReference.getVenue().getId())
+                .orElseThrow(() -> new com.example.venuebooking.api.error.VenueNotFoundException(
+                        reservationReference.getVenue().getId()));
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             return ReservationResponse.from(reservation);
