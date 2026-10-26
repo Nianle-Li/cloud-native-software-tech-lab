@@ -45,6 +45,17 @@ npm run dev
 
 本地 Vite 把 `/api` 代理到 `VITE_API_PROXY_TARGET` 指定的后端；默认目标为 `http://127.0.0.1:8081`，与上述模拟 API 一致。真实后端可用时，在启动 Vite 前将该变量设为实际地址。浏览器代码始终只请求相对路径 `/api`。`frontend/Dockerfile` 使用 Node 构建、Nginx 运行；Nginx 将 `/api/` 原样代理到 Compose 服务 `api:8080`。目前尚无完整 Compose 文件，不能把前端单独启动等同于系统验收。
 
+### 前端容器单独检查
+
+启动 Docker Desktop 后，在仓库根目录运行：
+
+```powershell
+docker build -t venue-booking-frontend:lab1-local ./frontend
+docker run --rm -p 127.0.0.1:18080:80 venue-booking-frontend:lab1-local
+```
+
+打开 `http://127.0.0.1:18080/`，应能看到前端页面；按 `Ctrl+C` 结束容器。未接入 `api` 服务时，页面的 API 数据不可用，属于当前独立检查的预期情况。Nginx 在收到 `/api/` 请求时通过 Docker 网络解析 `api`，因此单独运行前端容器也能先提供静态页面。完整代理和业务功能仍须等真实后端及 Compose 就绪后联调。
+
 若 `npm` 在 PowerShell 中提示 `npm.ps1` 被禁止运行，可在上述命令中改用 `npm.cmd`，无需修改系统执行策略。若提示 `node` 或 `npm` 未找到，先安装兼容的 Node.js 并重开终端；若 `npm ci` 失败，先确认当前目录末尾是 `frontend`，再检查网络能否访问 npm 官方源。若页面显示“无法连接服务器”，检查模拟 API 或真实后端是否正在运行、端口是否为 `8081`。本地端口被占用时，停止已有进程或按 Vite 实际显示的地址访问。
 
 后端和 Compose 完成后，应补充实际启动命令、环境变量、访问地址、真实联调结果与实验报告证据。
