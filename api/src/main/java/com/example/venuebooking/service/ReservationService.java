@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -90,7 +91,7 @@ public class ReservationService {
                 request.attendeeCount(),
                 request.purpose(),
                 ReservationStatus.ACTIVE,
-                OffsetDateTime.now(businessClock),
+                databaseTimestamp(),
                 null);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
@@ -107,8 +108,12 @@ public class ReservationService {
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             return ReservationResponse.from(reservation);
         }
-        reservation.cancel(OffsetDateTime.now(businessClock));
+        reservation.cancel(databaseTimestamp());
         return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    private OffsetDateTime databaseTimestamp() {
+        return OffsetDateTime.now(businessClock).truncatedTo(ChronoUnit.MICROS);
     }
 
     private Reservation findReservation(Long id) {
