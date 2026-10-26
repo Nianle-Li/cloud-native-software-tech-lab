@@ -43,6 +43,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .section-heading { margin-bottom: 1rem; }
 .section-heading h2 { margin: 0 0 0.25rem; font-size: 1.35rem; }
 .section-heading p { margin: 0; color: #60798a; }
+.refresh-button { margin-top: 0.75rem; }
 .notice { padding: 0.8rem 1rem; border-radius: 8px; }
 .notice.error { color: #87352b; background: #fff0ed; }
 .notice.success { color: #196247; background: #e8f7ef; }

@@ -5,10 +5,11 @@ import type { CreateReservationInput, Venue } from '../types'
 interface ReservationFormProps {
   venue: Venue
   isSubmitting: boolean
+  isUnavailable: boolean
   onCreate: (input: CreateReservationInput) => Promise<boolean>
 }
 
-export function ReservationForm({ venue, isSubmitting, onCreate }: ReservationFormProps) {
+export function ReservationForm({ venue, isSubmitting, isUnavailable, onCreate }: ReservationFormProps) {
   const [bookedBy, setBookedBy] = useState('')
   const [reservationDate, setReservationDate] = useState('')
   const [startTime, setStartTime] = useState('')
@@ -18,6 +19,7 @@ export function ReservationForm({ venue, isSubmitting, onCreate }: ReservationFo
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (isSubmitting || isUnavailable) return
     const created = await onCreate({
       venue_id: venue.id,
       booked_by: bookedBy.trim(),
@@ -67,7 +69,7 @@ export function ReservationForm({ venue, isSubmitting, onCreate }: ReservationFo
           <textarea value={purpose} onChange={(event) => setPurpose(event.target.value)} maxLength={500} rows={3} required />
         </label>
       </div>
-      <button type="submit" disabled={isSubmitting}>
+      <button type="submit" disabled={isSubmitting || isUnavailable}>
         {isSubmitting ? '提交中…' : '提交预约'}
       </button>
     </form>
