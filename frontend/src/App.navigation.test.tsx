@@ -72,4 +72,46 @@ describe('独立页面导航', () => {
     expect(await screen.findByRole('heading', { name: '预约 羽毛球馆 A' })).toBeInTheDocument()
     await waitFor(() => expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' }))
   })
+
+  it('切换页面时更新标题并把键盘焦点移到页面标题', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    const homeHeading = await screen.findByRole('heading', { level: 1 })
+    expect(homeHeading).not.toHaveFocus()
+    expect(document.title).toContain('场地概览')
+
+    await user.click(await screen.findByRole('link', { name: '预约羽毛球馆 A' }))
+    const bookingHeading = await screen.findByRole('heading', { name: '预约 羽毛球馆 A' })
+    expect(bookingHeading).toHaveFocus()
+    expect(document.title).toContain('羽毛球馆 A')
+
+    await user.click(screen.getByRole('link', { name: '预约记录' }))
+    expect(screen.getByRole('heading', { name: '预约记录', level: 1 })).toHaveFocus()
+    expect(document.title).toContain('预约记录')
+  })
+
+  it('再次进入记录页时重新获取其他客户端更新的记录', async () => {
+    const user = userEvent.setup()
+    let listCalls = 0
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === '/api/venues') return Response.json(venues)
+      if (String(input) === '/api/reservations') {
+        listCalls += 1
+        return Response.json(listCalls < 3 ? [] : [{
+          id: 42, venue_id: 1, booked_by: '另一位用户', reservation_date: '2030-10-30',
+          start_time: '10:00', end_time: '11:00', attendee_count: 2, purpose: '团队活动',
+          status: 'ACTIVE', created_at: '2030-10-01T10:00:00+08:00', cancelled_at: null,
+        }])
+      }
+      throw new Error(`Unexpected request: ${String(input)}`)
+    }))
+    render(<App />)
+    await screen.findByRole('heading', { name: '场地列表' })
+    await user.click(screen.getByRole('link', { name: '预约记录' }))
+    expect(await screen.findByText('暂无预约记录。')).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: '场地概览' }))
+    await user.click(screen.getByRole('link', { name: '预约记录' }))
+    expect(await screen.findByText('另一位用户')).toBeInTheDocument()
+    expect(listCalls).toBe(3)
+  })
 })

@@ -77,4 +77,40 @@ describe('预约记录浏览', () => {
     expect(screen.getByText('预约人 8')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '下一页' })).not.toBeInTheDocument()
   })
+
+  it('刷新同等数量的记录后保留当前页', async () => {
+    const user = userEvent.setup()
+    const props = { venues: [venue], cancellingId: null, onCancel: vi.fn() }
+    const { rerender } = render(<ReservationList reservations={reservations} {...props} />)
+    await user.click(screen.getByRole('button', { name: '下一页' }))
+    rerender(<ReservationList reservations={[...reservations]} {...props} />)
+    expect(screen.getByText('第 2 / 2 页')).toBeInTheDocument()
+    expect(screen.getByText('预约人 1')).toBeInTheDocument()
+  })
+
+  it('记录数缩减后固定在实际页，数量恢复时不跳回旧页', async () => {
+    const user = userEvent.setup()
+    const props = { venues: [venue], cancellingId: null, onCancel: vi.fn() }
+    const { rerender } = render(<ReservationList reservations={reservations} {...props} />)
+    await user.click(screen.getByRole('button', { name: '下一页' }))
+    rerender(<ReservationList reservations={reservations.slice(0, 3)} {...props} />)
+    expect(screen.getByText('预约人 8')).toBeInTheDocument()
+    rerender(<ReservationList reservations={[...reservations]} {...props} />)
+    expect(screen.getByText('第 1 / 2 页')).toBeInTheDocument()
+  })
+
+  it('取消预约需二次确认，放弃确认不发送请求', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    render(<ReservationList reservations={reservations} venues={[venue]} cancellingId={null} onCancel={onCancel} />)
+    await user.click(screen.getByRole('button', { name: '取消预约 8' }))
+    expect(onCancel).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: '确认取消预约 8' })).toHaveFocus()
+    await user.click(screen.getByRole('button', { name: '保留预约' }))
+    expect(onCancel).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: '取消预约 8' })).toHaveFocus()
+    await user.click(screen.getByRole('button', { name: '取消预约 8' }))
+    await user.click(screen.getByRole('button', { name: '确认取消预约 8' }))
+    expect(onCancel).toHaveBeenCalledExactlyOnceWith(8)
+  })
 })

@@ -18,7 +18,7 @@ export function HomePage({ venues, loadingVenues, venueError, onRefreshVenues }:
       <section className="hero" aria-labelledby="page-title">
         <div className="hero-copy">
           <p className="eyebrow">场地预约 · 便捷查看与管理</p>
-          <h1 id="page-title">找到合适的场地，<br /><span>安排每一次相聚。</span></h1>
+          <h1 id="page-title" tabIndex={-1}>找到合适的场地，<br /><span>安排每一次相聚。</span></h1>
           <p className="hero-description">先了解场地的位置、容量与开放时间，再选择适合你的空间。</p>
           <button type="button" className="hero-link" onClick={() => document.getElementById('venues')?.scrollIntoView()}>
             浏览场地 <span aria-hidden="true">↗</span>

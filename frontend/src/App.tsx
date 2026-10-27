@@ -34,22 +34,39 @@ export default function App() {
   const [loadingReservations, setLoadingReservations] = useState(true)
   const [venueError, setVenueError] = useState('')
   const [reservationError, setReservationError] = useState('')
-  const [actionError, setActionError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-  const [actionOrigin, setActionOrigin] = useState<'booking' | 'reservations'>('booking')
+  const [bookingFeedback, setBookingFeedback] = useState<{ venueId: number; error: string; success: string } | null>(null)
+  const [reservationFeedback, setReservationFeedback] = useState<{ reservationId: number; error: string; success: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [cancellingId, setCancellingId] = useState<number | null>(null)
-  const [feedbackReservationId, setFeedbackReservationId] = useState<number | null>(null)
   const [venueReloadKey, setVenueReloadKey] = useState(0)
   const [reservationReloadKey, setReservationReloadKey] = useState(0)
+  const [reservationVisitKey, setReservationVisitKey] = useState(0)
   // 写入成功后让更早发出的列表响应失效。
   const reservationRevision = useRef(0)
   // 刷新结果不能清除在其发出之后产生的操作错误。
   const mutationRevision = useRef(0)
   const submittingRef = useRef(false)
   const cancellingRef = useRef(false)
+  const previousRouteKind = useRef(route.kind)
+  const skipNextReservationEntryRefresh = useRef(false)
+  const routeKey = route.kind === 'booking' ? `booking:${route.venueId}` : route.kind
+  const previousRouteKey = useRef(routeKey)
+  useLayoutEffect(() => {
+    scrollToPageTop()
+    if (previousRouteKey.current !== routeKey) document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true })
+    previousRouteKey.current = routeKey
+  }, [routeKey])
 
-  useLayoutEffect(scrollToPageTop, [route])
+  useEffect(() => {
+    if (route.kind === 'reservations' && previousRouteKind.current !== 'reservations') {
+      if (skipNextReservationEntryRefresh.current) {
+        skipNextReservationEntryRefresh.current = false
+      } else {
+        setReservationVisitKey((current) => current + 1)
+      }
+    }
+    previousRouteKind.current = route.kind
+  }, [route.kind])
 
   useEffect(() => {
     let active = true
@@ -82,7 +99,9 @@ export default function App() {
       .then((items) => {
         if (!active || revision !== reservationRevision.current) return
         setReservations(items)
-        if (reservationReloadKey > 0 && mutationAtStart === mutationRevision.current) setActionError('')
+        if (reservationReloadKey > 0 && mutationAtStart === mutationRevision.current) {
+          setReservationFeedback((current) => current ? { ...current, error: '' } : current)
+        }
       })
       .catch((error: unknown) => {
         if (active && revision === reservationRevision.current) setReservationError(messageFor(error))
@@ -92,40 +111,45 @@ export default function App() {
       })
 
     return () => { active = false }
-  }, [reservationReloadKey])
+  }, [reservationReloadKey, reservationVisitKey])
 
   const bookingVenue = route.kind === 'booking'
     ? venues.find((venue) => venue.id === route.venueId) ?? null
     : null
 
+  useEffect(() => {
+    const pageName = route.kind === 'booking'
+      ? `预约${bookingVenue ? ` ${bookingVenue.name}` : '场地'}`
+      : route.kind === 'reservations' ? '预约记录' : route.kind === 'home' ? '场地概览' : '页面不存在'
+    document.title = `${pageName} | 场地预约系统`
+  }, [routeKey, bookingVenue?.name])
+
   async function createReservation(input: CreateReservationInput): Promise<boolean> {
     if (submittingRef.current) return false
-    setActionOrigin('booking')
+    setBookingFeedback({ venueId: input.venue_id, error: '', success: '' })
     mutationRevision.current += 1
     const venue = venues.find((item) => item.id === input.venue_id)
     const validationError = venue
       ? validateReservation(input, venue)[0]?.message
       : '场地不可预约，请刷新场地列表'
     if (validationError) {
-      setActionError(validationError)
-      setSuccessMessage('')
+      setBookingFeedback({ venueId: input.venue_id, error: validationError, success: '' })
       return false
     }
 
     submittingRef.current = true
     setIsSubmitting(true)
-    setActionError('')
-    setSuccessMessage('')
     try {
       const created = await bookingApi.createReservation(input)
       reservationRevision.current += 1
       setReservations((current) => [created, ...current.filter((item) => item.id !== created.id)])
       setReservationError('')
       setLoadingReservations(false)
-      setSuccessMessage(`预约成功，编号 ${created.id}`)
+      skipNextReservationEntryRefresh.current = true
+      setBookingFeedback({ venueId: input.venue_id, error: '', success: `预约成功，编号 ${created.id}` })
       return true
     } catch (error) {
-      setActionError(mutationErrorMessage(error, '预约'))
+      setBookingFeedback({ venueId: input.venue_id, error: mutationErrorMessage(error, '预约'), success: '' })
       return false
     } finally {
       submittingRef.current = false
@@ -136,21 +160,19 @@ export default function App() {
   async function cancelReservation(id: number): Promise<void> {
     if (cancellingRef.current) return
     cancellingRef.current = true
-    setActionOrigin('reservations')
-    setFeedbackReservationId(id)
+    setReservationFeedback({ reservationId: id, error: '', success: '' })
     mutationRevision.current += 1
     setCancellingId(id)
-    setActionError('')
-    setSuccessMessage('')
     try {
       const updated = await bookingApi.cancelReservation(id)
       reservationRevision.current += 1
       setReservations((current) => current.map((item) => item.id === id ? updated : item))
       setReservationError('')
       setLoadingReservations(false)
-      setSuccessMessage(`预约 ${id} 已取消`)
+      skipNextReservationEntryRefresh.current = true
+      setReservationFeedback({ reservationId: id, error: '', success: `预约 ${id} 已取消` })
     } catch (error) {
-      setActionError(mutationErrorMessage(error, '取消预约'))
+      setReservationFeedback({ reservationId: id, error: mutationErrorMessage(error, '取消预约'), success: '' })
     } finally {
       cancellingRef.current = false
       setCancellingId(null)
@@ -188,8 +210,8 @@ export default function App() {
             loadingVenues={loadingVenues}
             venueError={venueError}
             isSubmitting={isSubmitting}
-            actionError={actionOrigin === 'booking' ? actionError : ''}
-            successMessage={actionOrigin === 'booking' ? successMessage : ''}
+            actionError={bookingFeedback?.venueId === route.venueId ? bookingFeedback.error : ''}
+            successMessage={bookingFeedback?.venueId === route.venueId ? bookingFeedback.success : ''}
             onRefreshVenues={() => setVenueReloadKey((current) => current + 1)}
             onCreate={createReservation}
           />
@@ -202,9 +224,9 @@ export default function App() {
             loadingReservations={loadingReservations}
             reservationError={reservationError}
             cancellingId={cancellingId}
-            feedbackReservationId={feedbackReservationId}
-            actionError={actionOrigin === 'reservations' ? actionError : ''}
-            successMessage={actionOrigin === 'reservations' ? successMessage : ''}
+            feedbackReservationId={reservationFeedback?.reservationId ?? null}
+            actionError={reservationFeedback?.error ?? ''}
+            successMessage={reservationFeedback?.success ?? ''}
             onRefreshReservations={() => setReservationReloadKey((current) => current + 1)}
             onCancel={cancelReservation}
           />
@@ -213,7 +235,7 @@ export default function App() {
         {route.kind === 'notFound' && (
           <section className="panel not-found-panel">
             <p className="section-kicker">页面不存在</p>
-            <h1>无法打开这个页面</h1>
+            <h1 tabIndex={-1}>无法打开这个页面</h1>
             <p>请从场地概览重新选择场地。</p>
             <a className="detail-book-link" href="#/">返回场地概览</a>
           </section>

@@ -21,7 +21,7 @@ export function ReservationsPage({ reservations, venues, loadingReservations, re
       <div className="subpage-banner">
         <a className="back-link" href="#/">← 返回场地概览</a>
         <p className="eyebrow">预约管理</p>
-        <h1>预约记录</h1>
+        <h1 tabIndex={-1}>预约记录</h1>
         <p>查看预约结果和状态，并管理仍有效的记录。</p>
       </div>
       <section className="panel records-panel" aria-labelledby="records-heading">
@@ -35,8 +35,10 @@ export function ReservationsPage({ reservations, venues, loadingReservations, re
             刷新预约记录
           </button>
         </div>
-        {(loadingReservations || reservationError) && <ActionFeedback error={actionError} success={successMessage} />}
-        {loadingReservations ? <p className="empty-state">正在加载预约记录…</p> : reservationError ? <p role="alert" className="notice error">{reservationError}</p> : (
+        {reservations.length === 0 && (loadingReservations || reservationError) && <ActionFeedback error={actionError} success={successMessage} />}
+        {loadingReservations && <p className="empty-state">正在加载预约记录…</p>}
+        {reservationError && <p role="alert" className="notice error">{reservationError}{reservations.length > 0 && '；当前显示上次加载的记录，可能不是最新。'}</p>}
+        {(reservations.length > 0 || (!loadingReservations && !reservationError)) && (
           <ReservationList reservations={reservations} venues={venues} cancellingId={cancellingId} feedbackReservationId={feedbackReservationId} actionError={actionError} successMessage={successMessage} onCancel={onCancel} />
         )}
       </section>

@@ -22,7 +22,7 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
       <div className="subpage-banner">
         <a className="back-link" href="#/">← 返回场地概览</a>
         <p className="eyebrow">场地预约</p>
-        <h1>{venue ? `预约 ${venue.name}` : '预约场地'}</h1>
+        <h1 tabIndex={-1}>{venue ? `预约 ${venue.name}` : '预约场地'}</h1>
         <p>核对场地信息并填写预约申请。提交结果以服务器响应为准。</p>
       </div>
       <div className="booking-layout">

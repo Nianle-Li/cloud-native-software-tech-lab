@@ -18,6 +18,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   outline: 3px solid #e3a650;
   outline-offset: 3px;
 }
+main h1:focus { outline: none; }
+main h1:focus-visible { outline: 3px solid #e3a650; outline-offset: 5px; }
 
 .page-frame { min-height: 100vh; overflow: clip; }
 .site-header, .app-shell { width: min(1240px, calc(100% - 3rem)); margin-inline: auto; }
@@ -155,6 +157,10 @@ button.secondary:hover:not(:disabled) { border-color: #0c7e88; background: #f0f8
 .reservation-card dt { margin-bottom: 0.15rem; color: #859699; font-size: 0.73rem; }
 .reservation-card dd { margin: 0; color: #264650; font-size: 0.86rem; font-weight: 650; line-height: 1.45; overflow-wrap: anywhere; }
 .cancel-button { margin-top: 1.15rem; }
+.cancel-confirmation { margin-top: 1rem; padding: 0.9rem; border: 1px solid #d8e6e2; border-radius: 8px; background: #f3f8f6; }
+.cancel-confirmation p { margin: 0 0 0.7rem; color: #264650; font-size: 0.84rem; }
+.cancel-confirmation-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.cancel-confirmation-actions .cancel-button { margin-top: 0; }
 .reservation-card .feedback-stack { margin-top: 1rem; }
 .reservation-browser > .feedback-stack { margin-bottom: 1rem; }
 .pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1.35rem; color: #647981; font-size: 0.82rem; font-variant-numeric: tabular-nums; }

@@ -194,6 +194,7 @@ describe('场地预约页面', () => {
     render(<App />)
     expect(await screen.findByText('软件技术小组')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '取消预约 12' }))
+    await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
     expect(await screen.findByText('已取消')).toBeInTheDocument()
     const cancelledCard = screen.getByRole('heading', { name: '预约 #12' }).closest('li')!
     expect(within(cancelledCard).getByText('预约 12 已取消')).toBeInTheDocument()
@@ -242,6 +243,7 @@ describe('场地预约页面', () => {
 
     render(<App />)
     await user.click(await screen.findByRole('button', { name: '取消预约 12' }))
+    await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('预约不存在')
     expect(within(screen.getByRole('region', { name: '全部记录' })).getByRole('alert')).toHaveTextContent('预约不存在')
     expect(screen.getByText('有效')).toBeInTheDocument()
@@ -518,7 +520,9 @@ describe('场地预约页面', () => {
 
     render(<App />)
     const cancelButton = await screen.findByRole('button', { name: '取消预约 12' })
-    act(() => { fireEvent.click(cancelButton); fireEvent.click(cancelButton) })
+    await userEvent.setup().click(cancelButton)
+    const confirmButton = screen.getByRole('button', { name: '确认取消预约 12' })
+    act(() => { fireEvent.click(confirmButton); fireEvent.click(confirmButton) })
     expect(fetchMock.mock.calls.filter(([path]) => path === '/api/reservations/12/cancel')).toHaveLength(1)
     await act(async () => {
       resolveCancellation(json({ ...reservation, status: 'CANCELLED', cancelled_at: '2030-10-01T11:00:00+08:00' }))
@@ -564,10 +568,79 @@ describe('场地预约页面', () => {
 
     render(<App />)
     await user.click(await screen.findByRole('button', { name: '取消预约 12' }))
+    await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('先刷新预约记录')
     expect(screen.getByText('有效')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '刷新预约记录' }))
     expect(await screen.findByText('已取消')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('切换到另一场地预约页时不显示前一场地的成功反馈', async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(input)
+      if (path === '/api/venues') return json([venue, { ...venue, id: 2, name: '羽毛球馆 B' }])
+      if (path === '/api/reservations' && !init) return json([])
+      if (path === '/api/reservations' && init?.method === 'POST') return json(reservation, 201)
+      throw new Error(`Unexpected request: ${path}`)
+    }))
+    render(<App />)
+    const form = await screen.findByRole('form', { name: '创建预约' })
+    await fillReservationForm(user, form)
+    await user.click(within(form).getByRole('button', { name: '提交预约' }))
+    expect(await screen.findByText('预约成功，编号 12')).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: '场地概览' }))
+    await user.click(await screen.findByRole('link', { name: '预约羽毛球馆 B' }))
+    expect(screen.getByRole('heading', { name: '预约 羽毛球馆 B' })).toBeInTheDocument()
+    expect(screen.queryByText('预约成功，编号 12')).not.toBeInTheDocument()
+  })
+
+  it('记录刷新失败时保留已知记录并明确提示可能不是最新', async () => {
+    window.history.replaceState(null, '', '/#/reservations')
+    const user = userEvent.setup()
+    let calls = 0
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) === '/api/venues') return json([venue])
+      if (String(input) === '/api/reservations') {
+        calls += 1
+        return calls === 1 ? json([reservation]) : json({ error: { code: 'INTERNAL_ERROR' } }, 503)
+      }
+      throw new Error(`Unexpected request: ${String(input)}`)
+    }))
+    render(<App />)
+    expect(await screen.findByText('软件技术小组')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '刷新预约记录' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('服务器暂时不可用')
+    expect(screen.getByText('软件技术小组')).toBeInTheDocument()
+    expect(screen.getByText(/可能不是最新/)).toBeInTheDocument()
+  })
+
+  it('创建和取消请求交错返回时，记录页不显示创建操作的反馈', async () => {
+    const user = userEvent.setup()
+    let resolveCreation!: (response: Response) => void
+    const creation = new Promise<Response>((resolve) => { resolveCreation = resolve })
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(input)
+      if (path === '/api/venues') return json([venue])
+      if (path === '/api/reservations' && !init) return json([reservation])
+      if (path === '/api/reservations' && init?.method === 'POST') return creation
+      if (path === '/api/reservations/12/cancel' && init?.method === 'POST') {
+        return json({ ...reservation, status: 'CANCELLED', cancelled_at: '2030-10-01T11:00:00+08:00' })
+      }
+      throw new Error(`Unexpected request: ${path}`)
+    }))
+    render(<App />)
+    const form = await screen.findByRole('form', { name: '创建预约' })
+    await fillReservationForm(user, form)
+    await user.click(within(form).getByRole('button', { name: '提交预约' }))
+    await user.click(screen.getByRole('link', { name: '预约记录' }))
+    await user.click(await screen.findByRole('button', { name: '取消预约 12' }))
+    await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
+    expect(await screen.findByText('预约 12 已取消')).toBeInTheDocument()
+
+    await act(async () => { resolveCreation(json({ ...reservation, id: 13 }, 201)); await creation })
+    expect(screen.getByText('预约 12 已取消')).toBeInTheDocument()
+    expect(screen.queryByText('预约成功，编号 13')).not.toBeInTheDocument()
   })
 })

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ActionFeedback } from './ActionFeedback'
 import type { Reservation, Venue } from '../types'
 
@@ -15,12 +15,10 @@ interface ReservationListProps {
 export function ReservationList({ reservations, venues, cancellingId, feedbackReservationId = null, actionError = '', successMessage = '', onCancel }: ReservationListProps) {
   const [filter, setFilter] = useState<'ALL' | Reservation['status']>('ALL')
   const [requestedPage, setRequestedPage] = useState(1)
-
-  useEffect(() => { setRequestedPage(1) }, [reservations])
-
-  if (reservations.length === 0) {
-    return <p className="empty-state">暂无预约记录。</p>
-  }
+  const [confirmingId, setConfirmingId] = useState<number | null>(null)
+  const confirmationButton = useRef<HTMLButtonElement>(null)
+  const cancelButtons = useRef(new Map<number, HTMLButtonElement>())
+  const restoreFocusId = useRef<number | null>(null)
 
   const venueNames = new Map(venues.map((venue) => [venue.id, venue.name]))
   const activeCount = reservations.filter((item) => item.status === 'ACTIVE').length
@@ -31,9 +29,28 @@ export function ReservationList({ reservations, venues, cancellingId, feedbackRe
   const visible = filtered.slice((page - 1) * pageSize, page * pageSize)
   const feedbackIsVisible = visible.some((item) => item.id === feedbackReservationId)
 
+  useEffect(() => {
+    if (requestedPage > pageCount) setRequestedPage(pageCount)
+  }, [requestedPage, pageCount])
+
+  useLayoutEffect(() => {
+    if (confirmingId !== null) {
+      confirmationButton.current?.focus()
+    } else if (restoreFocusId.current !== null) {
+      cancelButtons.current.get(restoreFocusId.current)?.focus()
+      restoreFocusId.current = null
+    }
+  }, [confirmingId])
+
   function selectFilter(next: typeof filter) {
     setFilter(next)
     setRequestedPage(1)
+    setConfirmingId(null)
+    restoreFocusId.current = null
+  }
+
+  if (reservations.length === 0) {
+    return <p className="empty-state">暂无预约记录。</p>
   }
 
   return (
@@ -59,14 +76,24 @@ export function ReservationList({ reservations, venues, cancellingId, feedbackRe
               <dl>
                 <div><dt>场地</dt><dd>{venueNames.get(reservation.venue_id) ?? `场地 #${reservation.venue_id}`}</dd></div>
                 <div><dt>预约人或组织</dt><dd>{reservation.booked_by}</dd></div>
-                <div><dt>日期与时间</dt><dd>{reservation.reservation_date} {reservation.start_time}–{reservation.end_time}</dd></div>
+                <div><dt>预约日期与时间</dt><dd>{reservation.reservation_date} {reservation.start_time}–{reservation.end_time}</dd></div>
                 <div><dt>参与人数</dt><dd>{reservation.attendee_count}</dd></div>
                 <div><dt>使用目的</dt><dd>{reservation.purpose}</dd></div>
               </dl>
               {reservation.status === 'ACTIVE' && (
-                <button type="button" className="secondary cancel-button" onClick={() => onCancel(reservation.id)} disabled={cancellingId !== null}>
-                  {cancellingId === reservation.id ? '取消中…' : `取消预约 ${reservation.id}`}
-                </button>
+                confirmingId === reservation.id ? (
+                  <div className="cancel-confirmation" role="group" aria-label={`确认取消预约 ${reservation.id}`}>
+                    <p>确定取消预约 #{reservation.id}？取消后仍可在记录中查看。</p>
+                    <div className="cancel-confirmation-actions">
+                      <button type="button" className="secondary" onClick={() => { restoreFocusId.current = reservation.id; setConfirmingId(null) }} disabled={cancellingId !== null}>保留预约</button>
+                      <button type="button" ref={confirmationButton} className="secondary cancel-button" onClick={() => { setConfirmingId(null); onCancel(reservation.id) }} disabled={cancellingId !== null}>确认取消预约 {reservation.id}</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" ref={(element) => { if (element) cancelButtons.current.set(reservation.id, element); else cancelButtons.current.delete(reservation.id) }} className="secondary cancel-button" onClick={() => setConfirmingId(reservation.id)} disabled={cancellingId !== null}>
+                    {cancellingId === reservation.id ? '取消中…' : `取消预约 ${reservation.id}`}
+                  </button>
+                )
               )}
               {reservation.id === feedbackReservationId && <ActionFeedback error={actionError} success={successMessage} />}
             </li>
