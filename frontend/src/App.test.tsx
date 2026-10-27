@@ -127,7 +127,7 @@ describe('场地预约页面', () => {
     await user.click(within(form).getByRole('button', { name: '提交预约' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('该场地在所选时段已被预约')
-    expect(within(screen.getByRole('region', { name: '预约场地' })).getByRole('alert')).toHaveTextContent('该场地在所选时段已被预约')
+    expect(within(screen.getByRole('region', { name: '填写预约信息' })).getByRole('alert')).toHaveTextContent('该场地在所选时段已被预约')
     expect(screen.queryByText(/预约成功，编号/)).not.toBeInTheDocument()
   })
 
@@ -245,7 +245,7 @@ describe('场地预约页面', () => {
     await user.click(await screen.findByRole('button', { name: '取消预约 12' }))
     await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('预约不存在')
-    expect(within(screen.getByRole('region', { name: '全部记录' })).getByRole('alert')).toHaveTextContent('预约不存在')
+    expect(within(screen.getByRole('region', { name: '预约列表' })).getByRole('alert')).toHaveTextContent('预约不存在')
     expect(screen.getByText('有效')).toBeInTheDocument()
   })
 

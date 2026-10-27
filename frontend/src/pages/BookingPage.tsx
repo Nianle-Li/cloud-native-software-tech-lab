@@ -23,7 +23,7 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
         <a className="back-link" href="#/">← 返回场地概览</a>
         <p className="eyebrow">场地预约</p>
         <h1 tabIndex={-1}>{venue ? `预约 ${venue.name}` : '预约场地'}</h1>
-        <p>核对场地信息并填写预约申请。提交结果以服务器响应为准。</p>
+        <p>核对场地信息，填写预约申请。</p>
       </div>
       <div className="booking-layout">
         <aside className="panel booking-aside" aria-labelledby="venue-summary-heading">
@@ -54,12 +54,12 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
         <section className="panel booking-panel" aria-labelledby="booking-heading">
           <div className="section-heading">
             <div>
-              <p className="section-kicker">填写预约申请</p>
-              <h2 id="booking-heading">预约场地</h2>
-              <p>请填写预约人、日期、时段、人数与使用目的。</p>
+              <p className="section-kicker">预约申请</p>
+              <h2 id="booking-heading">填写预约信息</h2>
+              <p>填写预约人、日期、时段、人数和用途后提交。</p>
             </div>
           </div>
-          {venue && <p className="booking-inline-summary">{venue.name} · {venue.open_time}–{venue.close_time} · 最多 {venue.capacity} 人</p>}
+          {venue && <p className="booking-inline-summary"><span>{venue.name}</span><span>{venue.open_time}–{venue.close_time}</span><span>最多 {venue.capacity} 人</span></p>}
           {venue?.status === 'OPEN' ? (
             <>
               {loadingVenues && <p className="empty-state form-notice">正在更新场地信息…</p>}

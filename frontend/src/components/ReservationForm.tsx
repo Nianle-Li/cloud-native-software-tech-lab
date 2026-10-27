@@ -31,7 +31,7 @@ export function ReservationForm({ venue, draft, onDraftChange, isSubmitting, isU
   return (
     <form aria-label="创建预约" onSubmit={handleSubmit} className="booking-form">
       <h3>创建预约</h3>
-      <p className="form-intro">请填写真实的预约信息，提交后可在表单下方查看处理结果。</p>
+      <p className="form-intro">所有字段均为必填，提交结果会显示在表单下方。</p>
       <div className="form-grid">
         <label>
           预约人或组织

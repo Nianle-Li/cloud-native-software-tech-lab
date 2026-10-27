@@ -7,7 +7,7 @@ interface VenueListProps {
 
 export function VenueList({ venues }: VenueListProps) {
   if (venues.length === 0) {
-    return <p className="empty-state">暂无场地，请等待场地数据初始化。</p>
+    return <p className="empty-state">暂无场地信息，请稍后刷新列表。</p>
   }
 
   return (
@@ -26,7 +26,7 @@ export function VenueList({ venues }: VenueListProps) {
             <span>{venue.open_time}–{venue.close_time}</span>
             <span>最多 {venue.capacity} 人</span>
           </div>
-          <span className="venue-action" aria-hidden="true">{venue.status === 'OPEN' ? '立即预约 ↗' : '暂不可预约'}</span>
+          <span className="venue-action" aria-hidden="true">{venue.status === 'OPEN' ? '预约此场地 ↗' : '场地已停用'}</span>
         </>
         return <li key={venue.id} className={`venue-card${venue.status === 'CLOSED' ? ' closed' : ''}`}>
           {venue.status === 'OPEN'
