@@ -24,7 +24,7 @@ export function VenueForm({ draft, onDraftChange, isSubmitting, onCreate }: Venu
   }
 
   return (
-    <form aria-label="创建场地" onSubmit={handleSubmit} className="booking-form">
+    <form aria-label="创建场地" onSubmit={handleSubmit} noValidate className="booking-form">
       <p className="form-intro">所有字段均为必填，提交结果会显示在表单下方。</p>
       <fieldset className="form-fields" disabled={isSubmitting}>
         <legend>场地资料</legend>

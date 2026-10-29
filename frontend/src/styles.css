@@ -168,7 +168,7 @@ button.secondary:hover:not(:disabled) { border-color: var(--accent); background:
 .form-grid input, .form-grid textarea, .form-grid select { width: 100%; min-width: 0; padding: 0.75rem 0.8rem; border: 1px solid #cbd9cc; border-radius: 8px; outline: none; background: #fff; color: var(--ink); font-size: 0.9rem; font-weight: 500; }
 .form-grid input::placeholder, .form-grid textarea::placeholder { color: #6f8177; }
 .form-grid input:focus, .form-grid textarea:focus, .form-grid select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(71 110 99 / 14%); }
-.form-fields:disabled input, .form-fields:disabled select { background: var(--surface-soft); color: var(--ink-muted); cursor: not-allowed; }
+.form-fields:disabled input, .form-fields:disabled select, .form-fields:disabled textarea { background: var(--surface-soft); color: var(--ink-muted); cursor: not-allowed; }
 .form-grid textarea { resize: vertical; min-height: 90px; }
 .form-actions { margin-top: 1.3rem; }
 .form-actions button { width: 100%; padding: 0.82rem 1rem; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font-size: 0.92rem; font-weight: 800; }

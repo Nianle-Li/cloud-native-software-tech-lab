@@ -93,10 +93,12 @@ export const bookingApi = {
     }, 201)
     return requireShape(body, (value): value is Reservation => isReservation(value)
       && value.venue_id === input.venue_id
+      && value.booked_by === input.booked_by
       && value.reservation_date === input.reservation_date
       && value.start_time === input.start_time
       && value.end_time === input.end_time
       && value.attendee_count === input.attendee_count
+      && value.purpose === input.purpose
       && value.status === 'ACTIVE')
   },
 

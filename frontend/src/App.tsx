@@ -50,6 +50,7 @@ export default function App() {
   const [reservationVisitKey, setReservationVisitKey] = useState(0)
   // 记录列表请求与成功写入的先后关系。
   const reservationRevision = useRef(0)
+  const reservationMutationVersions = useRef(new Map<number, number>())
   const venueRevision = useRef(0)
   // 刷新结果不能清除在其发出之后产生的操作错误。
   const mutationRevision = useRef(0)
@@ -114,9 +115,15 @@ export default function App() {
 
     bookingApi.listReservations()
       .then((items) => {
-        if (!active || revision !== reservationRevision.current) return
-        setReservations(items)
-        if (reservationReloadKey > 0 && mutationAtStart === mutationRevision.current) {
+        if (!active) return
+        setReservations((current) => {
+          if (revision === reservationRevision.current) return items
+          // 仅保护请求发出后由本页确认写入的记录，其余记录采用服务端列表。
+          const newerLocalItems = current.filter((item) => (reservationMutationVersions.current.get(item.id) ?? 0) > revision)
+          const byId = new Map<number, Reservation>([...items, ...newerLocalItems].map((item) => [item.id, item]))
+          return [...byId.values()].sort((a, b) => b.id - a.id)
+        })
+        if (revision === reservationRevision.current && reservationReloadKey > 0 && mutationAtStart === mutationRevision.current) {
           setReservationFeedback((current) => current ? { ...current, error: '' } : current)
         }
       })
@@ -188,6 +195,7 @@ export default function App() {
     try {
       const created = await bookingApi.createReservation(input)
       reservationRevision.current += 1
+      reservationMutationVersions.current.set(created.id, reservationRevision.current)
       setReservations((current) => [created, ...current.filter((item) => item.id !== created.id)])
       setReservationError('')
       setLoadingReservations(false)
@@ -212,6 +220,7 @@ export default function App() {
     try {
       const updated = await bookingApi.cancelReservation(id)
       reservationRevision.current += 1
+      reservationMutationVersions.current.set(id, reservationRevision.current)
       setReservations((current) => current.map((item) => item.id === id ? updated : item))
       setReservationError('')
       setLoadingReservations(false)

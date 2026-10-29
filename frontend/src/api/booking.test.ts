@@ -28,6 +28,17 @@ const reservation = {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('预约 API 的成功响应校验', () => {
+  it.each([
+    ['场地列表不是数组', 'venues', { id: 1, ...venueInput }],
+    ['场地列表含无效容量', 'venues', [{ id: 1, ...venueInput, capacity: 0 }]],
+    ['预约列表不是数组', 'reservations', reservation],
+    ['预约列表中取消状态与时间不一致', 'reservations', [{ ...reservation, status: 'CANCELLED', cancelled_at: null }]],
+  ])('%s时拒绝整份列表', async (_description, resource, body) => {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json(body)))
+    const result = resource === 'venues' ? bookingApi.listVenues() : bookingApi.listReservations()
+    await expect(result).rejects.toMatchObject({ code: 'INVALID_RESPONSE' })
+  })
+
   it('按公共契约创建场地并校验服务端响应', async () => {
     const fetchMock = vi.fn(async () => Response.json({ id: 21, ...venueInput }, { status: 201 }))
     vi.stubGlobal('fetch', fetchMock)
@@ -58,6 +69,8 @@ describe('预约 API 的成功响应校验', () => {
 
   it.each([
     [{ ...reservation, venue_id: 2 }, '场地不匹配'],
+    [{ ...reservation, booked_by: '其他用户' }, '预约人不匹配'],
+    [{ ...reservation, purpose: '其他用途' }, '用途不匹配'],
     [{ ...reservation, status: 'CANCELLED', cancelled_at: '2030-10-01T11:00:00+08:00' }, '状态不匹配'],
     [{ ...reservation, id: 0 }, '无效编号'],
   ])('创建响应出现%s时不报告成功：%s', async (body, _reason) => {

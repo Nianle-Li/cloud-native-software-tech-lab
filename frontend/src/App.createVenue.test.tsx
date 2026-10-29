@@ -111,8 +111,7 @@ describe('创建场地流程', () => {
     render(<App />)
     const form = await fillForm(user)
     fireEvent.change(within(form).getByLabelText(label), { target: { value } })
-    // 直接提交以同时验证不依赖浏览器原生约束的业务校验。
-    fireEvent.submit(form)
+    await user.click(within(form).getByRole('button', { name: '提交场地' }))
     expect(await screen.findByRole('alert')).toHaveTextContent(message)
     expect(fetchMock).not.toHaveBeenCalledWith('/api/venues', expect.objectContaining({ method: 'POST' }))
     expect(within(form).getByLabelText('场地名称')).toHaveValue(label === '场地名称' ? value : '  排练室  ')
