@@ -7,6 +7,12 @@ type ErrorBody = {
 }
 
 const fieldLabels: Record<string, string> = {
+  name: '场地名称',
+  location: '所在位置',
+  capacity: '可容纳人数',
+  open_time: '开放时间',
+  close_time: '关闭时间',
+  status: '场地状态',
   venue_id: '场地',
   booked_by: '预约人或组织',
   reservation_date: '预约日期',
@@ -50,12 +56,16 @@ function errorFromBody(status: number, body: unknown): ApiError {
   return new ApiError(detailMessages.length ? `${message}：${detailMessages.join('；')}` : message, status, code)
 }
 
-export async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+export async function requestJson<T>(path: string, init?: RequestInit, expectedStatus?: number): Promise<T> {
   let response: Response
   try {
     response = await fetch(`/api${path}`, init)
   } catch {
     throw new ApiError('无法连接服务器，请检查网络或稍后重试', 0, 'NETWORK_ERROR')
+  }
+
+  if (response.ok && expectedStatus !== undefined && response.status !== expectedStatus) {
+    throw new ApiError('服务器返回了无效数据，请稍后重试', response.status, 'INVALID_RESPONSE')
   }
 
   let body: unknown

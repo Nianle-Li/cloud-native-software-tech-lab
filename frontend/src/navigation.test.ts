@@ -9,6 +9,10 @@ describe('页面地址', () => {
     expect(parseRoute('#/reservations')).toEqual({ kind: 'reservations' })
   })
 
+  it('解析公开的场地创建页', () => {
+    expect(parseRoute('#/venues/new')).toEqual({ kind: 'createVenue' })
+  })
+
   it('拒绝无效或不支持的地址', () => {
     expect(parseRoute('#/venues/0/book')).toEqual({ kind: 'notFound' })
     expect(parseRoute('#/venues/abc/book')).toEqual({ kind: 'notFound' })

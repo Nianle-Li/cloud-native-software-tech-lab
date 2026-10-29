@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 export type Route =
   | { kind: 'home' }
+  | { kind: 'createVenue' }
   | { kind: 'booking'; venueId: number }
   | { kind: 'reservations' }
   | { kind: 'notFound' }
@@ -10,6 +11,7 @@ export function parseRoute(hash: string): Route {
   const path = hash.startsWith('#') ? hash.slice(1) : hash
   if (path === '' || path === '/') return { kind: 'home' }
   if (path === '/reservations') return { kind: 'reservations' }
+  if (path === '/venues/new') return { kind: 'createVenue' }
 
   const booking = /^\/venues\/([1-9]\d*)\/book$/.exec(path)
   if (booking) {

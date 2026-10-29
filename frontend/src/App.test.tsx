@@ -105,6 +105,35 @@ describe('场地预约页面', () => {
     )
   })
 
+  it('创建后先返回概览再进入记录页时重新读取服务器记录', async () => {
+    const user = userEvent.setup()
+    let listCalls = 0
+    let created = false
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === '/api/venues') return json([venue])
+      if (String(input) === '/api/reservations' && init?.method === 'POST') {
+        created = true
+        return json(reservation, 201)
+      }
+      if (String(input) === '/api/reservations') {
+        listCalls += 1
+        return json(created ? [reservation, { ...reservation, id: 13, booked_by: '另一位用户' }] : [])
+      }
+      throw new Error(`Unexpected request: ${String(input)}`)
+    }))
+
+    render(<App />)
+    const form = await screen.findByRole('form', { name: '创建预约' })
+    await fillReservationForm(user, form)
+    await user.click(within(form).getByRole('button', { name: '提交预约' }))
+    expect(await screen.findByText('预约成功，编号 12')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: '← 返回场地概览' }))
+    await user.click(screen.getByRole('link', { name: '预约记录' }))
+    expect(await screen.findByText('另一位用户')).toBeInTheDocument()
+    expect(listCalls).toBe(2)
+  })
+
   it('显示后端返回的冲突错误，不伪造预约成功', async () => {
     const user = userEvent.setup()
     vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {

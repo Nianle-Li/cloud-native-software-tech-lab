@@ -114,4 +114,35 @@ describe('独立页面导航', () => {
     expect(await screen.findByText('另一位用户')).toBeInTheDocument()
     expect(listCalls).toBe(3)
   })
+
+  it('取消后离开记录页再返回时重新读取服务器记录', async () => {
+    const user = userEvent.setup()
+    const reservation = {
+      id: 12, venue_id: 1, booked_by: '测试小组', reservation_date: '2030-10-30',
+      start_time: '10:00', end_time: '11:00', attendee_count: 2, purpose: '团队活动',
+      status: 'ACTIVE', created_at: '2030-10-01T10:00:00+08:00', cancelled_at: null,
+    }
+    let listCalls = 0
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === '/api/venues') return Response.json(venues)
+      if (String(input) === '/api/reservations') {
+        listCalls += 1
+        return Response.json([reservation])
+      }
+      if (String(input) === '/api/reservations/12/cancel' && init?.method === 'POST') {
+        return Response.json({ ...reservation, status: 'CANCELLED', cancelled_at: '2030-10-01T11:00:00+08:00' })
+      }
+      throw new Error(`Unexpected request: ${String(input)}`)
+    }))
+
+    render(<App />)
+    await user.click(screen.getByRole('link', { name: '预约记录' }))
+    await user.click(await screen.findByRole('button', { name: '取消预约 12' }))
+    await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
+    expect(await screen.findByText('预约 12 已取消')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: '场地概览' }))
+    await user.click(screen.getByRole('link', { name: '预约记录' }))
+    await waitFor(() => expect(listCalls).toBe(3))
+  })
 })

@@ -1,5 +1,5 @@
 import { ApiError, requestJson } from './client'
-import type { CreateReservationInput, Reservation, Venue } from '../types'
+import type { CreateReservationInput, CreateVenueInput, Reservation, Venue } from '../types'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -63,11 +63,26 @@ function requireList<T>(value: unknown, valid: (item: unknown) => item is T): T[
 
 export const bookingApi = {
   async listVenues(): Promise<Venue[]> {
-    return requireList(await requestJson<unknown>('/venues'), isVenue)
+    return requireList(await requestJson<unknown>('/venues', undefined, 200), isVenue)
+  },
+
+  async createVenue(input: CreateVenueInput): Promise<Venue> {
+    const body = await requestJson<unknown>('/venues', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    }, 201)
+    return requireShape(body, (value): value is Venue => isVenue(value)
+      && value.name === input.name
+      && value.location === input.location
+      && value.capacity === input.capacity
+      && value.open_time === input.open_time
+      && value.close_time === input.close_time
+      && value.status === (input.status ?? 'OPEN'))
   },
 
   async listReservations(): Promise<Reservation[]> {
-    return requireList(await requestJson<unknown>('/reservations'), isReservation)
+    return requireList(await requestJson<unknown>('/reservations', undefined, 200), isReservation)
   },
 
   async createReservation(input: CreateReservationInput): Promise<Reservation> {
@@ -75,7 +90,7 @@ export const bookingApi = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(input),
-    })
+    }, 201)
     return requireShape(body, (value): value is Reservation => isReservation(value)
       && value.venue_id === input.venue_id
       && value.reservation_date === input.reservation_date
@@ -86,7 +101,7 @@ export const bookingApi = {
   },
 
   async cancelReservation(id: number): Promise<Reservation> {
-    const body = await requestJson<unknown>(`/reservations/${id}/cancel`, { method: 'POST' })
+    const body = await requestJson<unknown>(`/reservations/${id}/cancel`, { method: 'POST' }, 200)
     return requireShape(body, (value): value is Reservation => isReservation(value)
       && value.id === id
       && value.status === 'CANCELLED')

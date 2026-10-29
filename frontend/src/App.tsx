@@ -64,6 +64,8 @@ export default function App() {
       } else {
         setReservationVisitKey((current) => current + 1)
       }
+    } else if (route.kind !== 'booking') {
+      skipNextReservationEntryRefresh.current = false
     }
     previousRouteKind.current = route.kind
   }, [route.kind])
@@ -169,7 +171,6 @@ export default function App() {
       setReservations((current) => current.map((item) => item.id === id ? updated : item))
       setReservationError('')
       setLoadingReservations(false)
-      skipNextReservationEntryRefresh.current = true
       setReservationFeedback({ reservationId: id, error: '', success: `预约 ${id} 已取消` })
     } catch (error) {
       setReservationFeedback({ reservationId: id, error: mutationErrorMessage(error, '取消预约'), success: '' })
