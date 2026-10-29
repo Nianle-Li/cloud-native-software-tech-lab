@@ -7,7 +7,7 @@ interface VenueListProps {
 
 export function VenueList({ venues }: VenueListProps) {
   if (venues.length === 0) {
-    return <p className="empty-state">暂无场地信息，请稍后刷新列表。</p>
+    return <p className="empty-state">暂无场地，创建后将在这里显示。</p>
   }
 
   return (
@@ -26,13 +26,13 @@ export function VenueList({ venues }: VenueListProps) {
             <span>{venue.open_time}–{venue.close_time}</span>
             <span>最多 {venue.capacity} 人</span>
           </div>
-          <span className="venue-action" aria-hidden="true">{venue.status === 'OPEN' ? '预约此场地 ↗' : '场地已停用'}</span>
+          <span className="venue-detail-prompt" aria-hidden="true">查看场地详情 →</span>
         </>
         return <li key={venue.id} className={`venue-card${venue.status === 'CLOSED' ? ' closed' : ''}`}>
-          {venue.status === 'OPEN'
-            ? <a className="venue-card-content" href={bookingHref(venue.id)} aria-label={`预约${venue.name}`}>{content}</a>
-            : <div className="venue-card-content">{content}</div>}
-          <a className="venue-detail-link" href={venueDetailHref(venue.id)} aria-label={`查看${venue.name}详情`}>查看场地详情 →</a>
+          <a className="venue-card-content" href={venueDetailHref(venue.id)} aria-label={`查看${venue.name}详情`}>{content}</a>
+          {venue.status === 'OPEN' && <div className="venue-card-footer">
+            <a className="venue-action" href={bookingHref(venue.id)} aria-label={`预约${venue.name}`}>预约此场地 ↗</a>
+          </div>}
         </li>
       })}
     </ul>

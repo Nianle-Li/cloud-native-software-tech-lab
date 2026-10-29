@@ -18,26 +18,21 @@ export function HomePage({ venues, loadingVenues, venueError, onRefreshVenues }:
       <section className="hero" aria-labelledby="page-title">
         <div className="hero-copy">
           <p className="eyebrow">查看场地 · 在线预约</p>
-          <h1 id="page-title" tabIndex={-1}>找到合适场地，<br /><span>轻松安排活动。</span></h1>
+          <h1 id="page-title" tabIndex={-1}>找到合适场地，<span>轻松安排活动。</span></h1>
           <p className="hero-description">了解场地位置、开放时间和容量，选定场地后即可预约。</p>
-          <button type="button" className="hero-link" onClick={() => document.getElementById('venues')?.scrollIntoView()}>
-            浏览场地列表 <span aria-hidden="true">↗</span>
-          </button>
         </div>
         <div className="hero-stats" aria-label="场地数据概览">
           <p className="hero-stats-title">场地概况</p>
-          <div><strong>{openVenueCount}</strong><span>开放场地</span></div>
-          <div><strong>{venueCount}</strong><span>场地总数</span></div>
-          <div><strong>{closedVenueCount}</strong><span>已停用</span></div>
+          <div><strong>{openVenueCount}</strong><span>开放</span></div>
+          <div><strong>{venueCount}</strong><span>全部</span></div>
+          <div><strong>{closedVenueCount}</strong><span>停用</span></div>
         </div>
       </section>
 
       <section id="venues" aria-labelledby="venues-heading" className="panel home-panel">
         <div className="section-heading">
           <div>
-            <p className="section-kicker">场地概览</p>
             <h2 id="venues-heading">场地列表</h2>
-            <p>查看场地信息与状态，选择开放场地开始预约。</p>
           </div>
           <div className="section-actions">
             <a className="create-venue-link" href="#/venues/new">创建场地</a>

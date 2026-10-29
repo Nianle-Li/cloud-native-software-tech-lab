@@ -25,7 +25,6 @@ export function VenueForm({ draft, onDraftChange, isSubmitting, onCreate }: Venu
 
   return (
     <form aria-label="创建场地" onSubmit={handleSubmit} noValidate className="booking-form">
-      <p className="form-intro">所有字段均为必填，提交结果会显示在表单下方。</p>
       <fieldset className="form-fields" disabled={isSubmitting}>
         <legend>场地资料</legend>
         <div className="form-grid">
@@ -58,7 +57,7 @@ export function VenueForm({ draft, onDraftChange, isSubmitting, onCreate }: Venu
           </label>
         </div>
         <div className="form-actions">
-          <button type="submit">{isSubmitting ? '提交中…' : '提交场地'}</button>
+          <button type="submit">{isSubmitting ? '创建中…' : '创建场地'}</button>
           <p>每日开放时段按北京时间填写；关闭时间须晚于开放时间，不支持跨午夜。</p>
         </div>
       </fieldset>

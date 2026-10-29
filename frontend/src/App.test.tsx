@@ -469,7 +469,7 @@ describe('场地预约页面', () => {
 
     render(<App />)
     expect(await screen.findByRole('alert')).toHaveTextContent('服务器暂时不可用')
-    await user.click(screen.getByRole('button', { name: '刷新场地列表' }))
+    await user.click(screen.getByRole('button', { name: '刷新场地信息' }))
 
     expect(await screen.findByRole('form', { name: '创建预约' })).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
@@ -599,7 +599,7 @@ describe('场地预约页面', () => {
     render(<App />)
     const form = await screen.findByRole('form', { name: '创建预约' })
     await user.type(within(form).getByLabelText('预约人或组织'), '待确认的草稿')
-    await user.click(screen.getByRole('button', { name: '刷新场地列表' }))
+    await user.click(screen.getByRole('button', { name: '刷新场地信息' }))
     expect(screen.getByRole('form', { name: '创建预约' })).toBeInTheDocument()
     expect(within(form).getByLabelText('预约人或组织')).toHaveValue('待确认的草稿')
     expect(within(form).getByRole('button', { name: '提交预约' })).toBeDisabled()
@@ -628,7 +628,7 @@ describe('场地预约页面', () => {
     render(<App />)
     const form = await screen.findByRole('form', { name: '创建预约' })
     await user.type(within(form).getByLabelText('使用目的'), '保留的草稿')
-    await user.click(screen.getByRole('button', { name: '刷新场地列表' }))
+    await user.click(screen.getByRole('button', { name: '刷新场地信息' }))
     expect(within(form).getByRole('button', { name: '提交预约' })).toBeDisabled()
 
     await act(async () => { resolveRefresh(json([venue])); await refresh })

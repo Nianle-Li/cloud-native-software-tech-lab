@@ -38,6 +38,8 @@ npm run dev
 
 `npm ci` 应无错误结束；`npm test` 应全部通过；`npm run build` 应生成 `frontend/dist/index.html`。`npm run dev` 会持续运行而不是自动退出，终端应显示 Vite 本地地址（通常为 `http://localhost:5173/`）；打开该地址，确认页面标题为“场地预约系统”。结束开发服务器按 `Ctrl+C`。`frontend/.npmrc` 将依赖源设为 npm 官方源，并把缓存放在可写的 `frontend/.npm-cache/`；缓存、依赖和构建产物均不纳入 Git。
 
+前端另有真实 Chromium 回归检查：在 `frontend/` 中先运行 `npx playwright install chromium`，再运行 `npm run test:layout`。该命令会复用或启动本地模拟 API 和 Vite，检查六个视图在窄屏、桌面、放大文字和长内容下的布局，以及创建场地、预约、冲突提示、取消后重新预约等点击流程；浏览器下载仅需在首次运行时完成。
+
 ### 当前阶段：手动检查前端交互
 
 不启动后端时，可用模拟 API 独立检查前端。在 **第二个 PowerShell 终端**进入 `frontend/` 并运行 `npm run mock:api`，保持该终端运行；第一个终端运行 `npm run dev`。打开 Vite 页面检查：

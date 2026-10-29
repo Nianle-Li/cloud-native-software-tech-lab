@@ -18,12 +18,12 @@ interface BookingPageProps {
 
 export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueError, isSubmitting, actionError, successMessage, onRefreshVenues, onCreate }: BookingPageProps) {
   return (
-    <>
+    <div className="booking-page">
       <div className="subpage-banner">
         <a className="back-link" href="#/">← 返回场地概览</a>
         <p className="eyebrow">场地预约</p>
         <h1 tabIndex={-1}>{venue ? `预约 ${venue.name}` : '预约场地'}</h1>
-        <p>核对场地信息，填写预约申请。</p>
+        <p>核对场地信息后填写预约资料。</p>
       </div>
       <div className="booking-layout">
         <aside className="panel booking-aside" aria-labelledby="venue-summary-heading">
@@ -33,7 +33,7 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
               <h2 id="venue-summary-heading">场地信息</h2>
             </div>
             <button type="button" className="secondary refresh-button" disabled={loadingVenues} onClick={onRefreshVenues}>
-              刷新场地列表
+              刷新场地信息
             </button>
           </div>
           {venue ? (
@@ -48,22 +48,19 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
             </div>
           ) : loadingVenues ? <p className="empty-state">正在加载场地信息…</p> : null}
           {venueError && <p role="alert" className="notice error aside-error">{venueError}</p>}
-          <p className="booking-aside-note">预约日期和时段按北京时间计算；若时段冲突，服务器会拒绝本次申请。</p>
+          <p className="booking-aside-note">预约日期和时间按北京时间计算；若时段冲突，预约无法创建。</p>
         </aside>
 
         <section className="panel booking-panel" aria-labelledby="booking-heading">
           <div className="section-heading">
             <div>
-              <p className="section-kicker">预约申请</p>
               <h2 id="booking-heading">填写预约信息</h2>
-              <p>填写预约人、日期、时段、人数和用途后提交。</p>
             </div>
           </div>
-          {venue && <p className="booking-inline-summary"><span>{venue.name}</span><span>{venue.open_time}–{venue.close_time}</span><span>最多 {venue.capacity} 人</span></p>}
           {venue?.status === 'OPEN' ? (
             <>
               {loadingVenues && <p className="empty-state form-notice">正在更新场地信息…</p>}
-              {venueError && <p className="empty-state form-notice">场地信息暂不可用，请刷新场地列表。</p>}
+              {venueError && <p className="empty-state form-notice">场地信息暂不可用，请刷新场地信息。</p>}
               <ReservationForm
                 venue={venue}
                 draft={draft}
@@ -76,7 +73,7 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
           ) : loadingVenues ? (
             <p className="empty-state">正在加载场地信息…</p>
           ) : venueError ? (
-            <p className="empty-state">场地信息暂不可用，请刷新场地列表。</p>
+            <p className="empty-state">场地信息暂不可用，请刷新场地信息。</p>
           ) : venue ? (
             <p className="empty-state">该场地已停用，无法预约。</p>
           ) : (
@@ -86,6 +83,6 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
           {venue?.status === 'OPEN' && <a className="booking-records-link" href="#/reservations">查看预约记录 →</a>}
         </section>
       </div>
-    </>
+    </div>
   )
 }

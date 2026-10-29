@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { bookingApi } from './api/booking'
 import { ApiError } from './api/client'
 import { useRoute } from './navigation'
+import { RouteOverlay } from './components/RouteOverlay'
 import { BookingPage } from './pages/BookingPage'
 import { CreateVenuePage } from './pages/CreateVenuePage'
 import { HomePage } from './pages/HomePage'
@@ -59,30 +60,35 @@ export default function App() {
   const submittingRef = useRef(false)
   const creatingVenueRef = useRef(false)
   const cancellingRef = useRef(false)
-  const previousRouteKind = useRef(route.kind)
+  const reservationSurface = route.kind === 'reservations' || route.kind === 'reservationDetail'
+  const previousReservationSurface = useRef(reservationSurface)
   const skipNextReservationEntryRefresh = useRef(false)
   const routeKey = route.kind === 'booking' || route.kind === 'venueDetail'
     ? `${route.kind}:${route.venueId}`
     : route.kind === 'reservationDetail' ? `${route.kind}:${route.reservationId}` : route.kind
   const previousRouteKey = useRef(routeKey)
   useLayoutEffect(() => {
-    scrollToPageTop()
-    if (previousRouteKey.current !== routeKey) document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true })
+    const isOverlay = route.kind === 'venueDetail' || route.kind === 'reservationDetail' || route.kind === 'createVenue'
+    const previous = previousRouteKey.current
+    const returningToParent = (route.kind === 'home' && (previous.startsWith('venueDetail:') || previous === 'createVenue'))
+      || (route.kind === 'reservations' && previous.startsWith('reservationDetail:'))
+    if (!isOverlay && !returningToParent) scrollToPageTop()
+    if (!isOverlay && !returningToParent && previous !== routeKey) document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true })
     previousRouteKey.current = routeKey
   }, [routeKey])
 
   useEffect(() => {
-    if (route.kind === 'reservations' && previousRouteKind.current !== 'reservations') {
+    if (reservationSurface && !previousReservationSurface.current) {
       if (skipNextReservationEntryRefresh.current) {
         skipNextReservationEntryRefresh.current = false
       } else {
         setReservationVisitKey((current) => current + 1)
       }
-    } else if (route.kind !== 'booking') {
+    } else if (!reservationSurface && route.kind !== 'booking') {
       skipNextReservationEntryRefresh.current = false
     }
-    previousRouteKind.current = route.kind
-  }, [route.kind])
+    previousReservationSurface.current = reservationSurface
+  }, [reservationSurface, route.kind])
 
   useEffect(() => {
     let active = true
@@ -190,7 +196,7 @@ export default function App() {
     const venue = venues.find((item) => item.id === input.venue_id)
     const validationError = venue
       ? validateReservation(input, venue)[0]?.message
-      : '场地不可预约，请刷新场地列表'
+      : '场地当前不可预约，请刷新场地信息并核对状态'
     if (validationError) {
       setBookingFeedback({ venueId: input.venue_id, error: validationError, success: '' })
       return false
@@ -240,7 +246,7 @@ export default function App() {
   }
 
   return (
-    <div className="page-frame">
+    <div className="page-frame" inert={route.kind === 'venueDetail' || route.kind === 'reservationDetail' || route.kind === 'createVenue'}>
       <header className="site-header">
         <a className="brand" href="#/" aria-label="场地预约系统，返回场地概览">
           <span className="brand-mark" aria-hidden="true"><span /><span /><span /><span /></span>
@@ -254,7 +260,7 @@ export default function App() {
       </header>
 
       <main className="app-shell">
-        {route.kind === 'home' && (
+        {(route.kind === 'home' || route.kind === 'venueDetail' || route.kind === 'createVenue') && (
           <HomePage
             venues={venues}
             loadingVenues={loadingVenues}
@@ -278,22 +284,7 @@ export default function App() {
           />
         )}
 
-        {route.kind === 'createVenue' && (
-          <CreateVenuePage
-            draft={venueDraft}
-            onDraftChange={setVenueDraft}
-            isSubmitting={isCreatingVenue}
-            actionError={venueCreationError}
-            createdVenue={createdVenue}
-            onCreate={createVenue}
-          />
-        )}
-
-        {route.kind === 'venueDetail' && <VenueDetailPage venueId={route.venueId} />}
-
-        {route.kind === 'reservationDetail' && <ReservationDetailPage reservationId={route.reservationId} venues={venues} />}
-
-        {route.kind === 'reservations' && (
+        {reservationSurface && (
           <ReservationsPage
             reservations={reservations}
             venues={venues}
@@ -310,14 +301,27 @@ export default function App() {
 
         {route.kind === 'notFound' && (
           <section className="panel not-found-panel">
-            <p className="section-kicker">页面不存在</p>
             <h1 tabIndex={-1}>无法打开这个页面</h1>
-            <p>请从场地概览重新选择场地。</p>
+            <p>地址可能有误，请返回场地概览继续操作。</p>
             <a className="detail-book-link" href="#/">返回场地概览</a>
           </section>
         )}
-        <footer className="site-footer">场地预约系统</footer>
       </main>
+      {route.kind === 'createVenue' && (
+        <RouteOverlay name="创建场地" kind="form" returnHash="#/">
+          <CreateVenuePage draft={venueDraft} onDraftChange={setVenueDraft} isSubmitting={isCreatingVenue} actionError={venueCreationError} createdVenue={createdVenue} onCreate={createVenue} />
+        </RouteOverlay>
+      )}
+      {route.kind === 'venueDetail' && (
+        <RouteOverlay name="场地详情" kind="drawer" returnHash="#/">
+          <VenueDetailPage venueId={route.venueId} />
+        </RouteOverlay>
+      )}
+      {route.kind === 'reservationDetail' && (
+        <RouteOverlay name="预约详情" kind="drawer" returnHash="#/reservations">
+          <ReservationDetailPage reservationId={route.reservationId} venues={venues} />
+        </RouteOverlay>
+      )}
     </div>
   )
 }

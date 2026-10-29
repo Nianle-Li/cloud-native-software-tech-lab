@@ -35,7 +35,15 @@ describe('预约记录浏览', () => {
     render(<ReservationList reservations={reservations.slice(0, 1)} venues={[venue]} cancellingId={null} onCancel={vi.fn()} />)
     const card = screen.getByRole('heading', { name: '预约 #8' }).closest('li')!
     expect(within(card).getByText('羽毛球馆 A（编号 1）')).toBeInTheDocument()
+    expect(within(card).getByText('2 人')).toBeInTheDocument()
     expect(within(card).getByRole('link', { name: '查看预约 #8 详情' })).toHaveAttribute('href', '#/reservations/8')
+  })
+
+  it('场地名称未载入时只显示已确认的编号', () => {
+    render(<ReservationList reservations={reservations.slice(0, 1)} venues={[]} cancellingId={null} onCancel={vi.fn()} />)
+    const card = screen.getByRole('heading', { name: '预约 #8' }).closest('li')!
+    expect(within(card).getByText('编号 1')).toBeInTheDocument()
+    expect(within(card).queryByText(/未知场地/)).not.toBeInTheDocument()
   })
   it('超过一页时按原顺序分页，翻页不发起额外请求', async () => {
     const user = userEvent.setup()

@@ -22,12 +22,10 @@ export function ReservationsPage({ reservations, venues, loadingReservations, re
         <a className="back-link" href="#/">← 返回场地概览</a>
         <p className="eyebrow">预约管理</p>
         <h1 tabIndex={-1}>预约记录</h1>
-        <p>查看状态，管理有效预约。</p>
       </div>
       <section className="panel records-panel" aria-labelledby="records-heading">
         <div className="section-heading">
           <div>
-            <p className="section-kicker">查看与管理</p>
             <h2 id="records-heading">预约列表</h2>
             <p>按状态筛选；已取消记录仍保留。</p>
           </div>

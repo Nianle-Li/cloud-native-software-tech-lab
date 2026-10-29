@@ -30,8 +30,6 @@ export function ReservationForm({ venue, draft, onDraftChange, isSubmitting, isU
 
   return (
     <form aria-label="创建预约" onSubmit={handleSubmit} noValidate className="booking-form">
-      <h3>创建预约</h3>
-      <p className="form-intro">所有字段均为必填，提交结果会显示在表单下方。</p>
       <fieldset className="form-fields" aria-label="预约资料" disabled={isSubmitting}>
         <div className="form-grid">
           <label>
@@ -63,7 +61,6 @@ export function ReservationForm({ venue, draft, onDraftChange, isSubmitting, isU
           <button type="submit" disabled={isUnavailable}>
             {isSubmitting ? '提交中…' : '提交预约'}
           </button>
-          <p>提交后由服务器确认场地与时段是否可用。</p>
         </div>
       </fieldset>
     </form>
