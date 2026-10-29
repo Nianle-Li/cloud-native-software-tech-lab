@@ -114,6 +114,13 @@ export function createMockApiServer({ now = () => new Date() } = {}) {
         send(response, 200, venues)
         return
       }
+      const venueDetail = /^\/api\/venues\/(\d+)$/.exec(path)
+      if (request.method === 'GET' && venueDetail) {
+        const venue = venues.find((item) => item.id === Number(venueDetail[1]))
+        if (venue) send(response, 200, venue)
+        else fail(response, 404, 'VENUE_NOT_FOUND', '场地不存在')
+        return
+      }
       if (request.method === 'POST' && path === '/api/venues') {
         let input
         try {
@@ -141,6 +148,13 @@ export function createMockApiServer({ now = () => new Date() } = {}) {
       }
       if (request.method === 'GET' && path === '/api/reservations') {
         send(response, 200, [...reservations].reverse())
+        return
+      }
+      const reservationDetail = /^\/api\/reservations\/(\d+)$/.exec(path)
+      if (request.method === 'GET' && reservationDetail) {
+        const reservation = reservations.find((item) => item.id === Number(reservationDetail[1]))
+        if (reservation) send(response, 200, reservation)
+        else fail(response, 404, 'RESERVATION_NOT_FOUND', '预约不存在')
         return
       }
       if (request.method === 'POST' && path === '/api/reservations') {

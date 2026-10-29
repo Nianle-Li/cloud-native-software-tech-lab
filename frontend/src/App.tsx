@@ -6,6 +6,8 @@ import { BookingPage } from './pages/BookingPage'
 import { CreateVenuePage } from './pages/CreateVenuePage'
 import { HomePage } from './pages/HomePage'
 import { ReservationsPage } from './pages/ReservationsPage'
+import { ReservationDetailPage } from './pages/ReservationDetailPage'
+import { VenueDetailPage } from './pages/VenueDetailPage'
 import { emptyReservationDraft } from './reservationDraft'
 import type { ReservationDraft } from './reservationDraft'
 import type { CreateReservationInput, CreateVenueInput, Reservation, Venue } from './types'
@@ -59,7 +61,9 @@ export default function App() {
   const cancellingRef = useRef(false)
   const previousRouteKind = useRef(route.kind)
   const skipNextReservationEntryRefresh = useRef(false)
-  const routeKey = route.kind === 'booking' ? `booking:${route.venueId}` : route.kind
+  const routeKey = route.kind === 'booking' || route.kind === 'venueDetail'
+    ? `${route.kind}:${route.venueId}`
+    : route.kind === 'reservationDetail' ? `${route.kind}:${route.reservationId}` : route.kind
   const previousRouteKey = useRef(routeKey)
   useLayoutEffect(() => {
     scrollToPageTop()
@@ -145,6 +149,8 @@ export default function App() {
     const pageName = route.kind === 'booking'
       ? `预约${bookingVenue ? ` ${bookingVenue.name}` : '场地'}`
       : route.kind === 'createVenue' ? '创建场地'
+        : route.kind === 'venueDetail' ? '场地详情'
+          : route.kind === 'reservationDetail' ? '预约详情'
         : route.kind === 'reservations' ? '预约记录' : route.kind === 'home' ? '场地概览' : '页面不存在'
     document.title = `${pageName} | 场地预约系统`
   }, [routeKey, bookingVenue?.name])
@@ -282,6 +288,10 @@ export default function App() {
             onCreate={createVenue}
           />
         )}
+
+        {route.kind === 'venueDetail' && <VenueDetailPage venueId={route.venueId} />}
+
+        {route.kind === 'reservationDetail' && <ReservationDetailPage reservationId={route.reservationId} venues={venues} />}
 
         {route.kind === 'reservations' && (
           <ReservationsPage

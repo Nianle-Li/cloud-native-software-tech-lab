@@ -37,6 +37,23 @@ async function post(path, body) {
 }
 
 describe('本地模拟 API 与预约契约', () => {
+  it('按编号查询两类详情，不存在时返回明确的 404', async () => {
+    const venueResponse = await fetch(`${baseUrl}/api/venues/1`)
+    expect(venueResponse.status).toBe(200)
+    expect(await venueResponse.json()).toMatchObject({ id: 1, name: '羽毛球馆 A' })
+    const created = await post('/api/reservations', booking)
+    expect(created.status).toBe(201)
+    const reservation = await created.json()
+    const detailResponse = await fetch(`${baseUrl}/api/reservations/${reservation.id}`)
+    expect(detailResponse.status).toBe(200)
+    expect(await detailResponse.json()).toEqual(reservation)
+    const missingVenue = await fetch(`${baseUrl}/api/venues/999`)
+    expect(missingVenue.status).toBe(404)
+    expect((await missingVenue.json()).error.code).toBe('VENUE_NOT_FOUND')
+    const missingReservation = await fetch(`${baseUrl}/api/reservations/999`)
+    expect(missingReservation.status).toBe(404)
+    expect((await missingReservation.json()).error.code).toBe('RESERVATION_NOT_FOUND')
+  })
   it('创建场地返回 201 和编号，默认开放，并可通过列表查询及预约', async () => {
     const input = { name: '排练室', location: '教学楼', capacity: 20, open_time: '09:00', close_time: '21:00' }
     const response = await post('/api/venues', input)

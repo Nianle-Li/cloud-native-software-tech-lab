@@ -1,5 +1,5 @@
 import type { Venue } from '../types'
-import { bookingHref } from '../navigation'
+import { bookingHref, venueDetailHref } from '../navigation'
 
 interface VenueListProps {
   venues: Venue[]
@@ -32,6 +32,7 @@ export function VenueList({ venues }: VenueListProps) {
           {venue.status === 'OPEN'
             ? <a className="venue-card-content" href={bookingHref(venue.id)} aria-label={`预约${venue.name}`}>{content}</a>
             : <div className="venue-card-content">{content}</div>}
+          <a className="venue-detail-link" href={venueDetailHref(venue.id)} aria-label={`查看${venue.name}详情`}>查看场地详情 →</a>
         </li>
       })}
     </ul>

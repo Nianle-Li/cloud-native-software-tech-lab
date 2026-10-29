@@ -66,6 +66,11 @@ export const bookingApi = {
     return requireList(await requestJson<unknown>('/venues', undefined, 200), isVenue)
   },
 
+  async getVenue(id: number): Promise<Venue> {
+    const body = await requestJson<unknown>(`/venues/${id}`, undefined, 200)
+    return requireShape(body, (value): value is Venue => isVenue(value) && value.id === id)
+  },
+
   async createVenue(input: CreateVenueInput): Promise<Venue> {
     const body = await requestJson<unknown>('/venues', {
       method: 'POST',
@@ -83,6 +88,11 @@ export const bookingApi = {
 
   async listReservations(): Promise<Reservation[]> {
     return requireList(await requestJson<unknown>('/reservations', undefined, 200), isReservation)
+  },
+
+  async getReservation(id: number): Promise<Reservation> {
+    const body = await requestJson<unknown>(`/reservations/${id}`, undefined, 200)
+    return requireShape(body, (value): value is Reservation => isReservation(value) && value.id === id)
   },
 
   async createReservation(input: CreateReservationInput): Promise<Reservation> {

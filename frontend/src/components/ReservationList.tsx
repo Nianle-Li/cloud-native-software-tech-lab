@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ActionFeedback } from './ActionFeedback'
 import type { Reservation, Venue } from '../types'
+import { reservationDetailHref } from '../navigation'
 
 interface ReservationListProps {
   reservations: Reservation[]
@@ -74,12 +75,13 @@ export function ReservationList({ reservations, venues, cancellingId, feedbackRe
                 </span>
               </div>
               <dl>
-                <div><dt>场地</dt><dd>{venueNames.get(reservation.venue_id) ?? `场地 #${reservation.venue_id}`}</dd></div>
+                <div><dt>场地</dt><dd>{venueNames.get(reservation.venue_id) ?? '未知场地'}（编号 {reservation.venue_id}）</dd></div>
                 <div><dt>预约人或组织</dt><dd>{reservation.booked_by}</dd></div>
                 <div><dt>预约日期与时间</dt><dd>{reservation.reservation_date} {reservation.start_time}–{reservation.end_time}</dd></div>
                 <div><dt>参与人数</dt><dd>{reservation.attendee_count}</dd></div>
                 <div><dt>使用目的</dt><dd>{reservation.purpose}</dd></div>
               </dl>
+              <a className="record-detail-link" href={reservationDetailHref(reservation.id)} aria-label={`查看预约 #${reservation.id} 详情`}>查看详情 →</a>
               {reservation.status === 'ACTIVE' && (
                 confirmingId === reservation.id ? (
                   <div className="cancel-confirmation" role="group" aria-label={`确认取消预约 ${reservation.id}`}>

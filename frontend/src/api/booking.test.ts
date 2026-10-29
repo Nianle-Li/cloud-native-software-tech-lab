@@ -28,6 +28,19 @@ const reservation = {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('预约 API 的成功响应校验', () => {
+  it('按编号查询场地和预约详情，并拒绝编号不符的响应', async () => {
+    const fetchedVenue = { id: 1, ...venueInput }
+    const fetchMock = vi.fn(async (path: RequestInfo | URL) => Response.json(
+      String(path) === '/api/venues/1' ? fetchedVenue : reservation,
+    ))
+    vi.stubGlobal('fetch', fetchMock)
+    await expect(bookingApi.getVenue(1)).resolves.toEqual(fetchedVenue)
+    await expect(bookingApi.getReservation(12)).resolves.toEqual(reservation)
+    expect(fetchMock).toHaveBeenCalledWith('/api/venues/1', undefined)
+    expect(fetchMock).toHaveBeenCalledWith('/api/reservations/12', undefined)
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ...reservation, id: 99 })))
+    await expect(bookingApi.getReservation(12)).rejects.toMatchObject({ code: 'INVALID_RESPONSE' })
+  })
   it.each([
     ['场地列表不是数组', 'venues', { id: 1, ...venueInput }],
     ['场地列表含无效容量', 'venues', [{ id: 1, ...venueInput, capacity: 0 }]],

@@ -13,6 +13,13 @@ describe('页面地址', () => {
     expect(parseRoute('#/venues/new')).toEqual({ kind: 'createVenue' })
   })
 
+  it('解析场地和预约详情地址', () => {
+    expect(parseRoute('#/venues/12')).toEqual({ kind: 'venueDetail', venueId: 12 })
+    expect(parseRoute('#/reservations/34')).toEqual({ kind: 'reservationDetail', reservationId: 34 })
+    expect(parseRoute('#/venues/0')).toEqual({ kind: 'notFound' })
+    expect(parseRoute('#/reservations/abc')).toEqual({ kind: 'notFound' })
+  })
+
   it('拒绝无效或不支持的地址', () => {
     expect(parseRoute('#/venues/0/book')).toEqual({ kind: 'notFound' })
     expect(parseRoute('#/venues/abc/book')).toEqual({ kind: 'notFound' })
