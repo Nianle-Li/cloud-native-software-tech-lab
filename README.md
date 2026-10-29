@@ -7,6 +7,7 @@
 - [公共契约：架构、数据、API 与容器配置](docs/contract.md)
 - [三人总分工](docs/team-plan.md)
 - [验收与实验报告清单](docs/acceptance.md)
+- [Lab 1 实验报告](docs/lab1-report.md)
 
 课程任务书《云原生软件技术-Lab1-场地预约系统开发与Docker容器化.pdf》由课程渠道获取，仅作本地参考，不纳入 Git；任务书要求优先于仓库文档。
 
