@@ -39,9 +39,12 @@ export function HomePage({ venues, loadingVenues, venueError, onRefreshVenues }:
             <h2 id="venues-heading">场地列表</h2>
             <p>查看场地信息与状态，选择开放场地开始预约。</p>
           </div>
-          <button type="button" className="secondary refresh-button" disabled={loadingVenues} onClick={onRefreshVenues}>
-            刷新场地列表
-          </button>
+          <div className="section-actions">
+            <a className="create-venue-link" href="#/venues/new">创建场地</a>
+            <button type="button" className="secondary refresh-button" disabled={loadingVenues} onClick={onRefreshVenues}>
+              刷新场地列表
+            </button>
+          </div>
         </div>
         {loadingVenues ? <p className="empty-state">正在加载场地…</p> : venueError ? <p role="alert" className="notice error">{venueError}</p> : (
           <VenueList venues={venues} />

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { bookingApi } from './booking'
+import type { CreateVenueInput } from '../types'
 
-const venueInput = {
+const venueInput: CreateVenueInput = {
   name: '新场地', location: '教学楼 3 层', capacity: 12,
   open_time: '08:00', close_time: '20:00', status: 'OPEN',
 }

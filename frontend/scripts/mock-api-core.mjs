@@ -88,10 +88,23 @@ function validInput(input, venue, now) {
     && input.attendee_count >= 1 && input.attendee_count <= venue.capacity
 }
 
+function validVenueInput(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return false
+  const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/
+  return typeof input.name === 'string' && input.name.trim().length > 0 && input.name.length <= 100
+    && typeof input.location === 'string' && input.location.trim().length > 0 && input.location.length <= 200
+    && Number.isInteger(input.capacity) && input.capacity >= 1 && input.capacity <= 2147483647
+    && typeof input.open_time === 'string' && timePattern.test(input.open_time)
+    && typeof input.close_time === 'string' && timePattern.test(input.close_time)
+    && input.open_time < input.close_time
+    && (input.status === undefined || input.status === null || input.status === 'OPEN' || input.status === 'CLOSED')
+}
+
 export function createMockApiServer({ now = () => new Date() } = {}) {
   const venues = seedVenues.map((venue) => ({ ...venue }))
   const reservations = []
   let nextId = 1
+  let nextVenueId = Math.max(...venues.map((venue) => venue.id)) + 1
 
   return createServer((request, response) => {
     async function handle() {
@@ -99,6 +112,31 @@ export function createMockApiServer({ now = () => new Date() } = {}) {
 
       if (request.method === 'GET' && path === '/api/venues') {
         send(response, 200, venues)
+        return
+      }
+      if (request.method === 'POST' && path === '/api/venues') {
+        let input
+        try {
+          input = await readJson(request)
+        } catch {
+          fail(response, 400, 'VALIDATION_ERROR', '请求正文必须是有效的 JSON')
+          return
+        }
+        if (!validVenueInput(input)) {
+          fail(response, 400, 'VALIDATION_ERROR', '请检查场地名称、位置、容量、开放时段和状态')
+          return
+        }
+        const created = {
+          id: nextVenueId++,
+          name: input.name,
+          location: input.location,
+          capacity: input.capacity,
+          open_time: input.open_time,
+          close_time: input.close_time,
+          status: input.status ?? 'OPEN',
+        }
+        venues.push(created)
+        send(response, 201, created)
         return
       }
       if (request.method === 'GET' && path === '/api/reservations') {

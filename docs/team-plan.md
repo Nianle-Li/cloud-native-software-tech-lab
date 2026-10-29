@@ -4,7 +4,7 @@
 
 | 成员 | 主要责任与文件 |
 |---|---|
-| A：前端 | `frontend/`；场地列表/详情、预约创建/列表/取消及成功、参数错误、冲突提示；前端 Dockerfile、`.dockerignore`、Nginx `/api` 代理配置 |
+| A：前端 | `frontend/`；场地创建/列表/详情、预约创建/列表/取消及成功、参数错误、冲突提示；前端 Dockerfile、`.dockerignore`、Nginx `/api` 代理配置 |
 | B：后端 | `api/` 中的 Java 代码、JPA 映射、参数校验、业务事务与统一错误响应；后端 Dockerfile、`.dockerignore`、API 测试 |
 | C：数据库与部署 | `api/src/main/resources/db/migration/` 的 Flyway 表结构及少量场地种子数据；根目录 `compose.yaml`、`.env.example`、`.gitignore`；PostgreSQL 服务、named volume、`pg_isready`、部署与持久化说明 |
 

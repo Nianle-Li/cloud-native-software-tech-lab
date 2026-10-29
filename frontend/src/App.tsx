@@ -3,20 +3,23 @@ import { bookingApi } from './api/booking'
 import { ApiError } from './api/client'
 import { useRoute } from './navigation'
 import { BookingPage } from './pages/BookingPage'
+import { CreateVenuePage } from './pages/CreateVenuePage'
 import { HomePage } from './pages/HomePage'
 import { ReservationsPage } from './pages/ReservationsPage'
 import { emptyReservationDraft } from './reservationDraft'
 import type { ReservationDraft } from './reservationDraft'
-import type { CreateReservationInput, Reservation, Venue } from './types'
+import type { CreateReservationInput, CreateVenueInput, Reservation, Venue } from './types'
 import { validateReservation } from './validation/reservation'
+import { validateVenue } from './validation/venue'
+import { emptyVenueDraft } from './venueDraft'
 
 function messageFor(error: unknown): string {
   return error instanceof Error ? error.message : '操作失败，请稍后重试'
 }
 
-function mutationErrorMessage(error: unknown, operation: string): string {
+function mutationErrorMessage(error: unknown, operation: string, refreshTarget = '预约记录'): string {
   if (error instanceof ApiError && (error.status === 0 || error.status >= 500 || error.code === 'INVALID_RESPONSE')) {
-    return `无法确认${operation}是否成功。请先刷新预约记录，确认结果后再决定是否重试。`
+    return `无法确认${operation}是否成功。请先刷新${refreshTarget}，确认结果后再决定是否重试。`
   }
   return messageFor(error)
 }
@@ -30,6 +33,10 @@ export default function App() {
   const [venues, setVenues] = useState<Venue[]>([])
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [draftByVenue, setDraftByVenue] = useState<Record<number, ReservationDraft>>({})
+  const [venueDraft, setVenueDraft] = useState(emptyVenueDraft)
+  const [venueCreationError, setVenueCreationError] = useState('')
+  const [createdVenue, setCreatedVenue] = useState<Venue | null>(null)
+  const [isCreatingVenue, setIsCreatingVenue] = useState(false)
   const [loadingVenues, setLoadingVenues] = useState(true)
   const [loadingReservations, setLoadingReservations] = useState(true)
   const [venueError, setVenueError] = useState('')
@@ -41,11 +48,13 @@ export default function App() {
   const [venueReloadKey, setVenueReloadKey] = useState(0)
   const [reservationReloadKey, setReservationReloadKey] = useState(0)
   const [reservationVisitKey, setReservationVisitKey] = useState(0)
-  // 写入成功后让更早发出的列表响应失效。
+  // 记录列表请求与成功写入的先后关系。
   const reservationRevision = useRef(0)
+  const venueRevision = useRef(0)
   // 刷新结果不能清除在其发出之后产生的操作错误。
   const mutationRevision = useRef(0)
   const submittingRef = useRef(false)
+  const creatingVenueRef = useRef(false)
   const cancellingRef = useRef(false)
   const previousRouteKind = useRef(route.kind)
   const skipNextReservationEntryRefresh = useRef(false)
@@ -72,19 +81,25 @@ export default function App() {
 
   useEffect(() => {
     let active = true
+    const revision = ++venueRevision.current
     setLoadingVenues(true)
     setVenueError('')
 
     bookingApi.listVenues()
       .then((items) => {
         if (!active) return
-        setVenues(items)
+        setVenues((current) => {
+          if (revision === venueRevision.current) return items
+          // 较早的列表响应仍可补齐已有场地，但不能丢失刚创建的场地。
+          const returnedIds = new Set(items.map((item) => item.id))
+          return [...items, ...current.filter((item) => !returnedIds.has(item.id))].sort((a, b) => a.id - b.id)
+        })
       })
       .catch((error: unknown) => {
-        if (active) setVenueError(messageFor(error))
+        if (active && revision === venueRevision.current) setVenueError(messageFor(error))
       })
       .finally(() => {
-        if (active) setLoadingVenues(false)
+        if (active && revision === venueRevision.current) setLoadingVenues(false)
       })
 
     return () => { active = false }
@@ -122,9 +137,38 @@ export default function App() {
   useEffect(() => {
     const pageName = route.kind === 'booking'
       ? `预约${bookingVenue ? ` ${bookingVenue.name}` : '场地'}`
-      : route.kind === 'reservations' ? '预约记录' : route.kind === 'home' ? '场地概览' : '页面不存在'
+      : route.kind === 'createVenue' ? '创建场地'
+        : route.kind === 'reservations' ? '预约记录' : route.kind === 'home' ? '场地概览' : '页面不存在'
     document.title = `${pageName} | 场地预约系统`
   }, [routeKey, bookingVenue?.name])
+
+  async function createVenue(input: CreateVenueInput): Promise<void> {
+    if (creatingVenueRef.current) return
+    setVenueCreationError('')
+    setCreatedVenue(null)
+    const validationError = validateVenue(input)[0]?.message
+    if (validationError) {
+      setVenueCreationError(validationError)
+      return
+    }
+
+    creatingVenueRef.current = true
+    setIsCreatingVenue(true)
+    try {
+      const created = await bookingApi.createVenue(input)
+      venueRevision.current += 1
+      setVenues((current) => [...current.filter((item) => item.id !== created.id), created].sort((a, b) => a.id - b.id))
+      setVenueError('')
+      setLoadingVenues(false)
+      setCreatedVenue(created)
+      setVenueDraft(emptyVenueDraft())
+    } catch (error) {
+      setVenueCreationError(mutationErrorMessage(error, '创建场地', '场地列表'))
+    } finally {
+      creatingVenueRef.current = false
+      setIsCreatingVenue(false)
+    }
+  }
 
   async function createReservation(input: CreateReservationInput): Promise<boolean> {
     if (submittingRef.current) return false
@@ -189,6 +233,7 @@ export default function App() {
         </a>
         <nav className="site-nav" aria-label="页面导航">
           <a href="#/" aria-current={route.kind === 'home' ? 'page' : undefined} onClick={route.kind === 'home' ? scrollToPageTop : undefined}>场地概览</a>
+          <a href="#/venues/new" aria-current={route.kind === 'createVenue' ? 'page' : undefined} onClick={route.kind === 'createVenue' ? scrollToPageTop : undefined}>创建场地</a>
           <a href="#/reservations" aria-current={route.kind === 'reservations' ? 'page' : undefined} onClick={route.kind === 'reservations' ? scrollToPageTop : undefined}>预约记录</a>
         </nav>
       </header>
@@ -215,6 +260,17 @@ export default function App() {
             successMessage={bookingFeedback?.venueId === route.venueId ? bookingFeedback.success : ''}
             onRefreshVenues={() => setVenueReloadKey((current) => current + 1)}
             onCreate={createReservation}
+          />
+        )}
+
+        {route.kind === 'createVenue' && (
+          <CreateVenuePage
+            draft={venueDraft}
+            onDraftChange={setVenueDraft}
+            isSubmitting={isCreatingVenue}
+            actionError={venueCreationError}
+            createdVenue={createdVenue}
+            onCreate={createVenue}
           />
         )}
 

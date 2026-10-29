@@ -34,11 +34,11 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; }
-button, input, textarea { font: inherit; }
+button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.56; }
-button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
   outline: 3px solid #a65b38;
   outline-offset: 3px;
 }
@@ -112,6 +112,9 @@ main h1:focus-visible { outline: 3px solid #a65b38; outline-offset: 5px; }
 button.secondary { padding: 0.6rem 0.9rem; border: 1px solid #bbcdbf; border-radius: 9px; background: var(--surface); color: var(--accent-hover); font-size: 0.82rem; font-weight: 700; }
 button.secondary:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
 .refresh-button { flex: none; white-space: nowrap; }
+.section-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.create-venue-link { display: inline-flex; justify-content: center; padding: 0.6rem 0.9rem; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font-size: 0.82rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.create-venue-link:hover { background: var(--accent-hover); }
 
 .venue-list, .reservation-list { display: grid; gap: 0.9rem; margin: 0; padding: 0; list-style: none; }
 .venue-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -154,13 +157,18 @@ button.secondary:hover:not(:disabled) { border-color: var(--accent); background:
 .form-notice { margin-bottom: 1rem; }
 
 .booking-form h3 { margin: 0; color: var(--ink); font-size: 1.1rem; }
+.venue-create-panel { max-width: 860px; margin-inline: auto; }
+.venue-create-panel .feedback-stack { margin-top: 1rem; }
+.form-fields { min-width: 0; margin: 0; padding: 0; border: 0; }
+.form-fields legend { margin-bottom: 0.8rem; padding: 0; font-size: 0.9rem; font-weight: 700; }
 .form-intro { margin: 0.35rem 0 1.15rem; color: var(--ink-muted); font-size: 0.82rem; line-height: 1.5; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 0.8rem; }
 .form-grid label { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; color: var(--ink); font-size: 0.8rem; font-weight: 800; }
 .form-grid label:first-child, .form-grid .full-width { grid-column: 1 / -1; }
-.form-grid input, .form-grid textarea { width: 100%; min-width: 0; padding: 0.75rem 0.8rem; border: 1px solid #cbd9cc; border-radius: 8px; outline: none; background: #fff; color: var(--ink); font-size: 0.9rem; font-weight: 500; }
+.form-grid input, .form-grid textarea, .form-grid select { width: 100%; min-width: 0; padding: 0.75rem 0.8rem; border: 1px solid #cbd9cc; border-radius: 8px; outline: none; background: #fff; color: var(--ink); font-size: 0.9rem; font-weight: 500; }
 .form-grid input::placeholder, .form-grid textarea::placeholder { color: #6f8177; }
-.form-grid input:focus, .form-grid textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(71 110 99 / 14%); }
+.form-grid input:focus, .form-grid textarea:focus, .form-grid select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(71 110 99 / 14%); }
+.form-fields:disabled input, .form-fields:disabled select { background: var(--surface-soft); color: var(--ink-muted); cursor: not-allowed; }
 .form-grid textarea { resize: vertical; min-height: 90px; }
 .form-actions { margin-top: 1.3rem; }
 .form-actions button { width: 100%; padding: 0.82rem 1rem; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font-size: 0.92rem; font-weight: 800; }
@@ -226,6 +234,8 @@ button.secondary:hover:not(:disabled) { border-color: var(--accent); background:
   .form-grid { grid-template-columns: 1fr; }
   .form-grid label:first-child, .form-grid .full-width { grid-column: auto; }
   .refresh-button { width: 100%; }
+  .section-actions { width: 100%; }
+  .section-actions > * { width: 100%; }
   .hero-stats { padding: 0.8rem; gap: 0.3rem; }
   .hero-stats div { padding-left: 0.45rem; }
   .hero-stats strong { font-size: 1.6rem; }
