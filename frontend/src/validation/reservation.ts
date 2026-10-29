@@ -37,7 +37,7 @@ export function validateReservation(
   }
 
   if (input.venue_id !== venue.id || venue.status !== 'OPEN') {
-    add('venue_id', '场地不可预约，请刷新场地列表')
+    add('venue_id', '场地当前不可预约，请刷新场地信息并核对状态')
   }
   const bookedBy = input.booked_by.trim()
   if (!bookedBy || bookedBy.length > 100) add('booked_by', '预约人或组织须为 1–100 个字符')

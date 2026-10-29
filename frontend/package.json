@@ -11,6 +11,7 @@
     "mock:api": "node scripts/mock-api.mjs",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
+    "test:layout": "playwright test --config playwright.config.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -18,6 +19,7 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.56.1",
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
