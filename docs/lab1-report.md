@@ -187,13 +187,118 @@ Nginx 提供静态页面，并将 `/api/` 请求代理至 Compose 网络中的 `
 
 ## 4. 数据库设计
 
+### 4.1 数据模型与字段
+
+C 使用 PostgreSQL 16，业务表为 `venues` 与 `reservations`。一个场地对应多条预约，`reservations.venue_id` 是引用 `venues(id)` 的非空外键；两表主键均为数据库生成的 `BIGINT` identity。种子插入不指定 ID，后续 API 写入继续使用数据库序列。
+
+| 表 | 关键字段与存储方式 |
+| --- | --- |
+| `venues` | `name VARCHAR(100)`、`location VARCHAR(200)`、`capacity INTEGER`、`open_time/close_time TIME WITHOUT TIME ZONE`、`status VARCHAR(10)` |
+| `reservations` | `venue_id BIGINT`、`booked_by VARCHAR(100)`、`reservation_date DATE`、`start_time/end_time TIME WITHOUT TIME ZONE`、`attendee_count INTEGER`、`purpose VARCHAR(500)`、`status VARCHAR(10)`、`created_at/cancelled_at TIMESTAMP WITH TIME ZONE` |
+
+业务日期和日内钟点按 `Asia/Shanghai` 解释；创建与取消时间保存实际时间点。取消不删除行，`CANCELLED` 记录继续关联原场地，便于查询历史。外键没有级联删除配置。
+
+### 4.2 数据库约束与索引
+
+除 `cancelled_at` 外，业务列均要求非空；四种文本不能为空白，长度由 `VARCHAR` 上限约束。`capacity`、`attendee_count` 必须大于 0；开放时间、预约起止时间分别满足前者小于后者。场地状态仅允许 `OPEN/CLOSED`，预约状态仅允许 `ACTIVE/CANCELLED`；`ACTIVE` 必须没有取消时间，`CANCELLED` 必须有取消时间。场地和预约默认状态分别为 `OPEN`、`ACTIVE`，创建时间默认 `CURRENT_TIMESTAMP`。
+
+联合索引 `idx_reservations_conflict` 按 `(venue_id, reservation_date, status, start_time, end_time)` 建立，辅助有效预约的冲突查询。索引本身不阻止时段重叠；容量上限、开放时段、过去时间和并发冲突由 B 的 Service 及事务锁处理，见第 3 节。
+
+### 4.3 Flyway 管理与独立验证
+
+迁移位于 `api/src/main/resources/db/migration/`：V1 创建两张表、14 项命名约束及冲突索引；V2 插入两个开放场地和一个停用场地，不预置预约。Flyway 是结构唯一来源，由 API 启动时执行，JPA 使用 `ddl-auto=validate`。不另用数据库初始化目录或 JPA 自动建表；已执行迁移不回改，结构变化新增版本。
+
+C 的独立 PostgreSQL/Flyway 验证确认：两项迁移成功，`validate` 与再次 `migrate` 成功，种子未重复；21 组非法写入被预期 SQLSTATE 类别拒绝。合法文本长度边界、identity、默认值、逻辑取消和有预约引用时的外键删除保护均通过。该组测试在独立项目中回滚测试写入，保留三条种子，不与后续完整系统验收数据混用。独立工具使用 Flyway Community 11.20.0；应用使用 B 的 Maven 依赖配置，两者验证范围分开记录。
+
 ## 5. Docker 与 Compose 配置
+
+### 5.1 C 的三服务编排
+
+前后端 Dockerfile 分别由 A、B 提供，其构建与运行阶段见第 2.4、3.6 节。C 在根目录维护唯一一份 `compose.yaml`；数据库直接使用 `postgres:16.15-bookworm` 官方镜像，不编写第三个 Dockerfile。
+
+```text
+浏览器 → 宿主机 8080 → frontend:80
+                         │ /api/*，保留原路径
+                         ▼
+                       api:8080
+                         │ JDBC
+                         ▼
+                     database:5432
+                         │
+                     postgres_data
+```
+
+| 服务 | 构建或镜像 | 端口与职责 |
+| --- | --- | --- |
+| `frontend` | `./frontend` → `venue-booking-frontend:lab1` | 容器内 80；映射 `${FRONTEND_PORT:-8080}:80` |
+| `api` | `./api` → `venue-booking-api:lab1` | 容器内 8080；不发布宿主机端口 |
+| `database` | `postgres:16.15-bookworm` | 容器内 5432；不发布宿主机端口 |
+
+三个服务使用 Compose 默认网络，通过固定服务名互相访问。API 等待数据库 `service_healthy` 后启动，前端等待 API 容器 `service_started`；后者不等于应用就绪，因此还须检查实际健康端点。数据库 healthcheck 使用 `pg_isready` 经本地 TCP 检查，间隔 5 秒、超时 5 秒、启动宽限 10 秒、重试 12 次。
+
+### 5.2 配置外部化与命名卷
+
+根目录 `.env.example` 提供四个变量：`POSTGRES_DB`、`POSTGRES_USER`、`POSTGRES_PASSWORD`、`FRONTEND_PORT`。真实 `.env` 仅保存在本机，被 Git 忽略。本次实际配置使用数据库名与用户名 `venue_booking`、随机实验密码和前端端口 `8080`；密码未写入镜像或报告证据。
+
+Compose 显式向数据库传入三个 `POSTGRES_*` 变量，向 API 注入 `SPRING_DATASOURCE_URL/USERNAME/PASSWORD`。JDBC URL 为 `jdbc:postgresql://database:5432/${POSTGRES_DB}`；Compose 读取 `.env` 只用于变量替换，不意味着容器自动获得文件内全部变量。三个数据库变量为空时，配置解析直接失败。
+
+`postgres_data` 命名卷挂载到 `/var/lib/postgresql/data`。本次默认项目名为 `cloud-native-software-tech-lab`，实际卷名为 `cloud-native-software-tech-lab_postgres_data`，容器删除后该卷仍保留。healthcheck 中的 `$$POSTGRES_USER`、`$$POSTGRES_DB` 留到容器内展开。数据库接受连接的检查之外，另由 Actuator 验证 API 到数据库的连接。
 
 ## 6. 系统部署与功能验收
 
+### 6.1 C 的整体启动记录
+
+2026-10-30，C 在 ARM64 Mac 上使用 Docker Engine 29.2.1、Compose v5.1.0，从 `e2446b6` 源码执行统一部署。后续合并到 `d185d5e` 的内容仅为报告、截图和 `api/.gitignore`，应用及部署实现未变。
+
+首次配置时复制 `.env.example` 为 `.env` 并替换密码，已有配置不覆盖。根目录执行：
+
+```sh
+docker compose config --quiet
+docker compose up --build -d
+docker compose ps
+docker compose logs --tail=100 frontend api database
+docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
+```
+
+前后端镜像均从仓库源码构建成功，三个服务正常运行，数据库为 `healthy`，仅前端发布宿主机端口。API 日志确认空库成功应用 V1/V2、JPA 初始化完成、Spring Boot 启动成功；实际 JDBC URL 为 `jdbc:postgresql://database:5432/venue_booking`。Actuator 顶层与数据库健康状态均为 `UP`。浏览器入口为 `http://localhost:8080/`，首页和经 Nginx 转发的 `/api/venues` 均返回 `200`。
+
+### 6.2 C 提供的联调一手证据
+
+整体环境运行后，C 经前端入口执行 33 项真实 HTTP 检查，覆盖七个业务接口、主要校验错误、相邻时段、冲突、取消、幂等和重订；并发请求结果为一个 `201`、一个 `409 TIME_CONFLICT`，SQL 核对仅一条对应 `ACTIVE`。此数量与 B 的 7 项 Testcontainers 集成测试分别记录；本次 Dockerfile 构建跳过测试，不将镜像构建结果当作重新执行集成测试。
+
+Chrome 实际页面操作另验证了创建场地、列表与详情、预约成功、冲突提示、二次确认取消、同时间重订及刷新详情。页面验收场地为 #5，日期为 `2026-11-06`，时段为 `10:00–11:00`；原预约 #5 取消并保留，新预约 #6 为有效状态。完整记录见[真实 API 与页面验收 JSON](assets/lab1-report/stage4-acceptance.json)。这是供 D 汇总的 C 本机验证材料，最终跨模块流程和综合验收表由 D 整理。
+
 ## 7. 并发与数据持久化验证
 
+### 7.1 C 的容器重建持久化验证
+
+C 在 2026-10-30 14:58:48（北京时间）保存预约 #5、#6 的完整 API 响应，记录场地/预约总数、Flyway 历史、容器 ID、镜像 ID 和命名卷信息，然后执行：
+
+```sh
+docker compose down
+docker compose up -d
+docker volume ls
+```
+
+全程不使用 `-v`。`down` 后确认三个旧容器已移除，原数据库卷仍存在；14:59:54 完成重建后核对。三个容器 ID 均变化、镜像 ID 均未变，数据库继续挂载原 `cloud-native-software-tech-lab_postgres_data`，卷创建时间与挂载位置不变。
+
+| 对比项 | 重建前 | 重建后 |
+| --- | --- | --- |
+| 预约 #5 | `CANCELLED`，有取消时间 | 完整记录一致 |
+| 预约 #6 | `ACTIVE`，取消时间为空 | 完整记录一致 |
+| 场地总数 / 预约总数 | 5 / 6 | 5 / 6 |
+| Flyway 历史 | V1、V2 成功，校验和已记录 | 版本和校验和未变，无需重复迁移 |
+| 应用与数据库健康 | `UP / UP` | `UP / UP` |
+
+“完整记录一致”包含预约人、用途、日期、钟点、状态及创建/取消时间，而非仅判断同一编号存在。重建后通过 HTTP 重新查询并与 SQL 核对，API 启动日志无 `ERROR`。本次证明本地 Compose 环境的命名卷能在容器重建后保留预约，不包含备份恢复或生产高可用验证。
+
+证据见[重建前后对比 JSON](assets/lab1-report/stage5-persistence.json)及[重建后状态与日志](assets/lab1-report/deployment-status.txt)。正式验收卷与早期 `lab1-db-check-*` 独立验证卷分开，验收数据保留。
+
 ## 8. 小组分工
+
+### C 的实际交付
+
+C 完成 PostgreSQL/Flyway 两项迁移、数据约束与索引、场地种子，根目录 Compose、环境变量模板和忽略规则核对，以及独立数据库验证脚本；在最终运行实现上完成三服务源码构建与部署、数据库连接/迁移/健康检查、真实 API 和页面联调、并发数据库核对及容器重建持久化验收，并交付本报告的数据库、编排、启动和持久化材料及证据。A/B 的实现分别保留在第 2、3 节，三人总分工与综合结论由 D 统一整合。
 
 ## 9. 实验总结
 
@@ -208,3 +313,9 @@ Nginx 提供静态页面，并将 `/api/` 请求代理至 Compose 网络中的 `
 ### 后端：并发请求可能同时通过冲突检查
 
 如果创建预约只执行“查询冲突 → 插入”，两个请求可能在对方提交前都查到空结果，造成同一时段重复预约。后端把场地行的 `PESSIMISTIC_WRITE` 锁、业务校验、冲突查询和插入放在同一事务中；取消操作也先锁场地，再修改预约，保持加锁顺序一致。真实 PostgreSQL 并发测试同时提交两个相同请求，得到一个 `201` 和一个 `409 TIME_CONFLICT`，最终仅有一条匹配的 `ACTIVE` 预约。
+
+### C：首次构建下载与本机代理排查
+
+首次统一构建在 Docker Hub 认证请求处超时，尚未开始源码编译。通过 Docker 引擎预拉取原 Dockerfile 使用的 Node、Nginx、Maven、JRE 镜像后重试成功，未改代码、镜像标签或系统网络设置。后端 `dependency:go-offline` 首次预下载约 612 秒，随后编译打包约 13 秒，构建耗时主要来自依赖下载。
+
+启动后宿主机 Python HTTP 检查曾返回 `502`；通过禁用该请求的代理直接访问，首页和 `/api/venues` 均为 `200`，Nginx 访问日志一致，因而未修改应用或代理配置。独立数据库验证工具的 AMD64 模拟仅用于其 Flyway CLI 镜像，正式三服务使用本机架构。
