@@ -1,0 +1,64 @@
+C deployment evidence collected at 2026-10-30T15:18:49.496361+08:00
+Runtime built from e2446b6; d185d5e adds report/images and api/.gitignore only.
+This snapshot is AFTER the persistence restart. Original before/after IDs are in stage5-persistence.json.
+
+$ docker compose ps
+NAME                                        IMAGE                         COMMAND                  SERVICE    CREATED          STATUS                    PORTS
+cloud-native-software-tech-lab-api-1        venue-booking-api:lab1        "java -jar /app/app.…"   api        19 minutes ago   Up 19 minutes             8080/tcp
+cloud-native-software-tech-lab-database-1   postgres:16.15-bookworm       "docker-entrypoint.s…"   database   19 minutes ago   Up 19 minutes (healthy)   5432/tcp
+cloud-native-software-tech-lab-frontend-1   venue-booking-frontend:lab1   "/docker-entrypoint.…"   frontend   19 minutes ago   Up 19 minutes             0.0.0.0:8080->80/tcp, [::]:8080->80/tcp
+
+$ docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
+{"status":"UP","components":{"db":{"status":"UP","details":{"database":"PostgreSQL","validationQuery":"isValid()"}},"diskSpace":{"status":"UP","details":{"total":485473984512,"free":453949689856,"threshold":10485760,"path":"/app/.","exists":true}},"ping":{"status":"UP"},"ssl":{"status":"UP","details":{"validChains":[],"invalidChains":[]}}}}
+
+$ docker compose logs --no-color --tail=100 api
+api-1  | 
+api-1  |   .   ____          _            __ _ _
+api-1  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+api-1  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+api-1  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+api-1  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+api-1  |  =========|_|==============|___/=/_/_/_/
+api-1  | 
+api-1  |  :: Spring Boot ::                (v3.4.5)
+api-1  | 
+api-1  | 2026-10-30T06:59:21.119Z  INFO 1 --- [venue-booking-api] [           main] c.e.v.VenueBookingApplication            : Starting VenueBookingApplication v0.0.1-SNAPSHOT using Java 17.0.20.1 with PID 1 (/app/app.jar started by app in /app)
+api-1  | 2026-10-30T06:59:21.121Z  INFO 1 --- [venue-booking-api] [           main] c.e.v.VenueBookingApplication            : No active profile set, falling back to 1 default profile: "default"
+api-1  | 2026-10-30T06:59:21.742Z  INFO 1 --- [venue-booking-api] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+api-1  | 2026-10-30T06:59:21.774Z  INFO 1 --- [venue-booking-api] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 25 ms. Found 2 JPA repository interfaces.
+api-1  | 2026-10-30T06:59:22.123Z  INFO 1 --- [venue-booking-api] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+api-1  | 2026-10-30T06:59:22.128Z  INFO 1 --- [venue-booking-api] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+api-1  | 2026-10-30T06:59:22.129Z  INFO 1 --- [venue-booking-api] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+api-1  | 2026-10-30T06:59:22.140Z  INFO 1 --- [venue-booking-api] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+api-1  | 2026-10-30T06:59:22.140Z  INFO 1 --- [venue-booking-api] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 990 ms
+api-1  | 2026-10-30T06:59:22.327Z  INFO 1 --- [venue-booking-api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+api-1  | 2026-10-30T06:59:22.409Z  INFO 1 --- [venue-booking-api] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@255ed8e4
+api-1  | 2026-10-30T06:59:22.410Z  INFO 1 --- [venue-booking-api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+api-1  | 2026-10-30T06:59:22.423Z  INFO 1 --- [venue-booking-api] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://database:5432/venue_booking (PostgreSQL 16.15)
+api-1  | 2026-10-30T06:59:22.448Z  INFO 1 --- [venue-booking-api] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.016s)
+api-1  | 2026-10-30T06:59:22.466Z  INFO 1 --- [venue-booking-api] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 2
+api-1  | 2026-10-30T06:59:22.468Z  INFO 1 --- [venue-booking-api] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+api-1  | 2026-10-30T06:59:22.511Z  INFO 1 --- [venue-booking-api] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+api-1  | 2026-10-30T06:59:22.534Z  INFO 1 --- [venue-booking-api] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
+api-1  | 2026-10-30T06:59:22.547Z  INFO 1 --- [venue-booking-api] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+api-1  | 2026-10-30T06:59:22.658Z  INFO 1 --- [venue-booking-api] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+api-1  | 2026-10-30T06:59:22.695Z  INFO 1 --- [venue-booking-api] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+api-1  | 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+api-1  | 	Database driver: undefined/unknown
+api-1  | 	Database version: 16.15
+api-1  | 	Autocommit mode: undefined/unknown
+api-1  | 	Isolation level: undefined/unknown
+api-1  | 	Minimum pool size: undefined/unknown
+api-1  | 	Maximum pool size: undefined/unknown
+api-1  | 2026-10-30T06:59:23.106Z  INFO 1 --- [venue-booking-api] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+api-1  | 2026-10-30T06:59:23.121Z  INFO 1 --- [venue-booking-api] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+api-1  | 2026-10-30T06:59:23.259Z  INFO 1 --- [venue-booking-api] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+api-1  | 2026-10-30T06:59:23.942Z  INFO 1 --- [venue-booking-api] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+api-1  | 2026-10-30T06:59:23.977Z  INFO 1 --- [venue-booking-api] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+api-1  | 2026-10-30T06:59:23.990Z  INFO 1 --- [venue-booking-api] [           main] c.e.v.VenueBookingApplication            : Started VenueBookingApplication in 3.159 seconds (process running for 3.472)
+api-1  | 2026-10-30T06:59:54.055Z  INFO 1 --- [venue-booking-api] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+api-1  | 2026-10-30T06:59:54.055Z  INFO 1 --- [venue-booking-api] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+api-1  | 2026-10-30T06:59:54.056Z  INFO 1 --- [venue-booking-api] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+
+$ docker volume ls --filter name=cloud-native-software-tech-lab_postgres_data --format {{.Name}}
+cloud-native-software-tech-lab_postgres_data
