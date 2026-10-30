@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,10 +18,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.StreamSupport;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -62,6 +65,9 @@ class BookingApiIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -106,6 +112,61 @@ class BookingApiIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code", is("VALIDATION_ERROR")))
                 .andExpect(jsonPath("$.details[*].field", hasItem("capacity")));
+    }
+
+    @Test
+    void localTimesMatchDatabaseValuesWhenJvmUsesUtc() throws Exception {
+        TimeZone originalZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        try {
+            String venues = mockMvc.perform(get("/api/venues"))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+            JsonNode seededVenue = StreamSupport.stream(objectMapper.readTree(venues).spliterator(), false)
+                    .filter(node -> "羽毛球馆 A".equals(node.get("name").asText()))
+                    .findFirst().orElseThrow();
+            assertEquals("08:00", seededVenue.get("open_time").asText());
+            assertEquals("22:00", seededVenue.get("close_time").asText());
+
+            long venueId = createVenue(10, "09:00", "18:00");
+            mockMvc.perform(get("/api/venues/{id}", venueId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.open_time", is("09:00")))
+                    .andExpect(jsonPath("$.close_time", is("18:00")));
+            assertEquals("09:00", jdbcTemplate.queryForObject(
+                    "select to_char(open_time, 'HH24:MI') from venues where id = ?", String.class, venueId));
+            assertEquals("18:00", jdbcTemplate.queryForObject(
+                    "select to_char(close_time, 'HH24:MI') from venues where id = ?", String.class, venueId));
+
+            String created = mockMvc.perform(post("/api/reservations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(reservationJson(venueId, futureDate(), "10:00", "11:00", 2, "时区校验")))
+                    .andExpect(status().isCreated())
+                    .andReturn().getResponse().getContentAsString();
+            JsonNode createdReservation = objectMapper.readTree(created);
+            long reservationId = createdReservation.get("id").asLong();
+            OffsetDateTime createdAt = OffsetDateTime.parse(createdReservation.get("created_at").asText());
+            mockMvc.perform(get("/api/reservations/{id}", reservationId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.start_time", is("10:00")))
+                    .andExpect(jsonPath("$.end_time", is("11:00")));
+            assertEquals("10:00", jdbcTemplate.queryForObject(
+                    "select to_char(start_time, 'HH24:MI') from reservations where id = ?", String.class, reservationId));
+            assertEquals("11:00", jdbcTemplate.queryForObject(
+                    "select to_char(end_time, 'HH24:MI') from reservations where id = ?", String.class, reservationId));
+            assertEquals(createdAt.toInstant(), jdbcTemplate.queryForObject(
+                    "select created_at from reservations where id = ?", OffsetDateTime.class, reservationId).toInstant());
+
+            String cancelled = mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+            OffsetDateTime cancelledAt = OffsetDateTime.parse(
+                    objectMapper.readTree(cancelled).get("cancelled_at").asText());
+            assertEquals(cancelledAt.toInstant(), jdbcTemplate.queryForObject(
+                    "select cancelled_at from reservations where id = ?", OffsetDateTime.class, reservationId).toInstant());
+        } finally {
+            TimeZone.setDefault(originalZone);
+        }
     }
 
     @Test
