@@ -1,6 +1,6 @@
 # 场地预约系统 · 云原生软件技术 Lab 1
 
-本仓库实现课程 Lab 1 的场地预约系统，包含前端、Web API、PostgreSQL 及 Docker Compose 三服务部署。2026-10-30 已完成从源码构建、真实页面与 API 联调、并发冲突和容器重建后的持久化验收。实际验证范围与证据见[验收清单](docs/acceptance.md#5-统一部署与验收实际记录2026-10-30)。
+本仓库实现课程 Lab 1 的场地预约系统，包含前端、Web API、PostgreSQL 及 Docker Compose 三服务部署。2026-10-30 已完成从源码构建、真实页面与 API 联调、并发冲突和容器重建后的持久化验收；2026-10-31 对当前源码再次执行自动测试、真实页面与 API 流程及持久化复核。原始证据见[验收清单](docs/acceptance.md#5-统一部署与验收实际记录2026-10-30)，复核结果见[实验报告第 10 节](docs/lab1-report.md#10-问题与解决过程)。
 
 开发前请阅读：
 
@@ -15,7 +15,7 @@
 
 ## 完整系统部署
 
-准备 Docker Engine（或已启动引擎的 Docker Desktop）及支持本项目语法的 Docker Compose。项目使用 Compose v2 兼容语法，本机实测为 Docker Engine 29.2.1、Compose v5.1.0。前后端在 Docker 构建阶段编译，完整容器部署不要求宿主机预装 Node、Java 或 Maven；首次构建需要联网下载基础镜像及依赖。
+准备 Docker Engine（或已启动引擎的 Docker Desktop）及支持本项目语法的 Docker Compose。项目使用 Compose v2 兼容语法；2026-10-30 原始验收使用 Docker Engine 29.2.1、Compose v5.1.0，2026-10-31 复核使用 Docker Engine 29.1.3、Compose v2.40.3-desktop.1。前后端在 Docker 构建阶段编译，完整容器部署不要求宿主机预装 Node、Java 或 Maven；首次构建需要联网下载基础镜像及依赖。
 
 进入仓库根目录，首次运行时复制配置模板：
 
@@ -41,7 +41,7 @@ docker compose ps
 docker compose logs --tail=100 frontend api database
 ```
 
-打开 `http://localhost:8080/`；若修改了 `FRONTEND_PORT`，使用相应端口。仅前端发布宿主机端口；API 和数据库分别在 Compose 网络内监听 `8080`、`5432`。`api` 等待数据库健康后启动，前端启动不代表 API 已就绪，应等 API 日志显示启动成功后使用。
+打开 `http://localhost:8080/`；若修改了 `FRONTEND_PORT`，使用相应端口。仅前端发布宿主机端口；API 和数据库分别在 Compose 网络内监听 `8080`、`5432`。`api` 等待数据库健康后启动；前端等待 API 的 `/actuator/health` 返回健康状态后启动。
 
 在 Compose 网络内检查应用与数据库健康：
 
@@ -49,11 +49,27 @@ docker compose logs --tail=100 frontend api database
 docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 ```
 
-顶层 `status` 和 `components.db.status` 均应为 `UP`。正常停止执行 `docker compose down`，再次启动执行 `docker compose up -d`；数据库保存在 `postgres_data` 命名卷中。持久化验收不使用 `down -v`。在默认项目名下，实际卷名为 `cloud-native-software-tech-lab_postgres_data`；改变项目名会使用另一组项目资源。
+顶层 `status` 和 `components.db.status` 均应为 `UP`。正常停止执行 `docker compose down`，再次启动执行 `docker compose up -d`；数据库保存在 `postgres_data` 命名卷中。持久化验收不使用 `down -v`。在默认项目名下，实际卷名为 `cloud-native-software-tech-lab_postgres_data`；改变项目名会使用另一组项目资源。升级已有数据库时，Flyway V3 会校验四个必填文本字段；若旧记录仅含不可见字符，须先核查并修正这些记录，迁移不会自动改写业务数据。
 
 数据库卷已初始化后，仅修改 `.env` 不会重设已有数据库的用户名或密码。访问失败时先检查 `docker compose ps` 和日志；宿主机端口占用可调整 `FRONTEND_PORT`。若基础镜像认证或依赖下载超时，先排查 Docker Hub、npm 和 Maven 仓库连接；本次基础镜像预拉取后重新构建成功。若本机 HTTP 检查经代理返回 `502`，应核对代理是否绕过 `localhost`、`127.0.0.1`；本次禁用检查请求的代理后，首页和 `/api/venues` 均返回 `200`。
 
 运行及持久化验证记录见[实验报告的 C 部分](docs/lab1-report.md#6-系统部署与功能验收)与[验收清单](docs/acceptance.md#5-统一部署与验收实际记录2026-10-30)。
+
+## 实际 Web API
+
+浏览器经同源 `/api` 路径访问以下七个接口；请求和响应使用 UTF-8 JSON、`snake_case` 字段。创建成功返回 `201` 和指向详情的相对 `Location`，查询与取消成功返回 `200`。参数错误、资源不存在和预约冲突分别返回 `400`、`404`、`409`；取消使用逻辑取消，原记录保留。
+
+| 方法与路径 | 功能 |
+| --- | --- |
+| `GET /api/venues` | 查询场地列表 |
+| `GET /api/venues/{id}` | 查询场地详情 |
+| `POST /api/venues` | 创建场地 |
+| `POST /api/reservations` | 创建预约 |
+| `GET /api/reservations` | 查询预约列表 |
+| `GET /api/reservations/{id}` | 查询预约详情 |
+| `POST /api/reservations/{id}/cancel` | 取消预约 |
+
+请求字段、时间格式及错误结构见[公共契约](docs/contract.md#3-http-api-契约)。
 
 ## 前端开发
 
@@ -66,10 +82,9 @@ docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 
 ### 本地安装与自动检查
 
-使用 Node.js 24.15.0 或 `package.json` 所列兼容版本。先打开 **PowerShell 终端**，进入仓库根目录；以下命令必须在同一个终端依次运行：
+使用 Node.js 24.15.0 或 `package.json` 所列兼容版本。先打开 **PowerShell 终端**，用 `Set-Location` 进入自己克隆的仓库根目录；以下命令必须在同一个终端依次运行：
 
 ```powershell
-Set-Location 'D:\learning_materials\Cloud-Native_Software_Technology\lab\cloud-native-software-tech-lab'
 Set-Location frontend
 node --version
 npm --version

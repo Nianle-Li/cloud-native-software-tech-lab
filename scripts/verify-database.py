@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the real PostgreSQL/Flyway setup without the unfinished API.
+"""Verify the real PostgreSQL/Flyway setup without starting the API.
 
 Requires Python 3 and a running Docker engine. Uses an isolated Compose project,
 starts only database, and runs Flyway as a disposable tool container. Containers
@@ -30,7 +30,7 @@ def main():
 
     def run(args, sql=None):
         result = subprocess.run(args, cwd=ROOT, env=env, input=sql,
-                                text=True, capture_output=True)
+                                text=True, encoding='utf-8', capture_output=True)
         if result.returncode:
             raise RuntimeError((result.stdout + result.stderr).replace(password, '[REDACTED]'))
         return result.stdout.strip()
@@ -72,13 +72,15 @@ def main():
             print(run(flyway + ['migrate']), flush=True)
             history_sql = 'SELECT version, description, checksum, success FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank;'
             history = query(history_sql)
-            assert len(history.splitlines()) == 2
-            assert history.splitlines()[0].startswith('1|') and history.splitlines()[1].startswith('2|')
+            assert len(history.splitlines()) == 3
+            assert all(line.startswith(f'{version}|') for version, line in
+                       enumerate(history.splitlines(), start=1))
             assert all(line.endswith('|t') for line in history.splitlines())
             assert query("SELECT count(*), count(*) FILTER (WHERE status = 'OPEN'), count(*) FILTER (WHERE status = 'CLOSED') FROM venues;") == '3|2|1'
             assert query('SELECT count(*) FROM reservations;') == '0'
             assert query("SELECT count(*) FROM pg_indexes WHERE tablename = 'reservations' AND indexname = 'idx_reservations_conflict';") == '1'
-            print('PASS: migrations V1/V2 applied; three seed venues, no reservations, conflict index exists.', flush=True)
+            assert query("SELECT booking_has_visible_text(chr(160) || chr(8203)), booking_has_visible_text('场地');") == 'f|t'
+            print('PASS: migrations V1/V2/V3 applied; three seed venues, no reservations, conflict index exists.', flush=True)
             print(run(flyway + ['validate']), flush=True)
             print(run(flyway + ['migrate']), flush=True)
             assert query(history_sql) == history
@@ -91,7 +93,11 @@ def main():
             for label, changes, error in [
                 ('null venue name', {'name': 'NULL'}, 'not_null_violation'),
                 ('blank venue name', {'name': "E' \\t\\n'"}, 'check_violation'),
+                ('NBSP venue name', {'name': 'chr(160)'}, 'check_violation'),
+                ('zero-width venue name', {'name': 'chr(8203)'}, 'check_violation'),
                 ('blank location', {'location': "E'\\t'"}, 'check_violation'),
+                ('NBSP location', {'location': 'chr(160)'}, 'check_violation'),
+                ('zero-width location', {'location': 'chr(8203)'}, 'check_violation'),
                 ('long venue name', {'name': "repeat('名', 101)"}, 'string_data_right_truncation'),
                 ('long location', {'location': "repeat('地', 201)"}, 'string_data_right_truncation'),
                 ('zero capacity', {'capacity': '0'}, 'check_violation'),
@@ -106,7 +112,11 @@ def main():
                 ('missing venue', {'venue_id': '-1'}, 'foreign_key_violation'),
                 ('null venue', {'venue_id': 'NULL'}, 'not_null_violation'),
                 ('blank booked_by', {'booked_by': "E' \\t'"}, 'check_violation'),
+                ('NBSP booked_by', {'booked_by': 'chr(160)'}, 'check_violation'),
+                ('zero-width booked_by', {'booked_by': 'chr(8203)'}, 'check_violation'),
                 ('blank purpose', {'purpose': "E'\\n'"}, 'check_violation'),
+                ('NBSP purpose', {'purpose': 'chr(160)'}, 'check_violation'),
+                ('zero-width purpose', {'purpose': 'chr(8203)'}, 'check_violation'),
                 ('long booked_by', {'booked_by': "repeat('人', 101)"}, 'string_data_right_truncation'),
                 ('long purpose', {'purpose': "repeat('用', 501)"}, 'string_data_right_truncation'),
                 ('zero attendees', {'count': '0'}, 'check_violation'),

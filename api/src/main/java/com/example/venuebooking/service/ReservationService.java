@@ -98,11 +98,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse cancel(Long id) {
-        Reservation reservationReference = reservationRepository.findByIdWithVenue(id)
+        Long venueId = reservationRepository.findVenueIdByReservationId(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        venueRepository.findByIdForUpdate(reservationReference.getVenue().getId())
-                .orElseThrow(() -> new com.example.venuebooking.api.error.VenueNotFoundException(
-                        reservationReference.getVenue().getId()));
+        venueRepository.findByIdForUpdate(venueId)
+                .orElseThrow(() -> new com.example.venuebooking.api.error.VenueNotFoundException(venueId));
         Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
@@ -149,8 +148,11 @@ public class ReservationService {
     }
 
     private static void validateRequestText(String field, String value, int maxLength) {
-        if (value == null || value.isBlank()) {
+        if (RequestText.isBlank(value)) {
             throw validation(field, "不能为空白");
+        }
+        if (RequestText.containsNull(value)) {
+            throw validation(field, "不能包含空字符");
         }
         if (value.length() > maxLength) {
             throw validation(field, "长度不能超过 " + maxLength);

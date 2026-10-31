@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -42,10 +41,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> create(@Valid @RequestBody CreateReservationRequest request) {
         ReservationResponse response = reservationService.create(request);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(response.id())
-                .toUri();
+        URI location = URI.create("/api/reservations/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 
