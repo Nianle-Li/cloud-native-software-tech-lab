@@ -9,3 +9,15 @@ __pycache__/
 /frontend/full-test.txt
 /frontend/remaining.txt
 /frontend/test-output.txt
+
+# Local collaboration plans and development-stage audit notes
+/docs/team-plan.md
+/docs/contract.md
+/docs/acceptance.md
+/docs/frontend-create-venue-check.md
+/docs/frontend-requirements-audit.md
+/docs/frontend-test-audit.md
+
+# Local screenshots excluded from the final report
+/docs/assets/lab1-report/backend-compose-health.png
+/docs/assets/lab1-report/backend-testcontainers-passed.png
