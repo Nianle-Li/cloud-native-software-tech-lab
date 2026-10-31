@@ -2,11 +2,15 @@ package com.example.venuebooking;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -31,11 +35,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -316,6 +320,156 @@ class BookingApiIntegrationTest {
         mockMvc.perform(get("/api/venues/not-a-number"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code", is("VALIDATION_ERROR")));
+    }
+
+    @Test
+    void invisibleOnlyRequiredTextIsRejected() throws Exception {
+        for (String invisible : List.of("\u00A0", "\u200B")) {
+            mockMvc.perform(post("/api/venues")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"name\":\"" + invisible
+                                    + "\",\"location\":\"测试楼\",\"capacity\":1,"
+                                    + "\"open_time\":\"08:00\",\"close_time\":\"20:00\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.details[*].field", hasItem("name")));
+        }
+        long venueId = createVenue(10, "09:00", "18:00");
+        mockMvc.perform(post("/api/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reservationJson(venueId, futureDate(), "10:00", "11:00", 1, "活动")
+                                .replace("测试小组", "\u00A0")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[*].field", hasItem("booked_by")));
+        mockMvc.perform(post("/api/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reservationJson(venueId, futureDate(), "10:00", "11:00", 1, "\u200B")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[*].field", hasItem("purpose")));
+    }
+
+    @Test
+    void nullCharactersInTextReturnValidationErrors() throws Exception {
+        ObjectNode venue = objectMapper.createObjectNode();
+        venue.put("name", "测试场地");
+        venue.put("location", "测试楼");
+        venue.put("capacity", 1);
+        venue.put("open_time", "08:00");
+        venue.put("close_time", "20:00");
+        for (String field : List.of("name", "location")) {
+            ObjectNode invalid = venue.deepCopy();
+            invalid.put(field, "A\0B");
+            mockMvc.perform(post("/api/venues")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalid)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.details[*].field", hasItem(field)));
+        }
+
+        long venueId = createVenue(10, "09:00", "18:00");
+        ObjectNode reservation = (ObjectNode) objectMapper.readTree(
+                reservationJson(venueId, futureDate(), "10:00", "11:00", 1, "活动"));
+        for (String field : List.of("booked_by", "purpose")) {
+            ObjectNode invalid = reservation.deepCopy();
+            invalid.put(field, "A\0B");
+            mockMvc.perform(post("/api/reservations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalid)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.details[*].field", hasItem(field)));
+        }
+    }
+
+    @Test
+    void databaseConstraintsMatchRequiredTextValidation() throws Exception {
+        assertEquals(1, jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM flyway_schema_history WHERE version = '3' AND success", Integer.class));
+
+        StringBuilder invisible = new StringBuilder();
+        for (int codePoint = 1; codePoint <= Character.MAX_CODE_POINT; codePoint++) {
+            if (Character.isWhitespace(codePoint) || Character.isSpaceChar(codePoint)
+                    || Character.getType(codePoint) == Character.FORMAT) {
+                invisible.appendCodePoint(codePoint);
+            }
+        }
+        String blankText = invisible.toString();
+        assertFalse(jdbcTemplate.queryForObject(
+                "SELECT booking_has_visible_text(?)", Boolean.class, blankText));
+        assertTrue(jdbcTemplate.queryForObject(
+                "SELECT booking_has_visible_text(?)", Boolean.class, blankText + "场地"));
+
+        for (String blank : List.of("\u00A0", "\u200B", "\uFEFF")) {
+            assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+                    "INSERT INTO venues (name, location, capacity, open_time, close_time) "
+                            + "VALUES (?, '测试楼', 1, TIME '08:00', TIME '20:00')", blank));
+            assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+                    "INSERT INTO venues (name, location, capacity, open_time, close_time) "
+                            + "VALUES ('测试场地', ?, 1, TIME '08:00', TIME '20:00')", blank));
+        }
+
+        long venueId = createVenue(10, "09:00", "18:00");
+        for (String blank : List.of("\u00A0", "\u200B", "\uFEFF")) {
+            assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+                    "INSERT INTO reservations (venue_id, booked_by, reservation_date, start_time, "
+                            + "end_time, attendee_count, purpose) "
+                            + "VALUES (?, ?, CURRENT_DATE + 1, TIME '10:00', TIME '11:00', 1, '活动')",
+                    venueId, blank));
+            assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+                    "INSERT INTO reservations (venue_id, booked_by, reservation_date, start_time, "
+                            + "end_time, attendee_count, purpose) "
+                            + "VALUES (?, '测试小组', CURRENT_DATE + 1, TIME '10:00', TIME '11:00', 1, ?)",
+                    venueId, blank));
+        }
+    }
+
+    @Test
+    void existingV2DataSurvivesBlankConstraintMigration() {
+        String schema = "upgrade_probe";
+        jdbcTemplate.execute("CREATE SCHEMA " + schema);
+        try {
+            Flyway.configure()
+                    .dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
+                    .schemas(schema)
+                    .defaultSchema(schema)
+                    .locations("classpath:db/migration")
+                    .target(MigrationVersion.fromVersion("2"))
+                    .load()
+                    .migrate();
+
+            Long venueId = jdbcTemplate.queryForObject(
+                    "INSERT INTO " + schema + ".venues "
+                            + "(name, location, capacity, open_time, close_time) "
+                            + "VALUES ('升级前场地', '教学楼', 10, TIME '08:00', TIME '20:00') RETURNING id",
+                    Long.class);
+            Long reservationId = jdbcTemplate.queryForObject(
+                    "INSERT INTO " + schema + ".reservations "
+                            + "(venue_id, booked_by, reservation_date, start_time, end_time, attendee_count, purpose) "
+                            + "VALUES (?, '测试小组', CURRENT_DATE + 1, TIME '10:00', TIME '11:00', 1, '课程活动') "
+                            + "RETURNING id",
+                    Long.class, venueId);
+
+            Flyway.configure()
+                    .dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())
+                    .schemas(schema)
+                    .defaultSchema(schema)
+                    .locations("classpath:db/migration")
+                    .load()
+                    .migrate();
+
+            assertEquals("升级前场地", jdbcTemplate.queryForObject(
+                    "SELECT name FROM " + schema + ".venues WHERE id = ?", String.class, venueId));
+            assertEquals("课程活动", jdbcTemplate.queryForObject(
+                    "SELECT purpose FROM " + schema + ".reservations WHERE id = ?", String.class,
+                    reservationId));
+            assertEquals(1, jdbcTemplate.queryForObject(
+                    "SELECT count(*) FROM " + schema + ".flyway_schema_history "
+                            + "WHERE version = '3' AND success", Integer.class));
+            assertThrows(DataIntegrityViolationException.class, () -> jdbcTemplate.update(
+                    "INSERT INTO " + schema + ".venues "
+                            + "(name, location, capacity, open_time, close_time) "
+                            + "VALUES (?, '教学楼', 1, TIME '08:00', TIME '20:00')", "\u200B"));
+        } finally {
+            jdbcTemplate.execute("DROP SCHEMA " + schema + " CASCADE");
+        }
     }
 
     @Test

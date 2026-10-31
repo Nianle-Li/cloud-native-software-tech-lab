@@ -64,8 +64,11 @@ public class VenueService {
     }
 
     private static void validateText(String field, String value, int maxLength) {
-        if (value == null || value.isBlank()) {
+        if (RequestText.isBlank(value)) {
             throw validation(field, "不能为空白");
+        }
+        if (RequestText.containsNull(value)) {
+            throw validation(field, "不能包含空字符");
         }
         if (value.length() > maxLength) {
             throw validation(field, "长度不能超过 " + maxLength);
