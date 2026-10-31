@@ -2,3 +2,10 @@
 /.env
 /.env.*
 !/.env.example
+__pycache__/
+*.pyc
+*.log
+/frontend/build.txt
+/frontend/full-test.txt
+/frontend/remaining.txt
+/frontend/test-output.txt

@@ -51,7 +51,7 @@ class BookingApiIntegrationTest {
     private static final ZoneId BUSINESS_ZONE = ZoneId.of("Asia/Shanghai");
 
     static {
-        System.setProperty("api.version", "1.40");
+        System.setProperty("api.version", "1.44");
     }
 
     @Container
