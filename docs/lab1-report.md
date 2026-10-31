@@ -14,6 +14,16 @@ docker compose logs --tail=100 frontend api database
 
 ## 1. 实验目标与系统架构
 
+本实验完成可从源码重复构建的场地预约系统，并在 Docker Compose 中运行前端、Web API 和 PostgreSQL。浏览器经前端 Nginx 访问同源 `/api`；API 校验输入、场地状态与预约冲突，并将场地和预约保存到关系数据库。三个服务通过 Compose 网络通信，仅前端向宿主机发布端口。
+
+| 服务 | 实现与职责 | 数据及配置 |
+| --- | --- | --- |
+| `frontend` | React 页面由 Nginx 提供，代理 `/api` 请求 | 只接收 HTTP JSON，不连接数据库 |
+| `api` | Spring Boot 处理七个业务接口、事务与错误响应 | 从环境变量读取数据库连接；提供健康端点 |
+| `database` | PostgreSQL 保存场地和预约 | Flyway 初始化与迁移；命名卷保留数据 |
+
+用户可查询与创建场地、预约、查询和取消预约；API 拒绝无效输入、停用场地及重叠时段。取消采用逻辑取消，原记录仍可查询；取消后同一时段可重新预约。前后端各有独立 Dockerfile，数据库使用官方镜像。部署步骤、接口和验证结果分别见第 3、5–7 节。
+
 ## 2. 前端实现与用户交互
 
 ### 2.1 前端职责与技术结构
@@ -127,7 +137,7 @@ Nginx 提供静态页面，并将 `/api/` 请求代理至 Compose 网络中的 `
 
 后端使用 Java 17、Spring Boot 3.4.5、Spring Web、Jakarta Validation、Spring Data JPA 和 PostgreSQL 16。代码按 `Controller → DTO → Service → Repository → PostgreSQL` 分层：Controller 接收 HTTP 请求并返回状态码与 `Location`；DTO 定义公开的输入输出；Service 执行业务校验、事务和状态变更；Repository 查询和保存 JPA 实体。`GlobalExceptionHandler` 集中转换业务异常，Actuator 提供 `/actuator/health`。
 
-数据库结构由 Flyway 的 V1 建表迁移管理，V2 写入演示场地；应用启动时执行迁移，JPA 使用 `ddl-auto=validate` 检查实体与表结构，不自动建表。场地与预约分别对应 `venues`、`reservations`，预约通过非空 `venue_id` 外键关联场地。公开 JSON 使用 UTF-8、`snake_case` 字段、`YYYY-MM-DD` 日期和 `HH:mm` 日内时间；`created_at`、`cancelled_at` 为带时区的 ISO 8601 时间戳。业务日期按 `Asia/Shanghai` 判断，数据库的 `TIME WITHOUT TIME ZONE` 保持本地钟点值，不做时区偏移换算。
+数据库结构由 Flyway 的 V1 建表迁移管理，V2 写入演示场地，V3 收紧四个必填文本字段的非空白约束；应用启动时执行迁移，JPA 使用 `ddl-auto=validate` 检查实体与表结构，不自动建表。场地与预约分别对应 `venues`、`reservations`，预约通过非空 `venue_id` 外键关联场地。公开 JSON 使用 UTF-8、`snake_case` 字段、`YYYY-MM-DD` 日期和 `HH:mm` 日内时间；`created_at`、`cancelled_at` 为带时区的 ISO 8601 时间戳。业务日期按 `Asia/Shanghai` 判断，数据库的 `TIME WITHOUT TIME ZONE` 保持本地钟点值，不做时区偏移换算。
 
 ### 3.2 API 设计
 
@@ -175,7 +185,7 @@ Nginx 提供静态页面，并将 `/api/` 请求代理至 Compose 网络中的 `
 
 `api/Dockerfile` 使用 Maven/JDK 17 构建阶段从源码下载依赖并打包，再用 JRE 17 运行阶段只携带应用 jar，以非 root 用户在容器内监听 `8080`。数据库连接由 `SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD` 注入；Compose 中 JDBC 地址使用 `database:5432`，镜像内不写入密码。`/actuator/health` 可报告应用和数据库健康状态。
 
-后端使用 `postgres:16.15-bookworm` Testcontainers 运行的 7 项集成测试全部通过，覆盖七个接口、状态码与错误码、输入校验、相邻时段、逻辑取消与重新预约、真实并发冲突，以及 JVM 默认时区为 UTC 时 `TIME` 字段与数据库值一致。测试启动时 Flyway V1/V2 成功执行，JPA `validate` 通过；健康检查返回应用 `UP`、数据库 `UP`。实际执行 `docker compose up --build -d` 成功构建并启动 API 镜像，容器内健康检查同样为 `UP`。
+2026-10-30，后端使用 `postgres:16.15-bookworm` Testcontainers 运行的 7 项集成测试全部通过，覆盖七个接口、状态码与错误码、输入校验、相邻时段、逻辑取消与重新预约、真实并发冲突，以及 JVM 默认时区为 UTC 时 `TIME` 字段与数据库值一致。当时测试启动时 Flyway V1/V2 成功执行，JPA `validate` 通过；健康检查返回应用 `UP`、数据库 `UP`。实际执行 `docker compose up --build -d` 成功构建并启动 API 镜像，容器内健康检查同样为 `UP`。当前源码增加的测试与 V3 迁移结果见第 10 节。
 
 ![后端 PostgreSQL Testcontainers 集成测试通过](assets/lab1-report/backend-testcontainers-passed.png)
 
@@ -206,9 +216,9 @@ C 使用 PostgreSQL 16，业务表为 `venues` 与 `reservations`。一个场地
 
 ### 4.3 Flyway 管理与独立验证
 
-迁移位于 `api/src/main/resources/db/migration/`：V1 创建两张表、14 项命名约束及冲突索引；V2 插入两个开放场地和一个停用场地，不预置预约。Flyway 是结构唯一来源，由 API 启动时执行，JPA 使用 `ddl-auto=validate`。不另用数据库初始化目录或 JPA 自动建表；已执行迁移不回改，结构变化新增版本。
+迁移位于 `api/src/main/resources/db/migration/`：V1 创建两张表、14 项命名约束及冲突索引；V2 插入两个开放场地和一个停用场地，不预置预约；V3 保留原约束名，更新四个文本非空白检查。Flyway 是结构唯一来源，由 API 启动时执行，JPA 使用 `ddl-auto=validate`。不另用数据库初始化目录或 JPA 自动建表；已执行迁移不回改，结构变化新增版本。
 
-C 的独立 PostgreSQL/Flyway 验证确认：两项迁移成功，`validate` 与再次 `migrate` 成功，种子未重复；21 组非法写入被预期 SQLSTATE 类别拒绝。合法文本长度边界、identity、默认值、逻辑取消和有预约引用时的外键删除保护均通过。该组测试在独立项目中回滚测试写入，保留三条种子，不与后续完整系统验收数据混用。独立工具使用 Flyway Community 11.20.0；应用使用 B 的 Maven 依赖配置，两者验证范围分开记录。
+2026-10-30，C 的独立 PostgreSQL/Flyway 验证确认：当时的 V1/V2 两项迁移成功，`validate` 与再次 `migrate` 成功，种子未重复；21 组非法写入被预期 SQLSTATE 类别拒绝。合法文本长度边界、identity、默认值、逻辑取消和有预约引用时的外键删除保护均通过。该组测试在独立项目中回滚测试写入，保留三条种子，不与后续完整系统验收数据混用。独立工具使用 Flyway Community 11.20.0；应用使用 B 的 Maven 依赖配置，两者验证范围分开记录。V3 的新增验证见第 10 节。
 
 ## 5. Docker 与 Compose 配置
 
@@ -234,7 +244,7 @@ C 的独立 PostgreSQL/Flyway 验证确认：两项迁移成功，`validate` 与
 | `api` | `./api` → `venue-booking-api:lab1` | 容器内 8080；不发布宿主机端口 |
 | `database` | `postgres:16.15-bookworm` | 容器内 5432；不发布宿主机端口 |
 
-三个服务使用 Compose 默认网络，通过固定服务名互相访问。API 等待数据库 `service_healthy` 后启动，前端等待 API 容器 `service_started`；后者不等于应用就绪，因此还须检查实际健康端点。数据库 healthcheck 使用 `pg_isready` 经本地 TCP 检查，间隔 5 秒、超时 5 秒、启动宽限 10 秒、重试 12 次。
+三个服务使用 Compose 默认网络，通过固定服务名互相访问。API 等待数据库 `service_healthy` 后启动，前端等待 API 的 `/actuator/health` 通过后启动。数据库 healthcheck 使用 `pg_isready` 经本地 TCP 检查，间隔 5 秒、超时 5 秒、启动宽限 10 秒、重试 12 次。API 健康检查通过 HTTP 确认应用及数据库连接均可用；此等待方式于 2026-10-31 修订，早期验收记录对应修订前配置。
 
 ### 5.2 配置外部化与命名卷
 
@@ -266,7 +276,7 @@ docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 
 整体环境运行后，C 经前端入口执行 33 项真实 HTTP 检查，覆盖七个业务接口、主要校验错误、相邻时段、冲突、取消、幂等和重订；并发请求结果为一个 `201`、一个 `409 TIME_CONFLICT`，SQL 核对仅一条对应 `ACTIVE`。此数量与 B 的 7 项 Testcontainers 集成测试分别记录；本次 Dockerfile 构建跳过测试，不将镜像构建结果当作重新执行集成测试。
 
-Chrome 实际页面操作另验证了创建场地、列表与详情、预约成功、冲突提示、二次确认取消、同时间重订及刷新详情。页面验收场地为 #5，日期为 `2026-11-06`，时段为 `10:00–11:00`；原预约 #5 取消并保留，新预约 #6 为有效状态。完整记录见[真实 API 与页面验收 JSON](assets/lab1-report/stage4-acceptance.json)。这是供 D 汇总的 C 本机验证材料，最终跨模块流程和综合验收表由 D 整理。
+Chrome 实际页面操作另验证了创建场地、列表与详情、预约成功、冲突提示、二次确认取消、同时间重订及刷新详情。页面验收场地为 #5，日期为 `2026-11-06`，时段为 `10:00–11:00`；原预约 #5 取消并保留，新预约 #6 为有效状态。完整记录见[真实 API 与页面验收 JSON](assets/lab1-report/stage4-acceptance.json)；该记录属于 C 在 2026-10-30 的本机联调证据。
 
 ## 7. 并发与数据持久化验证
 
@@ -296,11 +306,21 @@ docker volume ls
 
 ## 8. 小组分工
 
-### C 的实际交付
+小组按前端、后端、数据库与部署三个组件分工；以下交付内容可由仓库文件和本报告对应章节核对。
 
-C 完成 PostgreSQL/Flyway 两项迁移、数据约束与索引、场地种子，根目录 Compose、环境变量模板和忽略规则核对，以及独立数据库验证脚本；在最终运行实现上完成三服务源码构建与部署、数据库连接/迁移/健康检查、真实 API 和页面联调、并发数据库核对及容器重建持久化验收，并交付本报告的数据库、编排、启动和持久化材料及证据。A/B 的实现分别保留在第 2、3 节，三人总分工与综合结论由 D 统一整合。
+| 成员 | 交付内容 | 报告位置 |
+| --- | --- | --- |
+| A：前端 | React 页面、API 调用与交互测试；前端 Dockerfile、Nginx 代理和界面截图 | 第 2 节 |
+| B：后端 | 七个业务接口、输入校验、预约事务与错误响应；后端 Dockerfile 和 PostgreSQL 集成测试 | 第 3 节 |
+| C：数据库与部署 | V1/V2 数据库迁移、种子与独立验证脚本；Compose、环境变量模板、部署联调和持久化验收记录 | 第 4–7 节 |
+
+2026-10-31 的复核修订另补充了并发取消、接口响应、输入校验、启动就绪与 V3 数据库约束的修复和验证，记录见第 10 节；这些修订不改写原始分工和验收证据。
 
 ## 9. 实验总结
+
+系统实现了任务书规定的场地与预约查询、创建、取消和冲突拒绝流程。前端通过 HTTP JSON 与 API 通信，API 使用 PostgreSQL 持久化数据；Compose 可从源码构建三服务，环境变量提供数据库配置，命名卷在容器重建后保留预约。本报告记录了接口、数据库结构、镜像与编排、页面流程、并发和持久化验证，以及复核阶段的修订。
+
+本实验验证的是本地 Docker Compose 部署与课程要求的业务流程。Worker、Kubernetes 编排和可观测性属于后续 Lab；本阶段没有验证生产环境的备份恢复或高可用能力。
 
 ## 10. 问题与解决过程
 
@@ -319,3 +339,15 @@ C 完成 PostgreSQL/Flyway 两项迁移、数据约束与索引、场地种子�
 首次统一构建在 Docker Hub 认证请求处超时，尚未开始源码编译。通过 Docker 引擎预拉取原 Dockerfile 使用的 Node、Nginx、Maven、JRE 镜像后重试成功，未改代码、镜像标签或系统网络设置。后端 `dependency:go-offline` 首次预下载约 612 秒，随后编译打包约 13 秒，构建耗时主要来自依赖下载。
 
 启动后宿主机 Python HTTP 检查曾返回 `502`；通过禁用该请求的代理直接访问，首页和 `/api/venues` 均为 `200`，Nginx 访问日志一致，因而未修改应用或代理配置。独立数据库验证工具的 AMD64 模拟仅用于其 Flyway CLI 镜像，正式三服务使用本机架构。
+
+### 2026-10-31 功能复核与修订
+
+复核发现同时取消同一预约时，多个请求可能在加锁前读取旧状态，导致 `cancelled_at` 被重复改写。取消流程现先查询场地编号、锁定场地，再读取并锁定预约；回归测试同时发起 8 次取消，确认所有响应和最终记录保留同一个取消时间。创建接口改为返回相对 `Location`，经前端代理访问时仍可正确定位详情；必填文本校验也拒绝仅含不间断空格或零宽空格的输入，并将含 NUL 字符的输入作为 `400 VALIDATION_ERROR` 处理。
+
+部署启动顺序改为前端等待 API 健康检查通过。修订后在独立 Compose 项目中从源码构建并启动三服务，API 与数据库均为 `healthy`；经前端入口执行的 14 项 HTTP 回归检查全部通过。补充 NUL 字符校验后，经前端入口核对两项正常创建及四个必填文本字段的 NUL 校验，6 项 HTTP 检查全部通过。
+
+数据库层复核发现，原有 `CHECK` 会放行仅含不间断空格或零宽空格的文本。新增 Flyway V3，以 Java 17 `Character.isWhitespace`、`isSpaceChar`、`FORMAT` 字符集合为准更新四个约束。13 项 PostgreSQL Testcontainers 集成测试全部通过：直接 SQL 写入不可见文本被四个约束拒绝，V2 数据库中的正常场地和预约在升级 V3 后保留。全新独立 Compose 部署成功执行 V1–V3，数据库与 API 均为 `healthy`；经前端入口完成场地列表、创建场地、创建预约与取消预约 4 项 HTTP 检查。若旧库存在仅含不可见字符的记录，V3 会拒绝迁移；须先核查并修正旧数据，不自动改写业务记录。以上结果属于本次修订的验证，不覆盖或改写 2026-10-30 的原始验收记录。
+
+最终复核在 Windows、Docker Engine 29.1.3、Compose v2.40.3-desktop.1 环境执行。从前端锁文件重新运行 `npm ci`，123 项 Vitest 测试、8 项 Playwright/Chromium 页面测试及生产构建均通过。独立 Compose 环境从当前源码构建三服务，经前端代理完成 20 项实际 HTTP 检查，覆盖七个业务接口、错误响应、时段冲突、取消幂等和取消后重订；真实 Chromium 页面操作完成创建场地、创建预约、冲突提示、取消与同时间重订，未见页面运行错误。执行 `docker compose down` 后用原命名卷重启，场地及取消、重订预约的记录仍一致，API 与数据库健康，服务日志未见持续错误。本次独立验证项目与 2026-10-30 的原始验收环境分开。
+
+独立数据库验证脚本同步适配 V3，并在 Windows 子进程中显式使用 UTF-8。运行 `python scripts/verify-database.py` 后，空库成功执行 V1–V3，Flyway `validate` 与第二次 `migrate` 通过，种子未重复；29 组非法写入按预期 SQLSTATE 类别被拒绝，合法边界、默认值、逻辑取消和外键保护通过，测试写入已回滚。该脚本只验证数据库与迁移，不代替上面的真实三服务验收。
