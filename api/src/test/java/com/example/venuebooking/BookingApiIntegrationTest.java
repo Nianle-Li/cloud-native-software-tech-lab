@@ -209,6 +209,48 @@ class BookingApiIntegrationTest {
     }
 
     @Test
+    void concurrentCancellationKeepsTheFirstCancellationTimestamp() throws Exception {
+        long venueId = createVenue(10, "09:00", "18:00");
+        String created = mockMvc.perform(post("/api/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reservationJson(venueId, futureDate(), "10:00", "11:00", 1, "并发取消")))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long reservationId = objectMapper.readTree(created).get("id").asLong();
+
+        int requestCount = 8;
+        CountDownLatch ready = new CountDownLatch(requestCount);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(requestCount);
+        List<Future<String>> futures = new ArrayList<>();
+        try {
+            for (int i = 0; i < requestCount; i++) {
+                futures.add(executor.submit(() -> {
+                    ready.countDown();
+                    start.await();
+                    String response = mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId))
+                            .andExpect(status().isOk())
+                            .andExpect(jsonPath("$.status", is("CANCELLED")))
+                            .andReturn().getResponse().getContentAsString();
+                    return objectMapper.readTree(response).get("cancelled_at").asText();
+                }));
+            }
+            ready.await();
+            start.countDown();
+            List<String> timestamps = new ArrayList<>();
+            for (Future<String> future : futures) {
+                timestamps.add(future.get());
+            }
+            assertEquals(1L, timestamps.stream().distinct().count());
+            mockMvc.perform(get("/api/reservations/{id}", reservationId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.cancelled_at", is(timestamps.get(0))));
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
     void reservationValidationConflictAndAdjacentIntervalsAreEnforced() throws Exception {
         long venueId = createVenue(3, "09:00", "18:00");
         String date = futureDate();

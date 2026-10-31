@@ -98,11 +98,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse cancel(Long id) {
-        Reservation reservationReference = reservationRepository.findByIdWithVenue(id)
+        Long venueId = reservationRepository.findVenueIdByReservationId(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        venueRepository.findByIdForUpdate(reservationReference.getVenue().getId())
-                .orElseThrow(() -> new com.example.venuebooking.api.error.VenueNotFoundException(
-                        reservationReference.getVenue().getId()));
+        venueRepository.findByIdForUpdate(venueId)
+                .orElseThrow(() -> new com.example.venuebooking.api.error.VenueNotFoundException(venueId));
         Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
