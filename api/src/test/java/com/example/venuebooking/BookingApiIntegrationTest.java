@@ -30,10 +30,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -101,7 +101,7 @@ class BookingApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", containsString("/api/venues/")))
+                .andExpect(header().string("Location", startsWith("/api/venues/")))
                 .andExpect(jsonPath("$.status", is("OPEN")))
                 .andExpect(jsonPath("$.open_time", is("08:00")))
                 .andExpect(jsonPath("$.close_time", is("22:00")));
@@ -179,7 +179,7 @@ class BookingApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", containsString("/api/reservations/")))
+                .andExpect(header().string("Location", startsWith("/api/reservations/")))
                 .andExpect(jsonPath("$.status", is("ACTIVE")))
                 .andExpect(jsonPath("$.cancelled_at").value((Object) null))
                 .andReturn().getResponse().getContentAsString();
