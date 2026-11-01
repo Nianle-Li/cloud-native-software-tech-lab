@@ -27,7 +27,7 @@ export function ReservationsPage({ reservations, venues, loadingReservations, re
         <div className="section-heading">
           <div>
             <h2 id="records-heading">预约列表</h2>
-            <p>按状态筛选；已取消记录仍保留。</p>
+            <p>预约状态按北京时间的时段计算；开始后不能取消，“时段内”和“已结束”不代表实际到场或使用。</p>
           </div>
           <button type="button" className="secondary refresh-button" disabled={loadingReservations} onClick={onRefreshReservations}>
             刷新预约记录

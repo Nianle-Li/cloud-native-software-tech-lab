@@ -213,6 +213,34 @@ class BookingApiIntegrationTest {
     }
 
     @Test
+    void startedAndEndedReservationsCannotBeCancelled() throws Exception {
+        long venueId = createVenue(10, "00:00", "23:59");
+        LocalDate today = LocalDate.now(BUSINESS_ZONE);
+        long startedId = jdbcTemplate.queryForObject("""
+                insert into reservations (venue_id, booked_by, reservation_date, start_time, end_time,
+                    attendee_count, purpose, status)
+                values (?, '测试小组', ?, '00:00', '23:59', 1, '取消边界', 'ACTIVE')
+                returning id
+                """, Long.class, venueId, today);
+        long endedId = jdbcTemplate.queryForObject("""
+                insert into reservations (venue_id, booked_by, reservation_date, start_time, end_time,
+                    attendee_count, purpose, status)
+                values (?, '测试小组', ?, '10:00', '11:00', 1, '取消边界', 'ACTIVE')
+                returning id
+                """, Long.class, venueId, today.minusDays(1));
+
+        for (long reservationId : new long[] {startedId, endedId}) {
+            mockMvc.perform(post("/api/reservations/{id}/cancel", reservationId))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.error.code", is("CANCELLATION_CLOSED")));
+            mockMvc.perform(get("/api/reservations/{id}", reservationId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status", is("ACTIVE")))
+                    .andExpect(jsonPath("$.cancelled_at").value((Object) null));
+        }
+    }
+
+    @Test
     void concurrentCancellationKeepsTheFirstCancellationTimestamp() throws Exception {
         long venueId = createVenue(10, "09:00", "18:00");
         String created = mockMvc.perform(post("/api/reservations")

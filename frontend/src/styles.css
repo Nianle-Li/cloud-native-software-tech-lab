@@ -130,8 +130,10 @@ button.secondary:hover:not(:disabled) { border-color: var(--accent); background:
 .venue-card-top, .reservation-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
 .venue-number { color: #4e6c5e; font-size: 0.84rem; font-weight: 800; letter-spacing: 0.1em; }
 .status { flex: none; display: inline-flex; align-items: center; padding: 0.32rem 0.62rem; border-radius: 999px; font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
-.status.active { color: #326a4d; background: #e6f2e7; }
 .status.cancelled { color: #636d65; background: #ecefe9; }
+.status.phase-upcoming { color: #3d5d73; background: #e9f1f5; }
+.status.phase-in-progress { color: #276852; background: #d9eee3; }
+.status.phase-ended { color: #626861; background: #f0f1ec; }
 .venue-card-body { margin-top: 1.2rem; }
 .venue-card h3 { margin: 0; color: var(--ink); font-size: 1.12rem; font-weight: 700; overflow-wrap: anywhere; }
 .venue-card-body p { margin: 0.43rem 0 0; color: var(--ink-muted); font-size: 0.84rem; line-height: 1.45; overflow-wrap: anywhere; }
@@ -166,6 +168,16 @@ button.secondary:hover:not(:disabled) { border-color: var(--accent); background:
 .booking-venue-card dt { color: var(--ink-muted); font-size: 0.76rem; }
 .booking-venue-card dd { margin: 0.2rem 0 0; color: var(--ink); font-size: 0.9rem; font-weight: 750; overflow-wrap: anywhere; }
 .booking-aside-note { margin: 1rem 0 0; color: var(--ink-muted); font-size: 0.83rem; line-height: 1.65; }
+.booking-availability { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.booking-availability-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.booking-availability h3 { margin: 0; color: var(--ink); font-size: 1rem; }
+.booking-availability-heading button { min-height: 36px; padding: 0.4rem 0.65rem; font-size: 0.78rem; }
+.booking-availability p { margin: 0.7rem 0 0; color: var(--ink-muted); font-size: 0.83rem; line-height: 1.55; }
+.booking-availability .booking-availability-full, .booking-availability .booking-availability-conflict { color: #9b382e; font-weight: 750; }
+.booking-availability .booking-availability-note { font-size: 0.76rem; }
+.booked-slots { display: grid; gap: 0.45rem; margin: 0.75rem 0 0; padding: 0; list-style: none; }
+.booked-slots li { display: flex; justify-content: space-between; gap: 0.6rem; padding: 0.55rem 0.7rem; border: 1px solid #e5ded5; border-radius: 8px; background: #fffdf9; color: var(--ink); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+.booked-slots li span:last-child { color: #9b382e; font-weight: 700; white-space: nowrap; }
 .aside-error { margin-top: 1rem; }
 .form-notice { margin-bottom: 1rem; }
 
@@ -199,7 +211,7 @@ button.secondary:hover:not(:disabled) { border-color: var(--accent); background:
 .reservation-card { min-width: 0; overflow: hidden; border: 1px solid #dfe5dc; border-left: 3px solid #a8bfb0; border-radius: 11px; background: #fffefb; }
 .reservation-card.is-cancelled { border-left-color: #cbd1c9; }
 .reservation-card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem 1rem; padding: 0.48rem 1rem 0.3rem; }
-.reservation-heading { align-items: center; justify-content: flex-start; gap: 0.65rem; min-width: 0; }
+.reservation-heading { align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 0.45rem 0.65rem; min-width: 0; }
 .reservation-heading h3 { margin: 0; color: var(--ink); font-size: 0.98rem; white-space: nowrap; }
 .reservation-card dl { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.3fr) minmax(0, 1.05fr) minmax(0, 0.55fr) minmax(0, 1.15fr); gap: 0.7rem; margin: 0 1rem; padding: 0.55rem 0 0.8rem; border-top: 1px solid #edf0eb; }
 .reservation-card dl div { min-width: 0; }

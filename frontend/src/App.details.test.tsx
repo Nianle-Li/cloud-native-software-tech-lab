@@ -13,6 +13,7 @@ const reservation = {
 beforeEach(() => window.history.replaceState(null, '', '/#/'))
 afterEach(() => {
   cleanup()
+  vi.useRealTimers()
   vi.unstubAllGlobals()
   window.history.replaceState(null, '', '/')
 })
@@ -55,9 +56,26 @@ describe('可直接访问的详情面板', () => {
     expect(within(detail).getByRole('heading', { level: 2, name: '预约 #12' })).toBeInTheDocument()
     expect(within(detail).getByText('羽毛球馆 A（编号 1）')).toBeInTheDocument()
     expect(within(detail).getByText('已取消')).toBeInTheDocument()
+    expect(within(detail).queryByText('时段进度')).not.toBeInTheDocument()
     expect(within(detail).getByText('2030-10-01T10:00:00+08:00')).toBeInTheDocument()
     expect(within(detail).getByText('2030-10-02T10:00:00+08:00')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith('/api/reservations/12', undefined)
+  })
+
+  it('未取消预约详情按北京时间显示当前状态', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2030-10-30T02:30:00Z'))
+    window.history.replaceState(null, '', '/#/reservations/12')
+    const active = { ...reservation, status: 'ACTIVE', cancelled_at: null }
+    vi.stubGlobal('fetch', vi.fn(async (path: RequestInfo | URL) => {
+      if (String(path) === '/api/venues') return Response.json([venue])
+      if (String(path) === '/api/reservations') return Response.json([active])
+      if (String(path) === '/api/reservations/12') return Response.json(active)
+      throw new Error(`Unexpected request: ${String(path)}`)
+    }))
+    render(<App />)
+    const detail = await screen.findByRole('dialog', { name: '预约详情' })
+    expect(within(detail).getByText('预约状态').nextElementSibling).toHaveTextContent('时段内')
   })
 
   it('场地列表不可用时预约详情仍显示确定的场地编号', async () => {
