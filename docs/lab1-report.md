@@ -5,12 +5,13 @@
 准备已启动的 Docker Engine（或 Docker Desktop）及支持 `docker compose` 命令的 Compose v2。在仓库根目录仅首次将 `.env.example` 复制为 `.env`，修改 `POSTGRES_PASSWORD`；`FRONTEND_PORT` 默认为 `8080`，可按需调整。然后执行：
 
 ```sh
-docker compose up --build -d
+docker compose config --quiet
+docker compose up --build -d --wait --wait-timeout 180
 docker compose ps
 docker compose logs --tail=100 frontend api database
 ```
 
-使用浏览器访问 `http://localhost:8080/`；如修改了 `FRONTEND_PORT`，则使用相应端口。结束运行时执行 `docker compose down`，保留数据库命名卷中的数据。
+使用浏览器访问 `http://localhost:8080/`；如修改了 `FRONTEND_PORT`，则使用相应端口。结束运行时执行 `docker compose down`，保留数据库命名卷中的数据，不添加 `-v`。
 
 ## 1. 实验目标与系统架构
 
@@ -91,7 +92,7 @@ Nginx 提供静态页面，并将 `/api/` 请求代理至 Compose 网络中的 `
 
 #### 2.5.1 自动验证
 
-在 Node.js 24.15.0 环境中，`npm test` 的 135 项 Vitest 测试、`npm run test:layout` 的 8 项 Playwright/Chromium 测试全部通过，`npm run build` 完成类型检查与生产构建。测试覆盖场地创建、详情查询、预约创建与取消、时段占用提示、预约时段状态及取消操作的时间边界、输入校验、服务端错误提示、冲突后取消并重新预约，以及页面布局与交互。浏览器交互测试使用可控 HTTP 响应，检验前端对各类接口结果的处理。
+在 Node.js 24.15.0 环境中，`npm test` 的 135 项 Vitest 测试、`npm run test:layout` 的 8 项 Playwright/Chromium 测试全部通过，`npm run build` 完成类型检查与生产构建。测试覆盖场地创建、详情查询、预约创建与取消、时段占用提示、预约时段状态及取消操作的时间边界、输入校验、服务端错误提示、冲突后取消并重新预约，以及页面布局与交互。浏览器交互测试使用可控 HTTP 响应，检验前端对各类接口结果的处理；真实部署的页面点击验收另见第 6.2 节。
 
 #### 2.5.2 界面展示
 
@@ -177,13 +178,13 @@ Nginx 提供静态页面，并将 `/api/` 请求代理至 Compose 网络中的 `
 }
 ```
 
-`400 VALIDATION_ERROR` 处理无效 JSON、字段、容量和日期时间，可附字段级 `details`；`404 VENUE_NOT_FOUND` 与 `404 RESERVATION_NOT_FOUND` 处理不存在的资源；`409 VENUE_CLOSED` 与 `409 TIME_CONFLICT` 处理业务冲突；意外故障返回 `500 INTERNAL_ERROR`。
+`400 VALIDATION_ERROR` 处理无效 JSON、字段、容量和日期时间，可附字段级 `details`；`404 VENUE_NOT_FOUND` 与 `404 RESERVATION_NOT_FOUND` 处理不存在的资源；`409 VENUE_CLOSED` 与 `409 TIME_CONFLICT` 处理场地停用和时段冲突；`409 CANCELLATION_CLOSED` 处理已到开始时刻的未取消预约；意外故障返回 `500 INTERNAL_ERROR`。已取消预约的重复取消仍返回 `200` 和原取消时间，即使此时已过开始时刻。
 
 ### 3.6 容器化与验证
 
 `api/Dockerfile` 使用 Maven/JDK 17 构建阶段从源码下载依赖并打包，再用 JRE 17 运行阶段只携带应用 jar，以非 root 用户在容器内监听 `8080`。数据库连接由 `SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD` 注入；Compose 中 JDBC 地址使用 `database:5432`，镜像内不写入密码。`/actuator/health` 可报告应用和数据库健康状态。
 
-当前源码使用 PostgreSQL Testcontainers 的 13 项集成测试全部通过，覆盖七个接口、输入与错误响应、相邻时段、取消与开始后拒绝取消、重订、并发冲突、日内时间及 V3 迁移。独立 Compose 环境从源码构建并启动三服务，API 健康端点的应用和数据库状态均为 `UP`。
+使用 Java 17 执行 PostgreSQL Testcontainers 的 13 项集成测试，全部通过，失败、错误和跳过均为 0，覆盖七个接口、输入与错误响应、相邻时段、取消与开始后拒绝取消、重订、并发冲突、日内时间及 V2 数据升级至 V3。独立 Compose 环境从源码构建并启动三服务，API 健康端点的应用和数据库状态均为 `UP`。
 
 ## 4. 数据库设计
 
@@ -248,47 +249,85 @@ Compose 显式向数据库传入三个 `POSTGRES_*` 变量，向 API 注入 `SPR
 
 ### 6.1 整体启动与状态
 
-从当前源码在 Windows、Docker Engine 29.1.3 和 Compose v2.40.3-desktop.1 环境完成三服务构建与部署。首次配置时复制 `.env.example` 为 `.env` 并替换密码，已有配置不覆盖。在仓库根目录执行：
+部署验证环境为 macOS 26.5 / arm64、Docker Engine 29.2.1 和 Compose 5.1.0。前后端镜像通过各自的 Dockerfile 从项目源码构建，由 Compose 统一启动三个服务。首次配置时复制 `.env.example` 为 `.env` 并替换密码，已有配置不覆盖。常规部署在仓库根目录执行：
 
 ```sh
 docker compose config --quiet
-docker compose up --build -d
+docker compose up --build -d --wait --wait-timeout 180
 docker compose ps
 docker compose logs --tail=100 frontend api database
 docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 ```
 
-前后端镜像均从仓库源码构建成功，三个服务正常运行，数据库为 `healthy`，仅前端发布宿主机端口。空库成功应用 V1–V3，Actuator 顶层与数据库健康状态均为 `UP`。默认浏览器入口为 `http://localhost:8080/`；修改 `FRONTEND_PORT` 时使用相应端口。首页和经 Nginx 转发的 `/api/venues` 均返回 `200`。
+部署验收采用独立 Compose 项目、环境配置和命名卷，通过 `FRONTEND_PORT=18080` 访问前端，避免影响已有服务。项目默认访问端口为 `8080`；端口调整不改变容器内的服务地址和通信方式。
+
+三个服务正常运行，API 和数据库为 `healthy`，仅前端发布宿主机端口。前端没有独立 healthcheck，其入口和代理链路通过实际 HTTP 请求及页面操作验证。空库成功应用 V1–V3，JPA 校验并正常启动，Actuator 顶层与数据库健康状态均为 `UP`。首页和经 Nginx 转发的 `/api/venues` 均返回 `200`。环境与重建后日志见[部署状态记录](assets/lab1-report/finalize-deployment-status.txt)。
 
 ### 6.2 功能联调
 
-当前源码经前端 Nginx 入口完成 20 项实际 HTTP 检查，覆盖七个业务接口、错误响应、相邻与冲突时段、取消幂等和重订。真实 Chromium 页面操作验证了创建场地、预约成功、冲突提示、取消与同时间重订。另有[原始联调记录](assets/lab1-report/stage4-acceptance.json)保存了 V1/V2 版本的 33 项真实 HTTP 结果及页面验收数据；该记录与当前 V3 版本的复核结果分别说明，不作为当前版本的测试计数。
+功能联调通过前端 Nginx 入口发起业务请求，并结合 SQL 查询和容器状态核对结果，共完成 28 项检查，涵盖七个业务接口、相对 `Location`、容量与不可见文本拒绝、相邻和冲突时段、取消幂等、取消后重订、并发创建与取消、开始后拒绝取消、迁移历史和 Actuator 健康状态。
+
+真实 Chrome 页面点击验收的 13 项检查全部通过：创建场地 #6、创建预约 #9、查询详情、已预约时段展示、重叠预提示、后端冲突拒绝、四种预约状态与取消入口、确认取消、取消后释放时段、同一时段重订为预约 #10、整日约满提示，以及重建后刷新有效和已取消预约。页面经 Nginx 连接真实 API 与 PostgreSQL，未使用模拟响应。
+
+检查结果见[验收记录](assets/lab1-report/finalize-acceptance.json)。第 2.5.2 节截图用于展示界面，采用演示数据与指定演示时间。开发过程中的 [V1/V2 联调记录](assets/lab1-report/stage4-acceptance.json)作为历史材料保留，验收结果以下表及所引用的验证记录为依据。
+
+### 6.3 验收结果汇总
+
+系统验证覆盖模块测试、数据库约束、三服务联调、用户操作及容器重建。各类检查分别统计，结果如下。
+
+| 验收项 | 结果 | 依据 |
+| --- | --- | --- |
+| 前端自动验证 | 135 项单元测试、8 项浏览器测试通过；生产构建通过 | 第 2.5.1 节；浏览器套件使用可控 HTTP 响应 |
+| 后端集成验证 | 13 项真实 PostgreSQL 测试通过，无失败、错误或跳过 | 第 3.6 节；包括 V2→V3 升级和并发边界 |
+| 数据库迁移与约束 | V1–V3、validate、重复 migrate 通过；29 组非法写入被拒绝 | 第 4.3 节 |
+| 三服务源码构建与启动 | 通过；API、数据库 healthy，Actuator 应用及 db 均 UP | 第 6.1 节 |
+| 七个接口与错误处理 | 通过；相对 Location、参数与业务冲突响应符合约定 | 第 6.2 节的真实链路检查 |
+| 并发预约与重复取消 | 一个 201、一个 409，只有一条匹配 ACTIVE；八次并发取消时间一致 | 第 3.4、9.2 节及真实链路记录 |
+| 开始后取消限制 | 时段内、已结束的未取消预约返回 409 CANCELLATION_CLOSED，状态保留 ACTIVE | 真实链路记录；开始时刻边界另由集成测试验证 |
+| 真实页面操作 | 13 项通过，包含冲突、取消、重订、状态和约满提示 | 第 6.2 节 |
+| 容器重建与持久化 | 10 项对比通过，完整数据库记录及 API 响应一致 | 第 7.1 节 |
+
+### 6.4 自动验证复现
+
+运行宿主机测试时需另备 Node.js 24.15.0 或满足 `frontend/package.json` 的版本，以及 Java 17、Maven 和已启动的 Docker Engine；仅通过 Compose 运行系统时无需安装这些开发工具。前端在 `frontend/` 中执行：
+
+```sh
+npm ci
+npm test
+npm run build
+npx playwright install chromium
+npm run test:layout
+```
+
+后端在 `api/` 中使用 Java 17 执行 `mvn test`；确认 `mvn --version` 显示 Java 17，Testcontainers 需能连接 Docker Engine。在仓库根目录执行 `python3 scripts/verify-database.py` 可独立验证迁移和约束；该脚本创建独立项目，结束后停止容器并保留验证卷。以上自动套件不代替第 6.2 节真实部署的人工页面验收。
 
 ## 7. 并发与数据持久化验证
 
 ### 7.1 容器重建与数据持久化
 
-V1/V2 联调记录保存了预约 #5、#6 的完整 API 响应、场地与预约总数、Flyway 历史、容器 ID、镜像 ID 和命名卷信息。随后执行：
+持久化验证先创建、取消并重新预约，保留已取消的预约 #9 和有效的预约 #10。重建前，记录全部场地、预约和 Flyway 历史的 SQL 快照、列表 API 完整响应，以及容器 ID、镜像 ID、命名卷和健康状态；随后停止并删除容器，再使用相同配置重新创建容器。核心操作为：
 
 ```sh
 docker compose down
-docker compose up -d
-docker volume ls
+docker compose up -d --wait --wait-timeout 180
 ```
 
-全程不使用 `-v`。重建后，三个容器 ID 均变化、镜像 ID 均未变；数据库继续挂载原命名卷。下表为该次原始记录的对比结果：
+使用独立项目验证时，两条命令均沿用启动时的项目名、环境文件和配置文件参数，确保操作同一组服务和命名卷。全程不使用 `-v`，重建时使用已有镜像。重建后，三个容器 ID 均变化、镜像 ID 均未变；数据库继续挂载同一命名卷。10 项对比检查全部通过：
 
 | 对比项 | 重建前 | 重建后 |
 | --- | --- | --- |
-| 预约 #5 | `CANCELLED`，有取消时间 | 完整记录一致 |
-| 预约 #6 | `ACTIVE`，取消时间为空 | 完整记录一致 |
-| 场地总数 / 预约总数 | 5 / 6 | 5 / 6 |
-| Flyway 历史 | V1、V2 成功，校验和已记录 | 版本和校验和未变，无需重复迁移 |
+| 预约 #9 | `CANCELLED`，有取消时间 | 完整记录一致 |
+| 预约 #10 | `ACTIVE`，取消时间为空 | 完整记录一致 |
+| 场地总数 / 预约总数 | 6 / 10 | 6 / 10 |
+| 全部 SQL 记录 / 列表 API 响应 | 完整快照已记录 | 逐字段一致 |
+| Flyway 历史 | V1、V2、V3 成功，校验和已记录 | 历史未变，无需重复迁移 |
+| 三个容器 / 镜像 | 原 ID 已记录 | 容器 ID 全变化，镜像 ID 全未变 |
+| 数据库命名卷 | 已记录项目对应的 `postgres_data` 卷 | 继续挂载同一卷 |
 | 应用与数据库健康 | `UP / UP` | `UP / UP` |
 
-“完整记录一致”包含预约人、用途、日期、钟点、状态及创建/取消时间。重建后通过 HTTP 重新查询并与 SQL 核对。当前 V3 版本也在独立 Compose 项目中完成创建、取消与重订后的 `down` / `up -d` 验证，原卷中的场地和预约状态保持一致，API 与数据库健康。验证范围为本地 Compose 命名卷在容器重建后的数据保留。
+“完整记录一致”包含预约人、用途、日期、钟点、状态及创建/取消时间。重建后重新读取 SQL 与 HTTP 数据并对比，且在真实页面刷新确认预约 #9、#10 的详情保留。验证范围为本地 Compose 命名卷在容器重建后的数据保留。
 
-V1/V2 版本的原始证据见[重建前后对比 JSON](assets/lab1-report/stage5-persistence.json)及[重建后状态与日志](assets/lab1-report/deployment-status.txt)。
+完整快照和检查结果见[持久化对比记录](assets/lab1-report/finalize-persistence.json)，环境与重建后日志见[部署状态记录](assets/lab1-report/finalize-deployment-status.txt)。开发过程中的[历史持久化记录](assets/lab1-report/stage5-persistence.json)及[历史部署日志](assets/lab1-report/deployment-status.txt)作为补充材料保留。
 
 ## 8. 小组分工
 
@@ -298,7 +337,7 @@ V1/V2 版本的原始证据见[重建前后对比 JSON](assets/lab1-report/stage
 | --- | --- |
 | 李佳凝 | 前端主要页面、API 对接、表单校验、交互测试、前端镜像和 Nginx；修复创建响应、并发取消、V3 文本约束及 Compose 启动就绪问题。 |
 | 张玳瑗 | Spring Boot 接口、JPA 数据模型、预约冲突与取消事务、统一接口参数校验与错误处理、后端镜像及数据库集成测试；修复日内时间偏移。 |
-| 吴柯蝶 | 数据库 V1/V2 迁移、种子数据、独立数据库验证脚本、Compose 编排与环境变量模板；完成三服务联调、HTTP 验收及重启持久化验证。 |
+| 吴柯蝶 | 数据库 V1/V2 迁移、种子数据、独立数据库验证脚本、Compose 编排与环境变量模板；完成三服务联调、HTTP 与页面验收、容器重建持久化验证，并整合最终报告与验收证据。 |
 
 ## 9. 关键问题与解决
 
@@ -312,7 +351,9 @@ PostgreSQL 的 `TIME WITHOUT TIME ZONE` 存储日内钟点，不表示具体时�
 
 ### 9.3 创建响应与文本校验
 
-经前端代理创建资源时，绝对 `Location` 依赖转发的主机信息。创建接口使用 `/api/...` 相对路径，前端入口可据此定位资源。API 与 Flyway V3 对四个必填文本字段采用一致的非空白判定，并将 NUL 输入转换为 `400 VALIDATION_ERROR`。直接 SQL 写入不可见文本会被数据库约束拒绝；如果旧库已有此类记录，须先核查和修正，V3 不会自动改写数据。
+经前端代理创建资源时，绝对 `Location` 依赖转发的主机信息。创建接口使用 `/api/...` 相对路径，前端入口可据此定位资源。API 与 Flyway V3 对四个必填文本字段采用一致的非空白判定，API 另将 NUL 输入转换为 `400 VALIDATION_ERROR`。直接 SQL 写入不可见文本会被数据库约束拒绝；如果旧库已有此类记录，须先核查和修正，V3 不会自动改写数据。
+
+前端必填文本预检查使用 JavaScript `trim()`，不会拦截所有零宽格式字符；此类输入由 API 返回字段错误，数据库约束也会拒绝直接写入。该差异影响提交前的提示时机，最终校验由服务端和数据库执行。
 
 ### 9.4 容器启动顺序
 
