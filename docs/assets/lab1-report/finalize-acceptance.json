@@ -1,0 +1,227 @@
+{
+  "recorded_at": "2026-11-01T14:00:00.174232+08:00",
+  "source_commit": "515f8fc",
+  "scope": "当前源码的隔离 Compose 部署；真实 Chrome 原生页面点击，无模拟 API",
+  "base_url": "http://127.0.0.1:18080",
+  "project": "lab1-finalize-20261101-132935",
+  "automated_verification": {
+    "frontend_unit": {
+      "passed": 135,
+      "files": 14
+    },
+    "frontend_build": "passed",
+    "frontend_browser_tests": {
+      "passed": 8,
+      "scope": "项目现有 Playwright 套件使用模拟 API；不计入真实后端页面联调"
+    },
+    "backend_testcontainers": {
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "database": "PostgreSQL"
+    },
+    "database_invalid_writes": {
+      "passed": 29
+    },
+    "database_migrations": "V1/V2/V3 migrate、validate 与第二次 migrate 通过；后端现有集成测试验证 V2 数据升级保留"
+  },
+  "real_http": {
+    "base_url": "http://127.0.0.1:18080",
+    "checks": [
+      {
+        "check": "Nginx serves frontend",
+        "passed": true
+      },
+      {
+        "check": "venue list through Nginx",
+        "passed": true
+      },
+      {
+        "check": "seed venues loaded",
+        "passed": true
+      },
+      {
+        "check": "create venue",
+        "passed": true
+      },
+      {
+        "check": "venue Location remains relative",
+        "passed": true
+      },
+      {
+        "check": "venue detail",
+        "passed": true
+      },
+      {
+        "check": "create reservation",
+        "passed": true
+      },
+      {
+        "check": "reservation Location remains relative",
+        "passed": true
+      },
+      {
+        "check": "reservation detail",
+        "passed": true
+      },
+      {
+        "check": "reservation list",
+        "passed": true
+      },
+      {
+        "check": "overlap rejected",
+        "passed": true
+      },
+      {
+        "check": "adjacent interval allowed",
+        "passed": true
+      },
+      {
+        "check": "capacity rejected",
+        "passed": true
+      },
+      {
+        "check": "zero width name rejected",
+        "passed": true
+      },
+      {
+        "check": "cancel future reservation",
+        "passed": true
+      },
+      {
+        "check": "repeat cancel",
+        "passed": true
+      },
+      {
+        "check": "repeat cancellation timestamp unchanged",
+        "passed": true
+      },
+      {
+        "check": "rebook freed interval",
+        "passed": true
+      },
+      {
+        "check": "concurrent create exactly 201 and 409",
+        "passed": true
+      },
+      {
+        "check": "concurrent create only one ACTIVE database row",
+        "passed": true
+      },
+      {
+        "check": "eight concurrent cancels preserve timestamp",
+        "passed": true
+      },
+      {
+        "check": "in-progress cancellation rule",
+        "passed": true
+      },
+      {
+        "check": "in-progress remains ACTIVE",
+        "passed": true
+      },
+      {
+        "check": "ended cancellation rule",
+        "passed": true
+      },
+      {
+        "check": "ended remains ACTIVE",
+        "passed": true
+      },
+      {
+        "check": "cancelled-past cancellation rule",
+        "passed": true
+      },
+      {
+        "check": "V1 V2 V3 migration success",
+        "passed": true
+      },
+      {
+        "check": "Actuator database health UP",
+        "passed": true
+      }
+    ],
+    "passed": 28,
+    "total": 28
+  },
+  "manual_browser": {
+    "method": "原生 Chrome 页面操作，通过 Nginx 连接真实后端与 PostgreSQL",
+    "venue_id": 6,
+    "cancelled_reservation_id": 9,
+    "replacement_reservation_id": 10,
+    "reservation_date": "2026-11-03",
+    "checks": [
+      {
+        "check": "创建场地",
+        "observed": "场地创建成功，编号 6",
+        "passed": true
+      },
+      {
+        "check": "创建未来预约",
+        "observed": "预约成功，编号 9；2026-11-03 10:00–11:00",
+        "passed": true
+      },
+      {
+        "check": "预约详情",
+        "observed": "编号、预约人、目的、钟点与创建响应一致",
+        "passed": true
+      },
+      {
+        "check": "已预约时段",
+        "observed": "10:00 – 11:00 已预约",
+        "passed": true
+      },
+      {
+        "check": "重叠时段预提示",
+        "observed": "所选时段与已预约时段重叠，请调整时间。",
+        "passed": true
+      },
+      {
+        "check": "真实后端冲突提示",
+        "observed": "该场地在所选时段已被预约",
+        "passed": true
+      },
+      {
+        "check": "预约状态",
+        "observed": "列表显示待开始、时段内、已结束、已取消；时段内与已结束记录没有取消按钮",
+        "passed": true
+      },
+      {
+        "check": "取消确认与状态变化",
+        "observed": "确认取消预约 9 后显示预约 9 已取消",
+        "passed": true
+      },
+      {
+        "check": "取消后释放时段",
+        "observed": "同日期与时段显示暂无已预约时段",
+        "passed": true
+      },
+      {
+        "check": "同一时段重新预约",
+        "observed": "预约成功，编号 10",
+        "passed": true
+      },
+      {
+        "check": "整日约满提示",
+        "observed": "场地 5 在 2026-11-01 显示该日期开放时段已约满，00:00–23:59 已预约",
+        "passed": true
+      },
+      {
+        "check": "重建后有效预约刷新",
+        "observed": "预约 #10 显示待开始，原场地、预约人、日期和钟点一致",
+        "passed": true
+      },
+      {
+        "check": "重建后取消预约刷新",
+        "observed": "预约 #9 显示已取消，原创建时间及取消时间一致",
+        "passed": true
+      }
+    ]
+  },
+  "notes": [
+    "首次 Chrome 页面暂时空白；刷新后打开控制台未发现报错，页面正常显示，随后完成全部点击验收。未修改代码。",
+    "保留历史验收证据；本记录对应 515f8fc，测试数据均在独立项目中。",
+    "本次未导出新截图文件；页面结果依据原生页面可访问性树及屏幕观察记录。"
+  ]
+}
