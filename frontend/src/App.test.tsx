@@ -742,6 +742,31 @@ describe('场地预约页面', () => {
     expect(await screen.findByText('已取消')).toBeInTheDocument()
   })
 
+  it('取消成功提示会消失，已取消状态仍保留', async () => {
+    window.history.replaceState(null, '', '/#/reservations')
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(input)
+      if (path === '/api/venues') return json([venue])
+      if (path === '/api/reservations' && !init) return json([reservation])
+      if (path === '/api/reservations/12/cancel' && init?.method === 'POST') {
+        return json({ ...reservation, status: 'CANCELLED', cancelled_at: '2030-10-01T11:00:00+08:00' })
+      }
+      throw new Error(`Unexpected request: ${path}`)
+    }))
+
+    render(<App />)
+    const cancelButton = await screen.findByRole('button', { name: '取消预约 12' })
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] })
+    fireEvent.click(cancelButton)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: '确认取消预约 12' })) })
+
+    expect(screen.getByRole('status')).toHaveTextContent('预约 12 已取消')
+    expect(screen.getByText('已取消')).toBeInTheDocument()
+    act(() => { vi.advanceTimersByTime(5_000) })
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.getByText('已取消')).toBeInTheDocument()
+  })
+
   it('创建接口返回无效成功响应时提示核对记录，不伪造成功', async () => {
     const user = userEvent.setup()
     vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {

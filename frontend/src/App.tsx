@@ -67,6 +67,16 @@ export default function App() {
     ? `${route.kind}:${route.venueId}`
     : route.kind === 'reservationDetail' ? `${route.kind}:${route.reservationId}` : route.kind
   const previousRouteKey = useRef(routeKey)
+  useEffect(() => {
+    const success = reservationFeedback?.success
+    if (!success) return
+
+    const timeout = window.setTimeout(() => {
+      setReservationFeedback((current) => current?.success === success ? null : current)
+    }, 5_000)
+    return () => window.clearTimeout(timeout)
+  }, [reservationFeedback?.success])
+
   useLayoutEffect(() => {
     const isOverlay = route.kind === 'venueDetail' || route.kind === 'reservationDetail' || route.kind === 'createVenue'
     const previous = previousRouteKey.current
