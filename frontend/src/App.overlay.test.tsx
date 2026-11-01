@@ -89,14 +89,14 @@ describe('就近查看与创建', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('link', { name: '预约记录' }))
-    await user.click(await screen.findByRole('button', { name: '有效 1' }))
+    await user.click(await screen.findByRole('button', { name: '待开始 1' }))
     await user.click(screen.getByRole('link', { name: '查看预约 #12 详情' }))
     const dialog = await screen.findByRole('dialog', { name: '预约详情' })
     expect(within(dialog).getByText('软件技术小组')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '有效 1' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '待开始 1' })).toHaveAttribute('aria-pressed', 'true')
     await user.click(within(dialog).getByRole('button', { name: '关闭预约详情' }))
     expect(window.location.hash).toBe('#/reservations')
-    expect(screen.getByRole('button', { name: '有效 1' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '待开始 1' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('从场地详情进入预约时关闭面板并聚焦预约页标题', async () => {

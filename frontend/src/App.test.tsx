@@ -355,7 +355,7 @@ describe('场地预约页面', () => {
     await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('预约不存在')
     expect(within(screen.getByRole('region', { name: '预约列表' })).getByRole('alert')).toHaveTextContent('预约不存在')
-    expect(screen.getByText('有效')).toBeInTheDocument()
+    expect(screen.getByText('待开始')).toBeInTheDocument()
   })
 
   it('创建成功后忽略晚到的旧预约列表', async () => {
@@ -480,7 +480,7 @@ describe('场地预约页面', () => {
     await act(async () => { resolveRefresh(json([externallyCancelled])); await refresh })
     await user.click(screen.getByRole('link', { name: '预约记录' }))
     expect(screen.getByText('预约 #12').closest('li')).toHaveTextContent('已取消')
-    expect(screen.getByText('预约 #13').closest('li')).toHaveTextContent('有效')
+    expect(screen.getByText('预约 #13').closest('li')).toHaveTextContent('待开始')
   })
 
   it('列表已包含新预约时，创建响应不会插入重复记录', async () => {
@@ -781,7 +781,7 @@ describe('场地预约页面', () => {
     await user.click(await screen.findByRole('button', { name: '取消预约 12' }))
     await user.click(screen.getByRole('button', { name: '确认取消预约 12' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('先刷新预约记录')
-    expect(screen.getByText('有效')).toBeInTheDocument()
+    expect(screen.getByText('待开始')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '刷新预约记录' }))
     expect(await screen.findByText('已取消')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()

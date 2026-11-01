@@ -209,6 +209,12 @@ export function createMockApiServer({ now = () => new Date() } = {}) {
           return
         }
         if (reservation.status === 'ACTIVE') {
+          const current = shanghaiDateTime(now())
+          if (reservation.reservation_date < current.date
+            || (reservation.reservation_date === current.date && reservation.start_time <= current.time)) {
+            fail(response, 409, 'CANCELLATION_CLOSED', '预约已开始，不能取消')
+            return
+          }
           reservation.status = 'CANCELLED'
           reservation.cancelled_at = now().toISOString()
         }

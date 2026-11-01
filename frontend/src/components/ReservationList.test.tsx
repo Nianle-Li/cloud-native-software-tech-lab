@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { act, cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Reservation, Venue } from '../types'
@@ -28,9 +28,51 @@ const reservations: Reservation[] = Array.from({ length: 8 }, (_, index) => ({
   cancelled_at: index === 1 || index === 5 ? '2030-10-01T11:00:00+08:00' : null,
 }))
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
 
 describe('预约记录浏览', () => {
+  it('按北京时间显示和筛选待开始、时段内、已结束，已取消优先', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2030-10-30T02:30:00Z'))
+    const user = userEvent.setup()
+    const mixed: Reservation[] = [
+      { ...reservations[0], id: 8, start_time: '11:00', end_time: '12:00' },
+      { ...reservations[0], id: 7, start_time: '10:00', end_time: '11:00' },
+      { ...reservations[0], id: 6, start_time: '08:00', end_time: '09:00' },
+      { ...reservations[0], id: 5, status: 'CANCELLED', cancelled_at: '2030-10-01T11:00:00+08:00' },
+    ]
+    render(<ReservationList reservations={mixed} venues={[venue]} cancellingId={null} onCancel={vi.fn()} />)
+
+    expect(screen.queryByRole('button', { name: /有效/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '已取消 1' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '待开始 1' }))
+    expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(1)
+    expect(screen.getByRole('heading', { name: '预约 #8' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '取消预约 8' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '时段内 1' }))
+    expect(screen.getByRole('heading', { name: '预约 #7' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '取消预约 7' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '已结束 1' }))
+    expect(screen.getByRole('heading', { name: '预约 #6' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '取消预约 6' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '已取消 1' }))
+    expect(screen.getByRole('heading', { name: '预约 #5' })).toBeInTheDocument()
+  })
+
+  it('页面保持打开时在开始时刻自动从待开始切换为时段内', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2030-10-30T01:59:30Z'))
+    render(<ReservationList reservations={[reservations[0]]} venues={[venue]} cancellingId={null} onCancel={vi.fn()} />)
+    const card = screen.getByRole('heading', { name: '预约 #8' }).closest('li')!
+    expect(within(card).getByText('待开始')).toBeInTheDocument()
+    act(() => { vi.advanceTimersByTime(30_100) })
+    expect(within(card).getByText('时段内')).toBeInTheDocument()
+    expect(within(card).queryByRole('button', { name: '取消预约 8' })).not.toBeInTheDocument()
+  })
+
   it('每条记录显示场地名称和编号，并提供独立详情入口', () => {
     render(<ReservationList reservations={reservations.slice(0, 1)} venues={[venue]} cancellingId={null} onCancel={vi.fn()} />)
     const card = screen.getByRole('heading', { name: '预约 #8' }).closest('li')!
@@ -74,7 +116,7 @@ describe('预约记录浏览', () => {
     expect(screen.getByText('预约人 3')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '下一页' })).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '有效 6' }))
+    await user.click(screen.getByRole('button', { name: '待开始 6' }))
     expect(screen.getAllByRole('listitem')).toHaveLength(6)
     expect(screen.queryByText('预约人 7')).not.toBeInTheDocument()
     expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(6)

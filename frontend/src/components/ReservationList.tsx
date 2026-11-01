@@ -2,6 +2,11 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ActionFeedback } from './ActionFeedback'
 import type { Reservation, Venue } from '../types'
 import { reservationDetailHref } from '../navigation'
+import { phaseLabels, reservationPhase } from '../reservationPhase'
+import type { ReservationPhase } from '../reservationPhase'
+import { useCurrentMinute } from '../useCurrentMinute'
+
+type ReservationFilter = 'ALL' | ReservationPhase
 
 interface ReservationListProps {
   reservations: Reservation[]
@@ -14,16 +19,21 @@ interface ReservationListProps {
 }
 
 export function ReservationList({ reservations, venues, cancellingId, feedbackReservationId = null, actionError = '', successMessage = '', onCancel }: ReservationListProps) {
-  const [filter, setFilter] = useState<'ALL' | Reservation['status']>('ALL')
+  const [filter, setFilter] = useState<ReservationFilter>('ALL')
   const [requestedPage, setRequestedPage] = useState(1)
   const [confirmingId, setConfirmingId] = useState<number | null>(null)
   const confirmationButton = useRef<HTMLButtonElement>(null)
   const cancelButtons = useRef(new Map<number, HTMLButtonElement>())
   const restoreFocusId = useRef<number | null>(null)
+  const now = useCurrentMinute()
 
   const venueNames = new Map(venues.map((venue) => [venue.id, venue.name]))
-  const activeCount = reservations.filter((item) => item.status === 'ACTIVE').length
-  const filtered = filter === 'ALL' ? reservations : reservations.filter((item) => item.status === filter)
+  const phases = new Map(reservations.map((item) => [item.id, reservationPhase(item, now)]))
+  const upcomingCount = reservations.filter((item) => phases.get(item.id) === 'UPCOMING').length
+  const inProgressCount = reservations.filter((item) => phases.get(item.id) === 'IN_PROGRESS').length
+  const endedCount = reservations.filter((item) => phases.get(item.id) === 'ENDED').length
+  const cancelledCount = reservations.filter((item) => phases.get(item.id) === 'CANCELLED').length
+  const filtered = filter === 'ALL' ? reservations : reservations.filter((item) => phases.get(item.id) === filter)
   const pageSize = 6
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize))
   const page = Math.min(requestedPage, pageCount)
@@ -58,51 +68,54 @@ export function ReservationList({ reservations, venues, cancellingId, feedbackRe
     <div className="reservation-browser">
       <div className="record-toolbar" role="group" aria-label="按预约状态筛选">
         <button type="button" className="filter-button" aria-pressed={filter === 'ALL'} onClick={() => selectFilter('ALL')}>全部 {reservations.length}</button>
-        <button type="button" className="filter-button" aria-pressed={filter === 'ACTIVE'} onClick={() => selectFilter('ACTIVE')}>有效 {activeCount}</button>
-        <button type="button" className="filter-button" aria-pressed={filter === 'CANCELLED'} onClick={() => selectFilter('CANCELLED')}>已取消 {reservations.length - activeCount}</button>
+        <button type="button" className="filter-button" aria-pressed={filter === 'UPCOMING'} onClick={() => selectFilter('UPCOMING')}>待开始 {upcomingCount}</button>
+        <button type="button" className="filter-button" aria-pressed={filter === 'IN_PROGRESS'} onClick={() => selectFilter('IN_PROGRESS')}>时段内 {inProgressCount}</button>
+        <button type="button" className="filter-button" aria-pressed={filter === 'ENDED'} onClick={() => selectFilter('ENDED')}>已结束 {endedCount}</button>
+        <button type="button" className="filter-button" aria-pressed={filter === 'CANCELLED'} onClick={() => selectFilter('CANCELLED')}>已取消 {cancelledCount}</button>
       </div>
       {!feedbackIsVisible && <ActionFeedback error={actionError} success={successMessage} />}
       {visible.length === 0 ? (
         <p className="empty-state">当前筛选条件下暂无预约记录。</p>
       ) : (
         <ul className="reservation-list">
-          {visible.map((reservation) => (
-            <li key={reservation.id} className={`reservation-card${reservation.status === 'CANCELLED' ? ' is-cancelled' : ''}`}>
-              <div className="reservation-card-top">
-                <div className="reservation-heading">
-                  <h3>预约 #{reservation.id}</h3>
-                  <span className={reservation.status === 'ACTIVE' ? 'status active' : 'status cancelled'}>
-                    {reservation.status === 'ACTIVE' ? '有效' : '已取消'}
-                  </span>
-                </div>
-                <div className="reservation-actions">
-                  <a className="record-detail-link" href={reservationDetailHref(reservation.id)} aria-label={`查看预约 #${reservation.id} 详情`}>查看详情 →</a>
-                  {reservation.status === 'ACTIVE' && confirmingId !== reservation.id && (
-                    <button type="button" ref={(element) => { if (element) cancelButtons.current.set(reservation.id, element); else cancelButtons.current.delete(reservation.id) }} className="secondary cancel-button" onClick={() => setConfirmingId(reservation.id)} disabled={cancellingId !== null}>
-                      {cancellingId === reservation.id ? '取消中…' : `取消预约 ${reservation.id}`}
-                    </button>
-                  )}
-                </div>
-              </div>
-              <dl className="reservation-summary">
-                <div><dt>场地</dt><dd>{venueNames.has(reservation.venue_id) ? `${venueNames.get(reservation.venue_id)}（编号 ${reservation.venue_id}）` : `编号 ${reservation.venue_id}`}</dd></div>
-                <div><dt>预约日期与时间</dt><dd><time dateTime={reservation.reservation_date}>{reservation.reservation_date}</time> {reservation.start_time}–{reservation.end_time}</dd></div>
-                <div><dt>预约人或组织</dt><dd>{reservation.booked_by}</dd></div>
-                <div><dt>参与人数</dt><dd>{reservation.attendee_count} 人</dd></div>
-                <div><dt>使用目的</dt><dd>{reservation.purpose}</dd></div>
-              </dl>
-              {reservation.status === 'ACTIVE' && confirmingId === reservation.id && (
-                <div className="cancel-confirmation" role="group" aria-label={`确认取消预约 ${reservation.id}`}>
-                  <p>确定取消预约 #{reservation.id}？取消后仍可在记录中查看。</p>
-                  <div className="cancel-confirmation-actions">
-                    <button type="button" className="secondary" onClick={() => { restoreFocusId.current = reservation.id; setConfirmingId(null) }} disabled={cancellingId !== null}>保留预约</button>
-                    <button type="button" ref={confirmationButton} className="secondary cancel-button" onClick={() => { setConfirmingId(null); onCancel(reservation.id) }} disabled={cancellingId !== null}>确认取消预约 {reservation.id}</button>
+          {visible.map((reservation) => {
+            const phase = phases.get(reservation.id)!
+            return (
+              <li key={reservation.id} className={`reservation-card${reservation.status === 'CANCELLED' ? ' is-cancelled' : ''}`}>
+                <div className="reservation-card-top">
+                  <div className="reservation-heading">
+                    <h3>预约 #{reservation.id}</h3>
+                    <span className={`status ${phase === 'CANCELLED' ? 'cancelled' : `phase-${phase.toLowerCase().replace('_', '-')}`}`}>{phaseLabels[phase]}</span>
+                  </div>
+                  <div className="reservation-actions">
+                    <a className="record-detail-link" href={reservationDetailHref(reservation.id)} aria-label={`查看预约 #${reservation.id} 详情`}>查看详情 →</a>
+                    {phase === 'UPCOMING' && confirmingId !== reservation.id && (
+                      <button type="button" ref={(element) => { if (element) cancelButtons.current.set(reservation.id, element); else cancelButtons.current.delete(reservation.id) }} className="secondary cancel-button" onClick={() => setConfirmingId(reservation.id)} disabled={cancellingId !== null}>
+                        {cancellingId === reservation.id ? '取消中…' : `取消预约 ${reservation.id}`}
+                      </button>
+                    )}
                   </div>
                 </div>
-              )}
-              {reservation.id === feedbackReservationId && <ActionFeedback error={actionError} success={successMessage} />}
-            </li>
-          ))}
+                <dl className="reservation-summary">
+                  <div><dt>场地</dt><dd>{venueNames.has(reservation.venue_id) ? `${venueNames.get(reservation.venue_id)}（编号 ${reservation.venue_id}）` : `编号 ${reservation.venue_id}`}</dd></div>
+                  <div><dt>预约日期与时间</dt><dd><time dateTime={reservation.reservation_date}>{reservation.reservation_date}</time> {reservation.start_time}–{reservation.end_time}</dd></div>
+                  <div><dt>预约人或组织</dt><dd>{reservation.booked_by}</dd></div>
+                  <div><dt>参与人数</dt><dd>{reservation.attendee_count} 人</dd></div>
+                  <div><dt>使用目的</dt><dd>{reservation.purpose}</dd></div>
+                </dl>
+                {phase === 'UPCOMING' && confirmingId === reservation.id && (
+                  <div className="cancel-confirmation" role="group" aria-label={`确认取消预约 ${reservation.id}`}>
+                    <p>确定取消预约 #{reservation.id}？取消后仍可在记录中查看。</p>
+                    <div className="cancel-confirmation-actions">
+                      <button type="button" className="secondary" onClick={() => { restoreFocusId.current = reservation.id; setConfirmingId(null) }} disabled={cancellingId !== null}>保留预约</button>
+                      <button type="button" ref={confirmationButton} className="secondary cancel-button" onClick={() => { setConfirmingId(null); onCancel(reservation.id) }} disabled={cancellingId !== null}>确认取消预约 {reservation.id}</button>
+                    </div>
+                  </div>
+                )}
+                {reservation.id === feedbackReservationId && <ActionFeedback error={actionError} success={successMessage} />}
+              </li>
+            )
+          })}
         </ul>
       )}
       {pageCount > 1 && (

@@ -2,6 +2,7 @@ package com.example.venuebooking.service;
 
 import com.example.venuebooking.api.dto.CreateReservationRequest;
 import com.example.venuebooking.api.dto.ReservationResponse;
+import com.example.venuebooking.api.error.CancellationClosedException;
 import com.example.venuebooking.api.error.ReservationNotFoundException;
 import com.example.venuebooking.api.error.TimeConflictException;
 import com.example.venuebooking.api.error.ValidationDetail;
@@ -107,7 +108,12 @@ public class ReservationService {
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             return ReservationResponse.from(reservation);
         }
-        reservation.cancel(databaseTimestamp());
+        OffsetDateTime cancellationTime = databaseTimestamp();
+        if (!reservation.getReservationDate().atTime(reservation.getStartTime())
+                .isAfter(cancellationTime.atZoneSameInstant(TimeConfiguration.BUSINESS_ZONE).toLocalDateTime())) {
+            throw new CancellationClosedException();
+        }
+        reservation.cancel(cancellationTime);
         return ReservationResponse.from(reservationRepository.save(reservation));
     }
 

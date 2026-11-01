@@ -14,9 +14,11 @@ const booking = {
 
 let server
 let baseUrl
+let currentTime
 
 beforeEach(async () => {
-  server = createMockApiServer({ now: () => new Date('2026-10-26T01:30:30Z') })
+  currentTime = new Date('2026-10-26T01:30:30Z')
+  server = createMockApiServer({ now: () => currentTime })
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
   const address = server.address()
   if (!address || typeof address === 'string') throw new Error('模拟 API 未监听 TCP 端口')
@@ -133,5 +135,19 @@ describe('本地模拟 API 与预约契约', () => {
 
     const rebookResponse = await post('/api/reservations', booking)
     expect(rebookResponse.status).toBe(201)
+  })
+
+  it('预约开始后拒绝取消并保留原记录', async () => {
+    currentTime = new Date('2030-10-30T01:30:00Z')
+    const createdResponse = await post('/api/reservations', booking)
+    expect(createdResponse.status).toBe(201)
+    const created = await createdResponse.json()
+
+    currentTime = new Date('2030-10-30T02:00:00Z')
+    const response = await fetch(`${baseUrl}/api/reservations/${created.id}/cancel`, { method: 'POST' })
+    expect(response.status).toBe(409)
+    expect((await response.json()).error.code).toBe('CANCELLATION_CLOSED')
+    const detail = await fetch(`${baseUrl}/api/reservations/${created.id}`)
+    expect(await detail.json()).toEqual(created)
   })
 })

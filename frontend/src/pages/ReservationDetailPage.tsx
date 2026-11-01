@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { bookingApi } from '../api/booking'
 import { venueDetailHref } from '../navigation'
+import { phaseLabels, reservationPhase } from '../reservationPhase'
 import type { Reservation, Venue } from '../types'
+import { useCurrentMinute } from '../useCurrentMinute'
 
 interface ReservationDetailPageProps {
   reservationId: number
@@ -13,6 +15,7 @@ export function ReservationDetailPage({ reservationId, venues }: ReservationDeta
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
+  const now = useCurrentMinute()
 
   useEffect(() => {
     let active = true
@@ -44,7 +47,7 @@ export function ReservationDetailPage({ reservationId, venues }: ReservationDeta
         {reservation && <>
           <dl className="detail-list">
             <div><dt>预约编号</dt><dd>{reservation.id}</dd></div>
-            <div><dt>预约状态</dt><dd>{reservation.status === 'ACTIVE' ? '有效' : '已取消'}</dd></div>
+            <div><dt>预约状态</dt><dd>{phaseLabels[reservationPhase(reservation, now)]}</dd></div>
             <div><dt>场地</dt><dd><a href={venueDetailHref(reservation.venue_id)}>{venueName ? `${venueName}（编号 ${reservation.venue_id}）` : `编号 ${reservation.venue_id}`}</a></dd></div>
             <div><dt>预约人或组织</dt><dd>{reservation.booked_by}</dd></div>
             <div><dt>预约日期</dt><dd>{reservation.reservation_date}</dd></div>
