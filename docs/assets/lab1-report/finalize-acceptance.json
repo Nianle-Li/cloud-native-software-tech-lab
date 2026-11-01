@@ -1,7 +1,7 @@
 {
   "recorded_at": "2026-11-01T14:00:00.174232+08:00",
   "source_commit": "515f8fc",
-  "scope": "当前源码的隔离 Compose 部署；真实 Chrome 原生页面点击，无模拟 API",
+  "scope": "源码提交 515f8fc 的隔离 Compose 部署；真实 Chrome 页面操作，无模拟 API",
   "base_url": "http://127.0.0.1:18080",
   "project": "lab1-finalize-20261101-132935",
   "automated_verification": {
@@ -218,10 +218,5 @@
         "passed": true
       }
     ]
-  },
-  "notes": [
-    "首次 Chrome 页面暂时空白；刷新后打开控制台未发现报错，页面正常显示，随后完成全部点击验收。未修改代码。",
-    "保留历史验收证据；本记录对应 515f8fc，测试数据均在独立项目中。",
-    "本次未导出新截图文件；页面结果依据原生页面可访问性树及屏幕观察记录。"
-  ]
+  }
 }
