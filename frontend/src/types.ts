@@ -11,6 +11,15 @@ export interface Venue {
   status: VenueStatus
 }
 
+export interface CreateVenueInput {
+  name: string
+  location: string
+  capacity: number
+  open_time: string
+  close_time: string
+  status?: VenueStatus
+}
+
 export interface CreateReservationInput {
   venue_id: number
   booked_by: string

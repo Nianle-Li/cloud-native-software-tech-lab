@@ -1,4 +1,5 @@
 import type { CreateReservationInput, Venue } from '../types'
+import { shanghaiDateTime } from '../shanghaiTime'
 
 export interface ValidationIssue {
   field: keyof CreateReservationInput
@@ -13,19 +14,6 @@ function isCalendarDate(value: string): boolean {
   return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === value
 }
 
-function shanghaiDateTime(now: Date): { date: string; time: string } {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).formatToParts(now)
-  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]))
-  return {
-    date: `${values.year}-${values.month}-${values.day}`,
-    time: `${values.hour}:${values.minute}`,
-  }
-}
-
 export function validateReservation(
   input: CreateReservationInput,
   venue: Venue,
@@ -37,7 +25,7 @@ export function validateReservation(
   }
 
   if (input.venue_id !== venue.id || venue.status !== 'OPEN') {
-    add('venue_id', '场地不可预约，请刷新场地列表')
+    add('venue_id', '场地当前不可预约，请刷新场地信息并核对状态')
   }
   const bookedBy = input.booked_by.trim()
   if (!bookedBy || bookedBy.length > 100) add('booked_by', '预约人或组织须为 1–100 个字符')

@@ -1,0 +1,1007 @@
+{
+  "source_commit": "515f8fc",
+  "project": "lab1-finalize-20261101-132935",
+  "base_url": "http://127.0.0.1:18080",
+  "commands": [
+    "docker compose <isolated configuration> down",
+    "docker compose <isolated configuration> up -d --wait --wait-timeout 180"
+  ],
+  "used_volume_deletion": false,
+  "before": {
+    "captured_at": "2026-11-01T05:58:42.748036+00:00",
+    "containers": {
+      "api": {
+        "container_id": "8dfe30e2385a178b2c026aa8153107904b18cac1560d4268f820b0ec2650390e",
+        "image_id": "sha256:9aba90681fb72d892e25db5a054dbaadfcaf04b6e45846d0f8b43f603668590e",
+        "status": "running",
+        "health": "healthy",
+        "ports": {},
+        "mounts": []
+      },
+      "database": {
+        "container_id": "540b060204b1d4fc95bc77889bcc928f340b4c707ee6bc680dd96270448ce223",
+        "image_id": "sha256:e8a07d2c7579b038938cdba6c539e580e5001caf9ea203d397b5cc83e76bd938",
+        "status": "running",
+        "health": "healthy",
+        "ports": {},
+        "mounts": [
+          {
+            "type": "volume",
+            "name": "lab1-finalize-20261101-132935_postgres_data",
+            "destination": "/var/lib/postgresql/data"
+          }
+        ]
+      },
+      "frontend": {
+        "container_id": "c4d3b0d59c4aa20b78b4682c711f61712a6339606b41340380f4b4be91402701",
+        "image_id": "sha256:38a3ee6c94c1c17bd4599488bc6cb4739d3c1bfc1a1de4c9406588bfe6630e7a",
+        "status": "running",
+        "health": null,
+        "ports": {
+          "80/tcp": [
+            {
+              "HostIp": "",
+              "HostPort": "18080"
+            }
+          ]
+        },
+        "mounts": []
+      }
+    },
+    "tables": {
+      "venues": [
+        {
+          "id": 1,
+          "name": "羽毛球馆 A",
+          "location": "体育中心 1 层",
+          "capacity": 8,
+          "open_time": "08:00:00",
+          "close_time": "22:00:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 2,
+          "name": "多功能教室 B",
+          "location": "教学楼 2 层",
+          "capacity": 30,
+          "open_time": "09:00:00",
+          "close_time": "21:00:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 3,
+          "name": "会议室 C",
+          "location": "行政楼 3 层",
+          "capacity": 12,
+          "open_time": "09:00:00",
+          "close_time": "18:00:00",
+          "status": "CLOSED"
+        },
+        {
+          "id": 4,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00:00",
+          "close_time": "23:59:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 5,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00:00",
+          "close_time": "23:59:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 6,
+          "name": "页面验收场地",
+          "location": "独立部署验收",
+          "capacity": 8,
+          "open_time": "00:00:00",
+          "close_time": "22:00:00",
+          "status": "OPEN"
+        }
+      ],
+      "reservations": [
+        {
+          "id": 1,
+          "venue_id": 4,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:16.726281+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 2,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:33:34.357268+00:00",
+          "cancelled_at": "2026-11-01T05:33:34.412407+00:00"
+        },
+        {
+          "id": 3,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "11:00:00",
+          "end_time": "12:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.388337+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 4,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.429774+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 5,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "14:00:00",
+          "end_time": "15:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:33:34.439668+00:00",
+          "cancelled_at": "2026-11-01T05:33:34.518024+00:00"
+        },
+        {
+          "id": 6,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-01",
+          "start_time": "00:00:00",
+          "end_time": "23:59:00",
+          "attendee_count": 2,
+          "purpose": "in-progress",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.592425+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 7,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "08:00:00",
+          "end_time": "09:00:00",
+          "attendee_count": 2,
+          "purpose": "ended",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.745198+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 8,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 2,
+          "purpose": "cancelled-past",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:33:34.912644+00:00",
+          "cancelled_at": "2026-11-01T05:33:34.912644+00:00"
+        },
+        {
+          "id": 9,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 1,
+          "purpose": "页面点击验收与持久化复验",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:57:02.397594+00:00",
+          "cancelled_at": "2026-11-01T05:57:43.275363+00:00"
+        },
+        {
+          "id": 10,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 1,
+          "purpose": "取消后重新预约与持久化复验",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:57:55.639834+00:00",
+          "cancelled_at": null
+        }
+      ],
+      "flyway_schema_history": [
+        {
+          "installed_rank": 1,
+          "version": "1",
+          "description": "create booking tables",
+          "type": "SQL",
+          "script": "V1__create_booking_tables.sql",
+          "checksum": 1339655604,
+          "installed_by": "booking_check",
+          "installed_on": "2026-11-01T05:31:05.176335",
+          "execution_time": 11,
+          "success": true
+        },
+        {
+          "installed_rank": 2,
+          "version": "2",
+          "description": "seed venues",
+          "type": "SQL",
+          "script": "V2__seed_venues.sql",
+          "checksum": 1252966318,
+          "installed_by": "booking_check",
+          "installed_on": "2026-11-01T05:31:05.207921",
+          "execution_time": 2,
+          "success": true
+        },
+        {
+          "installed_rank": 3,
+          "version": "3",
+          "description": "align blank text constraints",
+          "type": "SQL",
+          "script": "V3__align_blank_text_constraints.sql",
+          "checksum": 592474482,
+          "installed_by": "booking_check",
+          "installed_on": "2026-11-01T05:31:05.217956",
+          "execution_time": 2,
+          "success": true
+        }
+      ]
+    },
+    "api": {
+      "venues": [
+        {
+          "id": 1,
+          "name": "羽毛球馆 A",
+          "location": "体育中心 1 层",
+          "capacity": 8,
+          "open_time": "08:00",
+          "close_time": "22:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 2,
+          "name": "多功能教室 B",
+          "location": "教学楼 2 层",
+          "capacity": 30,
+          "open_time": "09:00",
+          "close_time": "21:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 3,
+          "name": "会议室 C",
+          "location": "行政楼 3 层",
+          "capacity": 12,
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "status": "CLOSED"
+        },
+        {
+          "id": 4,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00",
+          "close_time": "23:59",
+          "status": "OPEN"
+        },
+        {
+          "id": 5,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00",
+          "close_time": "23:59",
+          "status": "OPEN"
+        },
+        {
+          "id": 6,
+          "name": "页面验收场地",
+          "location": "独立部署验收",
+          "capacity": 8,
+          "open_time": "00:00",
+          "close_time": "22:00",
+          "status": "OPEN"
+        }
+      ],
+      "reservations": [
+        {
+          "id": 10,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 1,
+          "purpose": "取消后重新预约与持久化复验",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:57:55.639834+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 9,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 1,
+          "purpose": "页面点击验收与持久化复验",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:57:02.397594+08:00",
+          "cancelled_at": "2026-11-01T13:57:43.275363+08:00"
+        },
+        {
+          "id": 8,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 2,
+          "purpose": "cancelled-past",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:33:34.912644+08:00",
+          "cancelled_at": "2026-11-01T13:33:34.912644+08:00"
+        },
+        {
+          "id": 7,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "attendee_count": 2,
+          "purpose": "ended",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.745198+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 6,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-01",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "attendee_count": 2,
+          "purpose": "in-progress",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.592425+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 5,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "14:00",
+          "end_time": "15:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:33:34.439668+08:00",
+          "cancelled_at": "2026-11-01T13:33:34.518024+08:00"
+        },
+        {
+          "id": 4,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.429774+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 3,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "11:00",
+          "end_time": "12:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.388337+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 2,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:33:34.357268+08:00",
+          "cancelled_at": "2026-11-01T13:33:34.412407+08:00"
+        },
+        {
+          "id": 1,
+          "venue_id": 4,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:16.726281+08:00",
+          "cancelled_at": null
+        }
+      ]
+    },
+    "health": {
+      "status": "UP",
+      "components": {
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "diskSpace": {
+          "status": "UP",
+          "details": {
+            "total": 485473984512,
+            "free": 453417656320,
+            "threshold": 10485760,
+            "path": "/app/.",
+            "exists": true
+          }
+        },
+        "ping": {
+          "status": "UP"
+        },
+        "ssl": {
+          "status": "UP",
+          "details": {
+            "validChains": [],
+            "invalidChains": []
+          }
+        }
+      }
+    }
+  },
+  "after": {
+    "captured_at": "2026-11-01T05:58:56.111988+00:00",
+    "containers": {
+      "api": {
+        "container_id": "ba34e7ae8507a8c8f0d347538cab63f020057b6cd02e02a84dbc76bf977606cc",
+        "image_id": "sha256:9aba90681fb72d892e25db5a054dbaadfcaf04b6e45846d0f8b43f603668590e",
+        "status": "running",
+        "health": "healthy",
+        "ports": {},
+        "mounts": []
+      },
+      "database": {
+        "container_id": "6f5e6fcc98f7f0373ce36c9b5ba199e108f024bb6e85f5b987ebeb8693f937bd",
+        "image_id": "sha256:e8a07d2c7579b038938cdba6c539e580e5001caf9ea203d397b5cc83e76bd938",
+        "status": "running",
+        "health": "healthy",
+        "ports": {},
+        "mounts": [
+          {
+            "type": "volume",
+            "name": "lab1-finalize-20261101-132935_postgres_data",
+            "destination": "/var/lib/postgresql/data"
+          }
+        ]
+      },
+      "frontend": {
+        "container_id": "ea96bb086539f0e0ffd24ce28f60b2163b77c817f1bdabeaab48ec66818b35d9",
+        "image_id": "sha256:38a3ee6c94c1c17bd4599488bc6cb4739d3c1bfc1a1de4c9406588bfe6630e7a",
+        "status": "running",
+        "health": null,
+        "ports": {
+          "80/tcp": [
+            {
+              "HostIp": "",
+              "HostPort": "18080"
+            }
+          ]
+        },
+        "mounts": []
+      }
+    },
+    "tables": {
+      "venues": [
+        {
+          "id": 1,
+          "name": "羽毛球馆 A",
+          "location": "体育中心 1 层",
+          "capacity": 8,
+          "open_time": "08:00:00",
+          "close_time": "22:00:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 2,
+          "name": "多功能教室 B",
+          "location": "教学楼 2 层",
+          "capacity": 30,
+          "open_time": "09:00:00",
+          "close_time": "21:00:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 3,
+          "name": "会议室 C",
+          "location": "行政楼 3 层",
+          "capacity": 12,
+          "open_time": "09:00:00",
+          "close_time": "18:00:00",
+          "status": "CLOSED"
+        },
+        {
+          "id": 4,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00:00",
+          "close_time": "23:59:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 5,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00:00",
+          "close_time": "23:59:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 6,
+          "name": "页面验收场地",
+          "location": "独立部署验收",
+          "capacity": 8,
+          "open_time": "00:00:00",
+          "close_time": "22:00:00",
+          "status": "OPEN"
+        }
+      ],
+      "reservations": [
+        {
+          "id": 1,
+          "venue_id": 4,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:16.726281+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 2,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:33:34.357268+00:00",
+          "cancelled_at": "2026-11-01T05:33:34.412407+00:00"
+        },
+        {
+          "id": 3,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "11:00:00",
+          "end_time": "12:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.388337+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 4,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.429774+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 5,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "14:00:00",
+          "end_time": "15:00:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:33:34.439668+00:00",
+          "cancelled_at": "2026-11-01T05:33:34.518024+00:00"
+        },
+        {
+          "id": 6,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-01",
+          "start_time": "00:00:00",
+          "end_time": "23:59:00",
+          "attendee_count": 2,
+          "purpose": "in-progress",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.592425+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 7,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "08:00:00",
+          "end_time": "09:00:00",
+          "attendee_count": 2,
+          "purpose": "ended",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:33:34.745198+00:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 8,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 2,
+          "purpose": "cancelled-past",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:33:34.912644+00:00",
+          "cancelled_at": "2026-11-01T05:33:34.912644+00:00"
+        },
+        {
+          "id": 9,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 1,
+          "purpose": "页面点击验收与持久化复验",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T05:57:02.397594+00:00",
+          "cancelled_at": "2026-11-01T05:57:43.275363+00:00"
+        },
+        {
+          "id": 10,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00:00",
+          "end_time": "11:00:00",
+          "attendee_count": 1,
+          "purpose": "取消后重新预约与持久化复验",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T05:57:55.639834+00:00",
+          "cancelled_at": null
+        }
+      ],
+      "flyway_schema_history": [
+        {
+          "installed_rank": 1,
+          "version": "1",
+          "description": "create booking tables",
+          "type": "SQL",
+          "script": "V1__create_booking_tables.sql",
+          "checksum": 1339655604,
+          "installed_by": "booking_check",
+          "installed_on": "2026-11-01T05:31:05.176335",
+          "execution_time": 11,
+          "success": true
+        },
+        {
+          "installed_rank": 2,
+          "version": "2",
+          "description": "seed venues",
+          "type": "SQL",
+          "script": "V2__seed_venues.sql",
+          "checksum": 1252966318,
+          "installed_by": "booking_check",
+          "installed_on": "2026-11-01T05:31:05.207921",
+          "execution_time": 2,
+          "success": true
+        },
+        {
+          "installed_rank": 3,
+          "version": "3",
+          "description": "align blank text constraints",
+          "type": "SQL",
+          "script": "V3__align_blank_text_constraints.sql",
+          "checksum": 592474482,
+          "installed_by": "booking_check",
+          "installed_on": "2026-11-01T05:31:05.217956",
+          "execution_time": 2,
+          "success": true
+        }
+      ]
+    },
+    "api": {
+      "venues": [
+        {
+          "id": 1,
+          "name": "羽毛球馆 A",
+          "location": "体育中心 1 层",
+          "capacity": 8,
+          "open_time": "08:00",
+          "close_time": "22:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 2,
+          "name": "多功能教室 B",
+          "location": "教学楼 2 层",
+          "capacity": 30,
+          "open_time": "09:00",
+          "close_time": "21:00",
+          "status": "OPEN"
+        },
+        {
+          "id": 3,
+          "name": "会议室 C",
+          "location": "行政楼 3 层",
+          "capacity": 12,
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "status": "CLOSED"
+        },
+        {
+          "id": 4,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00",
+          "close_time": "23:59",
+          "status": "OPEN"
+        },
+        {
+          "id": 5,
+          "name": "最终验收场地",
+          "location": "隔离测试环境",
+          "capacity": 8,
+          "open_time": "00:00",
+          "close_time": "23:59",
+          "status": "OPEN"
+        },
+        {
+          "id": 6,
+          "name": "页面验收场地",
+          "location": "独立部署验收",
+          "capacity": 8,
+          "open_time": "00:00",
+          "close_time": "22:00",
+          "status": "OPEN"
+        }
+      ],
+      "reservations": [
+        {
+          "id": 10,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 1,
+          "purpose": "取消后重新预约与持久化复验",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:57:55.639834+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 9,
+          "venue_id": 6,
+          "booked_by": "页面验收小组",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 1,
+          "purpose": "页面点击验收与持久化复验",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:57:02.397594+08:00",
+          "cancelled_at": "2026-11-01T13:57:43.275363+08:00"
+        },
+        {
+          "id": 8,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 2,
+          "purpose": "cancelled-past",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:33:34.912644+08:00",
+          "cancelled_at": "2026-11-01T13:33:34.912644+08:00"
+        },
+        {
+          "id": 7,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-10-31",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "attendee_count": 2,
+          "purpose": "ended",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.745198+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 6,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-01",
+          "start_time": "00:00",
+          "end_time": "23:59",
+          "attendee_count": 2,
+          "purpose": "in-progress",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.592425+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 5,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "14:00",
+          "end_time": "15:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:33:34.439668+08:00",
+          "cancelled_at": "2026-11-01T13:33:34.518024+08:00"
+        },
+        {
+          "id": 4,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.429774+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 3,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "11:00",
+          "end_time": "12:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:34.388337+08:00",
+          "cancelled_at": null
+        },
+        {
+          "id": 2,
+          "venue_id": 5,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "CANCELLED",
+          "created_at": "2026-11-01T13:33:34.357268+08:00",
+          "cancelled_at": "2026-11-01T13:33:34.412407+08:00"
+        },
+        {
+          "id": 1,
+          "venue_id": 4,
+          "booked_by": "最终验收",
+          "reservation_date": "2026-11-03",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "attendee_count": 3,
+          "purpose": "真实链路检查",
+          "status": "ACTIVE",
+          "created_at": "2026-11-01T13:33:16.726281+08:00",
+          "cancelled_at": null
+        }
+      ]
+    },
+    "health": {
+      "status": "UP",
+      "components": {
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "diskSpace": {
+          "status": "UP",
+          "details": {
+            "total": 485473984512,
+            "free": 453417984000,
+            "threshold": 10485760,
+            "path": "/app/.",
+            "exists": true
+          }
+        },
+        "ping": {
+          "status": "UP"
+        },
+        "ssl": {
+          "status": "UP",
+          "details": {
+            "validChains": [],
+            "invalidChains": []
+          }
+        }
+      }
+    }
+  },
+  "checks": {
+    "all_three_containers_recreated": true,
+    "all_three_images_unchanged": true,
+    "same_named_volume": true,
+    "complete_database_rows_unchanged": true,
+    "complete_api_responses_unchanged": true,
+    "application_and_database_up": true,
+    "api_and_database_healthy": true,
+    "only_frontend_publishes_host_port": true,
+    "cancelled_reservation_9_preserved": true,
+    "active_reservation_10_preserved": true
+  },
+  "passed": true
+}

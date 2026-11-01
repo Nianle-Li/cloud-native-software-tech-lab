@@ -1,0 +1,278 @@
+{
+  "label": "C验收-20261030-143104",
+  "date": "2026-11-06",
+  "ids": {
+    "venue_id": 4,
+    "cancelled_reservation_id": 1,
+    "adjacent_reservation_id": 2,
+    "replacement_reservation_id": 3,
+    "concurrent_reservation_id": 4
+  },
+  "checks": [
+    {
+      "check": "场地列表",
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "创建场地与默认OPEN",
+      "status": 201,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "场地详情",
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "正常预约",
+      "status": 201,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "预约详情",
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "同场地同日期重叠冲突",
+      "status": 409,
+      "code": "TIME_CONFLICT",
+      "passed": true
+    },
+    {
+      "check": "相邻半开时段允许",
+      "status": 201,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "逻辑取消",
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "重复取消幂等",
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "取消后原时段重新预约",
+      "status": 201,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "已取消记录保留",
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "预约列表及降序",
+      "status": 200,
+      "code": null,
+      "passed": true
+    },
+    {
+      "check": "空白预约人",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "空白用途",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "过去日期",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "当天过去开始时间",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "起止时间相等",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "结束早于开始",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "开放时间之前",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "关闭时间之后",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "人数为零",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "人数超过容量",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "日期格式非法",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "时刻格式非法",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "缺少必填字段",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "场地参数错误",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    },
+    {
+      "check": "停用场地拒绝预约",
+      "status": 409,
+      "code": "VENUE_CLOSED",
+      "passed": true
+    },
+    {
+      "check": "不存在的场地详情",
+      "status": 404,
+      "code": "VENUE_NOT_FOUND",
+      "passed": true
+    },
+    {
+      "check": "预约不存在的场地",
+      "status": 404,
+      "code": "VENUE_NOT_FOUND",
+      "passed": true
+    },
+    {
+      "check": "不存在的预约详情",
+      "status": 404,
+      "code": "RESERVATION_NOT_FOUND",
+      "passed": true
+    },
+    {
+      "check": "取消不存在的预约",
+      "status": 404,
+      "code": "RESERVATION_NOT_FOUND",
+      "passed": true
+    },
+    {
+      "check": "真实HTTP并发冲突",
+      "statuses": [
+        201,
+        409
+      ],
+      "active_count": 1,
+      "passed": true
+    },
+    {
+      "check": "开放时间内当天已过去的开始时刻",
+      "status": 400,
+      "code": "VALIDATION_ERROR",
+      "passed": true
+    }
+  ],
+  "ui": {
+    "passed": true,
+    "method": "Native Chrome UI using cua_repl; no mocked routes",
+    "venue_id": 5,
+    "cancelled_reservation_id": 5,
+    "replacement_reservation_id": 6,
+    "date": "2026-11-06",
+    "time": "10:00-11:00",
+    "checks": [
+      "Overview loads real venues",
+      "Create venue via form and show server ID 5",
+      "New venue appears in overview and details match",
+      "Create reservation via form and show server ID 5",
+      "Same-slot repeat shows server conflict message",
+      "Reservation list and detail show expected values",
+      "Cancellation requires confirmation; record retained as CANCELLED",
+      "Same slot rebook succeeds as reservation ID 6",
+      "Browser reload of reservation detail retrieves ID 6 as ACTIVE"
+    ],
+    "database_rows": [
+      "5|CANCELLED|t",
+      "6|ACTIVE|f"
+    ],
+    "records": [
+      {
+        "id": 5,
+        "venue_id": 5,
+        "booked_by": "C页面验收小组",
+        "reservation_date": "2026-11-06",
+        "start_time": "10:00",
+        "end_time": "11:00",
+        "attendee_count": 3,
+        "purpose": "C统一部署页面功能验收",
+        "status": "CANCELLED",
+        "created_at": "2026-10-30T14:51:53.569368+08:00",
+        "cancelled_at": "2026-10-30T14:52:56.500903+08:00"
+      },
+      {
+        "id": 6,
+        "venue_id": 5,
+        "booked_by": "C页面验收小组",
+        "reservation_date": "2026-11-06",
+        "start_time": "10:00",
+        "end_time": "11:00",
+        "attendee_count": 3,
+        "purpose": "C页面验收：取消后原时段重新预约",
+        "status": "ACTIVE",
+        "created_at": "2026-10-30T14:53:18.633631+08:00",
+        "cancelled_at": null
+      }
+    ]
+  },
+  "persistence": "NOT TESTED in stage 4",
+  "database_check": {
+    "passed": true,
+    "rows": [
+      "1|CANCELLED|t",
+      "2|ACTIVE|f",
+      "3|ACTIVE|f",
+      "4|ACTIVE|f",
+      "1"
+    ]
+  },
+  "api_logs_no_errors": true
+}

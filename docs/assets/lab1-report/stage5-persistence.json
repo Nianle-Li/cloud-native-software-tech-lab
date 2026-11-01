@@ -1,0 +1,148 @@
+{
+  "captured_at": "2026-10-30T14:58:48.014762+08:00",
+  "project": "cloud-native-software-tech-lab",
+  "records_before": {
+    "5": {
+      "id": 5,
+      "venue_id": 5,
+      "booked_by": "C页面验收小组",
+      "reservation_date": "2026-11-06",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "attendee_count": 3,
+      "purpose": "C统一部署页面功能验收",
+      "status": "CANCELLED",
+      "created_at": "2026-10-30T14:51:53.569368+08:00",
+      "cancelled_at": "2026-10-30T14:52:56.500903+08:00"
+    },
+    "6": {
+      "id": 6,
+      "venue_id": 5,
+      "booked_by": "C页面验收小组",
+      "reservation_date": "2026-11-06",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "attendee_count": 3,
+      "purpose": "C页面验收：取消后原时段重新预约",
+      "status": "ACTIVE",
+      "created_at": "2026-10-30T14:53:18.633631+08:00",
+      "cancelled_at": null
+    }
+  },
+  "containers_before": {
+    "frontend": {
+      "id": "9c379ac608d3c1637f6157fc6be7f764aa6f97464fa5949736f256f4b1ff49f9",
+      "image_id": "sha256:cffa9f83ae1760146469c32002e92fa0ca9ad4cc0abff16417d72ee2aea2125d"
+    },
+    "api": {
+      "id": "cdd1daa4f8dcaccb041a0f61ea391799a1ce266632db7f8b0ea7b2fa49015bc9",
+      "image_id": "sha256:40ac3f9c8d5f5fbaea42d67c0d3df88110af9b3ce64cfbb1fef7f51b225ca631"
+    },
+    "database": {
+      "id": "fcda4e54cc7b5f875fa11b097d9b3f17cfd36d2f15463de75b17f1d1cfdaaec6",
+      "image_id": "sha256:e8a07d2c7579b038938cdba6c539e580e5001caf9ea203d397b5cc83e76bd938"
+    }
+  },
+  "volume_before": {
+    "name": "cloud-native-software-tech-lab_postgres_data",
+    "created_at": "2026-10-30T06:17:40Z",
+    "mountpoint": "/var/lib/docker/volumes/cloud-native-software-tech-lab_postgres_data/_data"
+  },
+  "sql_query": "SELECT id, venue_id, status, reservation_date, start_time, end_time, created_at, cancelled_at FROM reservations WHERE id IN (5,6) ORDER BY id; SELECT count(*) FROM venues; SELECT count(*) FROM reservations; SELECT version, checksum, success FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank;",
+  "sql_before": "5|5|CANCELLED|2026-11-06|10:00:00|11:00:00|2026-10-30 06:51:53.569368+00|2026-10-30 06:52:56.500903+00\n6|5|ACTIVE|2026-11-06|10:00:00|11:00:00|2026-10-30 06:53:18.633631+00|\n5\n6\n1|1339655604|t\n2|1252966318|t\n",
+  "result": "PASS",
+  "after_down": {
+    "containers_removed": true,
+    "original_volume_retained": true
+  },
+  "checked_at": "2026-10-30T14:59:54.810802+08:00",
+  "records_after": {
+    "5": {
+      "id": 5,
+      "venue_id": 5,
+      "booked_by": "C页面验收小组",
+      "reservation_date": "2026-11-06",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "attendee_count": 3,
+      "purpose": "C统一部署页面功能验收",
+      "status": "CANCELLED",
+      "created_at": "2026-10-30T14:51:53.569368+08:00",
+      "cancelled_at": "2026-10-30T14:52:56.500903+08:00"
+    },
+    "6": {
+      "id": 6,
+      "venue_id": 5,
+      "booked_by": "C页面验收小组",
+      "reservation_date": "2026-11-06",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "attendee_count": 3,
+      "purpose": "C页面验收：取消后原时段重新预约",
+      "status": "ACTIVE",
+      "created_at": "2026-10-30T14:53:18.633631+08:00",
+      "cancelled_at": null
+    }
+  },
+  "containers_after": {
+    "frontend": {
+      "id": "38c764d2b6b5a61a751381abdc074bb8f0affa5bf5c26ccaf33cd283f8985323",
+      "image_id": "sha256:cffa9f83ae1760146469c32002e92fa0ca9ad4cc0abff16417d72ee2aea2125d"
+    },
+    "api": {
+      "id": "55b80bd2ce28fb203f3bdd331eb275ae18727c55e2bbea58919300c0a790f094",
+      "image_id": "sha256:40ac3f9c8d5f5fbaea42d67c0d3df88110af9b3ce64cfbb1fef7f51b225ca631"
+    },
+    "database": {
+      "id": "afed3a8b7d423757e24bb7f04524e60348a974e0c9d32efbe757e8842cca847d",
+      "image_id": "sha256:e8a07d2c7579b038938cdba6c539e580e5001caf9ea203d397b5cc83e76bd938"
+    }
+  },
+  "sql_after": "5|5|CANCELLED|2026-11-06|10:00:00|11:00:00|2026-10-30 06:51:53.569368+00|2026-10-30 06:52:56.500903+00\n6|5|ACTIVE|2026-11-06|10:00:00|11:00:00|2026-10-30 06:53:18.633631+00|\n5\n6\n1|1339655604|t\n2|1252966318|t\n",
+  "volume_after": {
+    "name": "cloud-native-software-tech-lab_postgres_data",
+    "created_at": "2026-10-30T06:17:40Z",
+    "mountpoint": "/var/lib/docker/volumes/cloud-native-software-tech-lab_postgres_data/_data"
+  },
+  "health_after": {
+    "status": "UP",
+    "components": {
+      "db": {
+        "status": "UP",
+        "details": {
+          "database": "PostgreSQL",
+          "validationQuery": "isValid()"
+        }
+      },
+      "diskSpace": {
+        "status": "UP",
+        "details": {
+          "total": 485473984512,
+          "free": 453949857792,
+          "threshold": 10485760,
+          "path": "/app/.",
+          "exists": true
+        }
+      },
+      "ping": {
+        "status": "UP"
+      },
+      "ssl": {
+        "status": "UP",
+        "details": {
+          "validChains": [],
+          "invalidChains": []
+        }
+      }
+    }
+  },
+  "checks": [
+    "Containers actually recreated; images unchanged",
+    "Original named volume retained and remounted",
+    "Reservation 5 and 6 full JSON unchanged",
+    "SQL rows, total counts and migration history unchanged",
+    "Database healthy; actuator overall and db UP",
+    "Flyway validated existing migrations without reapplying; JPA initialized",
+    "No API ERROR logs"
+  ]
+}
