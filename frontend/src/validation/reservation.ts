@@ -1,4 +1,5 @@
 import type { CreateReservationInput, Venue } from '../types'
+import { shanghaiDateTime } from '../shanghaiTime'
 
 export interface ValidationIssue {
   field: keyof CreateReservationInput
@@ -11,19 +12,6 @@ function isCalendarDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
   const timestamp = Date.parse(`${value}T00:00:00Z`)
   return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === value
-}
-
-function shanghaiDateTime(now: Date): { date: string; time: string } {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).formatToParts(now)
-  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]))
-  return {
-    date: `${values.year}-${values.month}-${values.day}`,
-    time: `${values.hour}:${values.minute}`,
-  }
 }
 
 export function validateReservation(

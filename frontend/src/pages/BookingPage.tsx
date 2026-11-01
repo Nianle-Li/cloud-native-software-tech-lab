@@ -1,3 +1,7 @@
+import { useEffect, useState } from 'react'
+import { bookedSlotsForDate, isFullyBooked, overlapsBookedSlot } from '../availability'
+import type { BookedSlot } from '../availability'
+import { bookingApi } from '../api/booking'
 import { ActionFeedback } from '../components/ActionFeedback'
 import { ReservationForm } from '../components/ReservationForm'
 import type { ReservationDraft } from '../reservationDraft'
@@ -17,6 +21,48 @@ interface BookingPageProps {
 }
 
 export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueError, isSubmitting, actionError, successMessage, onRefreshVenues, onCreate }: BookingPageProps) {
+  const [snapshot, setSnapshot] = useState<{ venueId: number; date: string; slots: BookedSlot[] } | null>(null)
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [slotError, setSlotError] = useState(false)
+  const [slotReloadKey, setSlotReloadKey] = useState(0)
+  const date = draft.reservationDate
+
+  useEffect(() => {
+    if (!venue || venue.status !== 'OPEN' || !date) {
+      setSnapshot(null)
+      setLoadingSlots(false)
+      setSlotError(false)
+      return
+    }
+
+    let active = true
+    const venueId = venue.id
+    setSnapshot(null)
+    setLoadingSlots(true)
+    setSlotError(false)
+    bookingApi.listReservations()
+      .then((reservations) => {
+        if (active) setSnapshot({ venueId, date, slots: bookedSlotsForDate(reservations, venueId, date) })
+      })
+      .catch(() => {
+        if (active) setSlotError(true)
+      })
+      .finally(() => {
+        if (active) setLoadingSlots(false)
+      })
+    return () => { active = false }
+  }, [venue?.id, venue?.status, date, slotReloadKey])
+
+  const slots = snapshot?.venueId === venue?.id && snapshot?.date === date ? snapshot.slots : null
+  const fullyBooked = Boolean(venue && slots && isFullyBooked(slots, venue.open_time, venue.close_time))
+  const selectedSlotBooked = slots ? overlapsBookedSlot(slots, draft.startTime, draft.endTime) : false
+
+  async function handleCreate(input: CreateReservationInput): Promise<boolean> {
+    const created = await onCreate(input)
+    if (!created) setSlotReloadKey((current) => current + 1)
+    return created
+  }
+
   return (
     <div className="booking-page">
       <div className="subpage-banner">
@@ -48,7 +94,42 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
             </div>
           ) : loadingVenues ? <p className="empty-state">正在加载场地信息…</p> : null}
           {venueError && <p role="alert" className="notice error aside-error">{venueError}</p>}
-          <p className="booking-aside-note">预约日期和时间按北京时间计算；若时段冲突，预约无法创建。</p>
+          <p className="booking-aside-note">预约日期和时间按北京时间计算。可容纳人数是单笔预约的人数上限；同一时段只接受一笔预约。</p>
+          {venue?.status === 'OPEN' && (
+            <section className="booking-availability" aria-labelledby="booking-availability-heading">
+              <div className="booking-availability-heading">
+                <h3 id="booking-availability-heading">已预约时段</h3>
+                {date && (
+                  <button type="button" className="secondary" disabled={loadingSlots} onClick={() => setSlotReloadKey((current) => current + 1)}>
+                    刷新时段
+                  </button>
+                )}
+              </div>
+              {!date ? (
+                <p>选择预约日期后查看该场地的占用时段。</p>
+              ) : loadingSlots ? (
+                <p role="status">正在查询已预约时段…</p>
+              ) : slotError ? (
+                <p>暂时无法查询已预约时段，请刷新重试；仍可提交预约，由后端确认。</p>
+              ) : slots ? (
+                <>
+                  {fullyBooked ? <p className="booking-availability-full">该日期开放时段已约满。</p>
+                    : slots.length === 0 ? <p>该日期暂无已预约时段。</p> : null}
+                  {slots.length > 0 && (
+                    <ul className="booked-slots">
+                      {slots.map((slot, index) => (
+                        <li key={`${slot.startTime}-${slot.endTime}-${index}`}>
+                          <span>{slot.startTime}–{slot.endTime}</span><span>已预约</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {selectedSlotBooked && <p className="booking-availability-conflict" role="status">所选时段与已预约时段重叠，请调整时间。</p>}
+                  <p className="booking-availability-note">占用情况可能变化，最终以提交结果为准。</p>
+                </>
+              ) : null}
+            </section>
+          )}
         </aside>
 
         <section className="panel booking-panel" aria-labelledby="booking-heading">
@@ -67,7 +148,7 @@ export function BookingPage({ venue, draft, onDraftChange, loadingVenues, venueE
                 onDraftChange={onDraftChange}
                 isSubmitting={isSubmitting}
                 isUnavailable={loadingVenues || Boolean(venueError)}
-                onCreate={onCreate}
+                onCreate={handleCreate}
               />
             </>
           ) : loadingVenues ? (
