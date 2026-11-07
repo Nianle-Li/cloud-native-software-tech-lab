@@ -1,6 +1,8 @@
-# 场地预约系统 · 云原生软件技术 Lab 1
+# 场地预约系统 · 云原生软件技术课程项目
 
 本仓库包含前端、Web API、PostgreSQL 及 Docker Compose 配置。系统设计、接口字段、业务规则、测试结果和验收记录见 [Lab 1 实验报告](docs/lab1-report.md)。
+
+Lab 2 将在现有系统上增加 Kubernetes 编排和场地利用率报告。当前仓库尚未包含 Lab 2 的部署清单或已验证结果；实施边界见 [Lab 2 需求与实现契约](docs/lab2-contract.md)，跨成员接口见[公共契约](docs/lab2-shared-contract.md)，逐项验收见 [Lab 2 验收清单](docs/lab2-acceptance.md)，三人职责和开发顺序见 [Lab 2 分工文档](docs/lab2-team-plan.md)。以下运行说明仍对应已完成的 Lab 1 Compose 环境。
 
 ## 运行
 
@@ -42,4 +44,7 @@ docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 | `compose.yaml`、`.env.example` | 三服务编排与本地配置模板 |
 | `scripts/verify-database.py` | 独立数据库迁移与约束验证 |
 | `docs/lab1-report.md` | 架构、数据库、接口、部署、验收及小组分工 |
+| `docs/lab2-contract.md`、`docs/lab2-acceptance.md` | Lab 2 开发约定与待验证的验收项 |
+| `docs/lab2-shared-contract.md` | Lab 2 跨成员接口、确定的设计选择与环境适配规则 |
+| `docs/lab2-team-plan.md` | Lab 2 三人分工、统一契约和联调顺序 |
 | `docs/assets/lab1-report/` | 报告引用的截图与验收记录 |
