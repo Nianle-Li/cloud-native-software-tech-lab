@@ -7,10 +7,10 @@
 | 成员 | 负责实现 | 负责验证与报告内容 | 主要文件 |
 | --- | --- | --- | --- |
 | A：前端与周期/节点任务 | 报告查询页面及响应校验；前端 Kubernetes Nginx ConfigMap、Deployment/Service；报告 CronJob；节点 DNS 检查 DaemonSet；可指向集群入口的浏览器端到端回归。保留 Lab 1 前端业务。 | 报告页运行中、成功、失败和异常状态；在真实集群入口验证场地、预约、冲突、取消和报告查询；核对 CronJob 自动触发、DaemonSet 节点覆盖。撰写系统使用流程及 CronJob/DaemonSet 结果。 | `frontend/`（含 `e2e/`）、`k8s/base/frontend*`、`k8s/base/report-cronjob*`、`k8s/demo/`、`k8s/base/node-check*` |
-| B：后端与一次性任务 | 报告统计程序、Flyway 新迁移、报告查询 API、实例标识 API；API 双副本 Deployment/Service；一次性 Job 模板及手动触发方式。保留原预约事务与冲突规则。 | 有效/取消/零预约统计、失败与重试幂等；Job 状态和持久化结果；两个 API Pod 处理请求及并发预约冲突。撰写 API、Job 和副本策略。 | `api/`、`k8s/base/api*`、`k8s/jobs/`、报告触发脚本 |
-| C：集群与有状态基础设施 | 实验集群及镜像装载；命名空间、数据库 `venue-config` ConfigMap、Secret 创建说明；数据库 StatefulSet、Services、PVC；从空环境部署步骤与资源状态检查。 | 数据库 Pod 重建后数据保留、Service/DNS 可达、配置不泄密、整套资源可重复部署。撰写环境、架构资源表与存储方案。 | `k8s/base/namespace*`、`k8s/base/config*`、`k8s/base/database*`、部署说明及 `scripts/verify-k8s*` |
+| B：后端与一次性任务 | 报告统计程序、报告表的新 Flyway 迁移、报告查询 API、实例标识 API；API 双副本 Deployment/Service；一次性 Job 模板及手动触发方式。保留原预约事务与冲突规则。 | 新迁移在空库和已有 V1–V3 数据库上通过且与 JPA 映射一致；有效/取消/零预约统计、失败与重试幂等；Job 状态和持久化结果；两个 API Pod 处理请求及并发预约冲突。撰写 API、Job 和副本策略。 | `api/`（只新增迁移，不改 V1–V3）、`k8s/base/api*`、`k8s/jobs/`、报告触发脚本 |
+| C：集群与有状态基础设施 | 实验集群及镜像装载；复核 B 的新迁移及数据库约束；命名空间、数据库 `venue-config` ConfigMap、Secret 创建说明；数据库 StatefulSet、Services、PVC；从空环境部署步骤与资源状态检查。 | 数据库 Pod 重建后数据保留、Service/DNS 可达、配置不泄密、整套资源可重复部署。撰写环境、架构资源表与存储方案。 | `k8s/base/namespace*`、`k8s/base/config*`、`k8s/base/database*`、部署说明及 `scripts/verify-k8s*` |
 
-前端报告查询页是本组选择的展示方式，任务书没有规定必须新增该页面。页面只用 `#/reports` 一个入口，成员取得 Job ID 后在同页查询并查看结果；不需要浏览器拥有 Kubernetes 管理权限。资源文件名是默认责任边界，可随实际目录结构调整；修改其他成员负责的文件时先说明变更。
+前端报告查询页是本组选择的展示方式，任务书没有规定必须新增该页面。页面只用 `#/reports` 一个入口，成员取得 Job ID 后在同页查询并查看结果；不需要浏览器拥有 Kubernetes 管理权限。B 负责报告新迁移、映射、统计与测试，C 复核数据库结构及约束；旧 V1–V3 迁移不改动。资源文件名是默认责任边界，可随实际目录结构调整；修改其他成员负责的文件时先说明变更。
 
 ## 2. 课程知识与完成标准
 
@@ -43,7 +43,7 @@
 | 阶段 | 可并行开展的工作 | 进入下一阶段的条件 |
 | --- | --- | --- |
 | 0. 对齐契约 | 将本轮 Lab 2 文档纳入版本控制并共享；三人从同一提交建立各自功能分支，按第 3 节检查资源名、报告响应、执行入口、定时同窗口快照和异常终态；C 同时核查集群限制。 | 记录共同基线的提交 ID；未知环境值列出；A/B 无需等待集群完全搭好。 |
-| 1. 独立实现 | A 用固定 JSON 响应完成报告页、测试和浏览器回归脚本，编写前端、CronJob、DaemonSet 清单；B 用本地 PostgreSQL/测试容器完成迁移、报告程序、API、Job 清单；C 准备集群、数据库和配置清单。 | A 前端测试/构建通过，回归脚本可对模拟响应运行；B 统计、失败及重试测试通过；C 数据库就绪、PVC Bound，清单通过适用的静态检查。 |
+| 1. 独立实现 | A 用固定 JSON 响应完成报告页、测试和浏览器回归脚本，编写前端、CronJob、DaemonSet 清单；B 用本地 PostgreSQL/测试容器完成新 Flyway 迁移、报告程序、API、Job 清单；C 复核迁移并准备集群、数据库和配置清单。 | A 前端测试/构建通过，回归脚本可对模拟响应运行；B 新迁移在空库和已有 V1–V3 数据库上通过，JPA 映射、统计、失败及重试测试通过；C 数据库就绪、PVC Bound，清单通过适用的静态检查。 |
 | 2. 分层联调 | C 提供数据库、Secret、Service；B 部署双 API Pod 并运行手动 Job；A 接入真实 API，运行浏览器回归并验证 CronJob。DaemonSet 可先独立验证节点调度与 DNS。 | 按 `database → api → frontend/Job → CronJob` 验证；每层记录实际错误和修复。 |
 | 3. 共同验收 | 按验收清单回归 Lab 1 业务，验证报告、并发冲突、PVC 持久化、多副本和节点覆盖；三人交叉操作并核对报告。 | 架构图、资源表、命令、日志、截图和数据均对应同一次实际部署。 |
 
