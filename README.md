@@ -2,7 +2,7 @@
 
 本仓库包含前端、Web API、PostgreSQL 及 Docker Compose 配置。系统设计、接口字段、业务规则、测试结果和验收记录见 [Lab 1 实验报告](docs/lab1-report.md)。
 
-Lab 2 将在现有系统上增加 Kubernetes 编排和场地利用率报告。当前仓库尚未包含 Lab 2 的部署清单或已验证结果；实施边界见 [Lab 2 需求与实现契约](docs/lab2-contract.md)，跨成员接口见[公共契约](docs/lab2-shared-contract.md)，逐项验收见 [Lab 2 验收清单](docs/lab2-acceptance.md)，三人职责和开发顺序见 [Lab 2 分工文档](docs/lab2-team-plan.md)。以下运行说明仍对应已完成的 Lab 1 Compose 环境。
+Lab 2 在现有系统上增加 kind 集群的 Kubernetes 编排和场地利用率报告。仓库已包含 B 的 API/手动 Job 清单；A/C 的资源及统一 kind 集群验收仍待集成。实施边界见 [Lab 2 需求与实现契约](docs/lab2-contract.md)，跨成员接口与 kind 操作规范见[公共契约](docs/lab2-shared-contract.md)，逐项验收见 [Lab 2 验收清单](docs/lab2-acceptance.md)，三人职责和开发顺序见 [Lab 2 分工文档](docs/lab2-team-plan.md)。以下运行说明仍对应已完成的 Lab 1 Compose 环境。
 
 ## 运行
 
