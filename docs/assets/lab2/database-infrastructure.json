@@ -1,0 +1,920 @@
+{
+  "checked_at_utc": "2026-11-15T09:01:44.344404+00:00",
+  "context": "kind-venue-lab2",
+  "namespace": "venue-booking",
+  "source_commit": "97bf795ef43d93a4e10333ad4fc272278433f886",
+  "checks": [
+    "Authenticated PostgreSQL via database Service from the other worker",
+    "Headless Service and stable database Pod DNS resolve and accept connections",
+    "PVC is Bound and database Pod disables ServiceAccount token automount",
+    "Unique infrastructure probe row written through Service",
+    "StatefulSet recreates database-0 with a new Pod UID and same PVC/PV",
+    "Probe row survives PostgreSQL Pod recreation and is readable via Service",
+    "Public business table list and Secret resourceVersion unchanged",
+    "Both database Services are internal ClusterIP Services"
+  ],
+  "restart_requested": true,
+  "scope": "Database infrastructure only; business/Flyway/API acceptance pending",
+  "config_files": {
+    "k8s/base/namespace.yaml": "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: venue-booking\n  labels:\n    app.kubernetes.io/name: venue-booking\n",
+    "k8s/base/configmap.yaml": "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: venue-config\n  namespace: venue-booking\n  labels:\n    app.kubernetes.io/name: venue-booking\n    app.kubernetes.io/component: database\ndata:\n  POSTGRES_DB: venue_booking\n  PGDATA: /var/lib/postgresql/data/pgdata\n  SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/venue_booking\n",
+    "k8s/base/database-services.yaml": "apiVersion: v1\nkind: Service\nmetadata:\n  name: database\n  namespace: venue-booking\n  labels:\n    app.kubernetes.io/name: venue-booking\n    app.kubernetes.io/component: database\nspec:\n  type: ClusterIP\n  selector:\n    app.kubernetes.io/name: venue-booking\n    app.kubernetes.io/component: database\n  ports:\n    - name: postgres\n      port: 5432\n      targetPort: postgres\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: database-headless\n  namespace: venue-booking\n  labels:\n    app.kubernetes.io/name: venue-booking\n    app.kubernetes.io/component: database\nspec:\n  clusterIP: None\n  selector:\n    app.kubernetes.io/name: venue-booking\n    app.kubernetes.io/component: database\n  ports:\n    - name: postgres\n      port: 5432\n      targetPort: postgres\n",
+    "k8s/base/database-statefulset.yaml": "apiVersion: apps/v1\nkind: StatefulSet\nmetadata:\n  name: database\n  namespace: venue-booking\n  labels:\n    app.kubernetes.io/name: venue-booking\n    app.kubernetes.io/component: database\nspec:\n  serviceName: database-headless\n  replicas: 1\n  persistentVolumeClaimRetentionPolicy:\n    whenDeleted: Retain\n    whenScaled: Retain\n  selector:\n    matchLabels:\n      app.kubernetes.io/name: venue-booking\n      app.kubernetes.io/component: database\n  template:\n    metadata:\n      labels:\n        app.kubernetes.io/name: venue-booking\n        app.kubernetes.io/component: database\n    spec:\n      automountServiceAccountToken: false\n      terminationGracePeriodSeconds: 30\n      containers:\n        - name: database\n          image: postgres:16.15-bookworm\n          imagePullPolicy: IfNotPresent\n          ports:\n            - name: postgres\n              containerPort: 5432\n          env:\n            - name: POSTGRES_DB\n              valueFrom:\n                configMapKeyRef:\n                  name: venue-config\n                  key: POSTGRES_DB\n            - name: PGDATA\n              valueFrom:\n                configMapKeyRef:\n                  name: venue-config\n                  key: PGDATA\n            - name: POSTGRES_USER\n              valueFrom:\n                secretKeyRef:\n                  name: venue-db-credentials\n                  key: POSTGRES_USER\n            - name: POSTGRES_PASSWORD\n              valueFrom:\n                secretKeyRef:\n                  name: venue-db-credentials\n                  key: POSTGRES_PASSWORD\n          volumeMounts:\n            - name: postgres-data\n              mountPath: /var/lib/postgresql/data\n          startupProbe:\n            exec:\n              command: [sh, -ec, 'pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\"']\n            periodSeconds: 5\n            timeoutSeconds: 3\n            failureThreshold: 30\n          readinessProbe:\n            exec:\n              command: [sh, -ec, 'pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\"']\n            periodSeconds: 5\n            timeoutSeconds: 3\n            failureThreshold: 3\n          livenessProbe:\n            exec:\n              command: [sh, -ec, 'pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\"']\n            periodSeconds: 10\n            timeoutSeconds: 3\n            failureThreshold: 6\n          resources:\n            requests:\n              cpu: 100m\n              memory: 128Mi\n            limits:\n              cpu: 500m\n              memory: 512Mi\n  volumeClaimTemplates:\n    - metadata:\n        name: postgres-data\n        labels:\n          app.kubernetes.io/name: venue-booking\n          app.kubernetes.io/component: database\n      spec:\n        accessModes: [ReadWriteOnce]\n        storageClassName: standard\n        resources:\n          requests:\n            storage: 1Gi\n"
+  },
+  "pod_before": {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+      "creationTimestamp": "2026-11-15T09:00:11Z",
+      "generateName": "database-",
+      "generation": 1,
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking",
+        "apps.kubernetes.io/pod-index": "0",
+        "controller-revision-hash": "database-f74bb59bf",
+        "statefulset.kubernetes.io/pod-name": "database-0"
+      },
+      "name": "database-0",
+      "namespace": "venue-booking",
+      "ownerReferences": [
+        {
+          "apiVersion": "apps/v1",
+          "blockOwnerDeletion": true,
+          "controller": true,
+          "kind": "StatefulSet",
+          "name": "database",
+          "uid": "95091eca-c10d-4165-9b07-3b0dc177b842"
+        }
+      ],
+      "resourceVersion": "1467",
+      "uid": "0501055f-5840-4c42-bfc1-67951fa6f8ee"
+    },
+    "spec": {
+      "automountServiceAccountToken": false,
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "POSTGRES_DB",
+              "valueFrom": {
+                "configMapKeyRef": {
+                  "key": "POSTGRES_DB",
+                  "name": "venue-config"
+                }
+              }
+            },
+            {
+              "name": "PGDATA",
+              "valueFrom": {
+                "configMapKeyRef": {
+                  "key": "PGDATA",
+                  "name": "venue-config"
+                }
+              }
+            },
+            {
+              "name": "POSTGRES_USER",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "key": "POSTGRES_USER",
+                  "name": "venue-db-credentials"
+                }
+              }
+            },
+            {
+              "name": "POSTGRES_PASSWORD",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "key": "POSTGRES_PASSWORD",
+                  "name": "venue-db-credentials"
+                }
+              }
+            }
+          ],
+          "image": "postgres:16.15-bookworm",
+          "imagePullPolicy": "IfNotPresent",
+          "livenessProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 6,
+            "periodSeconds": 10,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "name": "database",
+          "ports": [
+            {
+              "containerPort": 5432,
+              "name": "postgres",
+              "protocol": "TCP"
+            }
+          ],
+          "readinessProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 3,
+            "periodSeconds": 5,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "resources": {
+            "limits": {
+              "cpu": "500m",
+              "memory": "512Mi"
+            },
+            "requests": {
+              "cpu": "100m",
+              "memory": "128Mi"
+            }
+          },
+          "startupProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 30,
+            "periodSeconds": 5,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "terminationMessagePath": "/dev/termination-log",
+          "terminationMessagePolicy": "File",
+          "volumeMounts": [
+            {
+              "mountPath": "/var/lib/postgresql/data",
+              "name": "postgres-data"
+            }
+          ]
+        }
+      ],
+      "dnsPolicy": "ClusterFirst",
+      "enableServiceLinks": true,
+      "hostname": "database-0",
+      "nodeName": "venue-lab2-worker2",
+      "preemptionPolicy": "PreemptLowerPriority",
+      "priority": 0,
+      "restartPolicy": "Always",
+      "schedulerName": "default-scheduler",
+      "securityContext": {},
+      "serviceAccount": "default",
+      "serviceAccountName": "default",
+      "subdomain": "database-headless",
+      "terminationGracePeriodSeconds": 30,
+      "tolerations": [
+        {
+          "effect": "NoExecute",
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "tolerationSeconds": 300
+        },
+        {
+          "effect": "NoExecute",
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "tolerationSeconds": 300
+        }
+      ],
+      "volumes": [
+        {
+          "name": "postgres-data",
+          "persistentVolumeClaim": {
+            "claimName": "postgres-data-database-0"
+          }
+        }
+      ]
+    },
+    "status": {
+      "conditions": [
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:00:16Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "PodReadyToStartContainers"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:00:15Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:00:21Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:00:21Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "ContainersReady"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:00:15Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containerStatuses": [
+        {
+          "allocatedResources": {
+            "cpu": "100m",
+            "memory": "128Mi"
+          },
+          "containerID": "containerd://10b173643b98a83a0eddccf6d4b63f76f92f9a45f3c978242b827d548235dcfc",
+          "image": "docker.io/library/postgres:16.15-bookworm",
+          "imageID": "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+          "lastState": {},
+          "name": "database",
+          "ready": true,
+          "resources": {
+            "limits": {
+              "cpu": "500m",
+              "memory": "512Mi"
+            },
+            "requests": {
+              "cpu": "100m",
+              "memory": "128Mi"
+            }
+          },
+          "restartCount": 0,
+          "started": true,
+          "state": {
+            "running": {
+              "startedAt": "2026-11-15T09:00:15Z"
+            }
+          },
+          "user": {
+            "linux": {
+              "gid": 0,
+              "supplementalGroups": [
+                0
+              ],
+              "uid": 0
+            }
+          },
+          "volumeMounts": [
+            {
+              "mountPath": "/var/lib/postgresql/data",
+              "name": "postgres-data"
+            }
+          ]
+        }
+      ],
+      "hostIP": "172.20.0.4",
+      "hostIPs": [
+        {
+          "ip": "172.20.0.4"
+        }
+      ],
+      "observedGeneration": 1,
+      "phase": "Running",
+      "podIP": "10.244.1.8",
+      "podIPs": [
+        {
+          "ip": "10.244.1.8"
+        }
+      ],
+      "qosClass": "Burstable",
+      "startTime": "2026-11-15T09:00:15Z"
+    }
+  },
+  "pvc_before": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+      "annotations": {
+        "pv.kubernetes.io/bind-completed": "yes",
+        "pv.kubernetes.io/bound-by-controller": "yes",
+        "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+        "volume.kubernetes.io/selected-node": "venue-lab2-worker2",
+        "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T09:00:11Z",
+      "finalizers": [
+        "kubernetes.io/pvc-protection"
+      ],
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking"
+      },
+      "name": "postgres-data-database-0",
+      "namespace": "venue-booking",
+      "resourceVersion": "1447",
+      "uid": "aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "resources": {
+        "requests": {
+          "storage": "1Gi"
+        }
+      },
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem",
+      "volumeName": "pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "status": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "1Gi"
+      },
+      "phase": "Bound"
+    }
+  },
+  "pv": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolume",
+    "metadata": {
+      "annotations": {
+        "local.path.provisioner/selected-node": "venue-lab2-worker2",
+        "pv.kubernetes.io/provisioned-by": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T09:00:14Z",
+      "finalizers": [
+        "kubernetes.io/pv-protection"
+      ],
+      "name": "pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f",
+      "resourceVersion": "1445",
+      "uid": "fe3104d7-8050-4c46-b1bf-2d107080fafb"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "1Gi"
+      },
+      "claimRef": {
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "name": "postgres-data-database-0",
+        "namespace": "venue-booking",
+        "resourceVersion": "1420",
+        "uid": "aebde979-7e14-4e77-8590-1bfdc4afa95f"
+      },
+      "hostPath": {
+        "path": "/var/local-path-provisioner/pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f_venue-booking_postgres-data-database-0",
+        "type": "DirectoryOrCreate"
+      },
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "kubernetes.io/hostname",
+                  "operator": "In",
+                  "values": [
+                    "venue-lab2-worker2"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "persistentVolumeReclaimPolicy": "Delete",
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem"
+    },
+    "status": {
+      "lastPhaseTransitionTime": "2026-11-15T09:00:14Z",
+      "phase": "Bound"
+    }
+  },
+  "secret_metadata_before": "cca39143-439d-4df3-93df-908e75e5a8d4/1410",
+  "client_node": "venue-lab2-worker",
+  "dns": "10.96.232.113   database.venue-booking.svc.cluster.local\n10.244.1.8      database-headless.venue-booking.svc.cluster.local\n10.244.1.8      database-0.database-headless.venue-booking.svc.cluster.local",
+  "connection": {
+    "database": "venue_booking",
+    "version": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "data_directory": "/var/lib/postgresql/data/pgdata",
+    "server_address": "10.244.1.8"
+  },
+  "business_tables_before": "",
+  "pod_after": {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+      "creationTimestamp": "2026-11-15T09:01:48Z",
+      "generateName": "database-",
+      "generation": 1,
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking",
+        "apps.kubernetes.io/pod-index": "0",
+        "controller-revision-hash": "database-f74bb59bf",
+        "statefulset.kubernetes.io/pod-name": "database-0"
+      },
+      "name": "database-0",
+      "namespace": "venue-booking",
+      "ownerReferences": [
+        {
+          "apiVersion": "apps/v1",
+          "blockOwnerDeletion": true,
+          "controller": true,
+          "kind": "StatefulSet",
+          "name": "database",
+          "uid": "95091eca-c10d-4165-9b07-3b0dc177b842"
+        }
+      ],
+      "resourceVersion": "1649",
+      "uid": "5090d2ee-b7ad-4881-9a79-d8c37034f589"
+    },
+    "spec": {
+      "automountServiceAccountToken": false,
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "POSTGRES_DB",
+              "valueFrom": {
+                "configMapKeyRef": {
+                  "key": "POSTGRES_DB",
+                  "name": "venue-config"
+                }
+              }
+            },
+            {
+              "name": "PGDATA",
+              "valueFrom": {
+                "configMapKeyRef": {
+                  "key": "PGDATA",
+                  "name": "venue-config"
+                }
+              }
+            },
+            {
+              "name": "POSTGRES_USER",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "key": "POSTGRES_USER",
+                  "name": "venue-db-credentials"
+                }
+              }
+            },
+            {
+              "name": "POSTGRES_PASSWORD",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "key": "POSTGRES_PASSWORD",
+                  "name": "venue-db-credentials"
+                }
+              }
+            }
+          ],
+          "image": "postgres:16.15-bookworm",
+          "imagePullPolicy": "IfNotPresent",
+          "livenessProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 6,
+            "periodSeconds": 10,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "name": "database",
+          "ports": [
+            {
+              "containerPort": 5432,
+              "name": "postgres",
+              "protocol": "TCP"
+            }
+          ],
+          "readinessProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 3,
+            "periodSeconds": 5,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "resources": {
+            "limits": {
+              "cpu": "500m",
+              "memory": "512Mi"
+            },
+            "requests": {
+              "cpu": "100m",
+              "memory": "128Mi"
+            }
+          },
+          "startupProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 30,
+            "periodSeconds": 5,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "terminationMessagePath": "/dev/termination-log",
+          "terminationMessagePolicy": "File",
+          "volumeMounts": [
+            {
+              "mountPath": "/var/lib/postgresql/data",
+              "name": "postgres-data"
+            }
+          ]
+        }
+      ],
+      "dnsPolicy": "ClusterFirst",
+      "enableServiceLinks": true,
+      "hostname": "database-0",
+      "nodeName": "venue-lab2-worker2",
+      "preemptionPolicy": "PreemptLowerPriority",
+      "priority": 0,
+      "restartPolicy": "Always",
+      "schedulerName": "default-scheduler",
+      "securityContext": {},
+      "serviceAccount": "default",
+      "serviceAccountName": "default",
+      "subdomain": "database-headless",
+      "terminationGracePeriodSeconds": 30,
+      "tolerations": [
+        {
+          "effect": "NoExecute",
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "tolerationSeconds": 300
+        },
+        {
+          "effect": "NoExecute",
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "tolerationSeconds": 300
+        }
+      ],
+      "volumes": [
+        {
+          "name": "postgres-data",
+          "persistentVolumeClaim": {
+            "claimName": "postgres-data-database-0"
+          }
+        }
+      ]
+    },
+    "status": {
+      "conditions": [
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:49Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "PodReadyToStartContainers"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:48Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:54Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:54Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "ContainersReady"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:48Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containerStatuses": [
+        {
+          "allocatedResources": {
+            "cpu": "100m",
+            "memory": "128Mi"
+          },
+          "containerID": "containerd://cb0bd1fa5b99d4a87c3701da430815642de037189054e8485954a22d7e4706ee",
+          "image": "docker.io/library/postgres:16.15-bookworm",
+          "imageID": "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+          "lastState": {},
+          "name": "database",
+          "ready": true,
+          "resources": {
+            "limits": {
+              "cpu": "500m",
+              "memory": "512Mi"
+            },
+            "requests": {
+              "cpu": "100m",
+              "memory": "128Mi"
+            }
+          },
+          "restartCount": 0,
+          "started": true,
+          "state": {
+            "running": {
+              "startedAt": "2026-11-15T09:01:49Z"
+            }
+          },
+          "user": {
+            "linux": {
+              "gid": 0,
+              "supplementalGroups": [
+                0
+              ],
+              "uid": 0
+            }
+          },
+          "volumeMounts": [
+            {
+              "mountPath": "/var/lib/postgresql/data",
+              "name": "postgres-data"
+            }
+          ]
+        }
+      ],
+      "hostIP": "172.20.0.4",
+      "hostIPs": [
+        {
+          "ip": "172.20.0.4"
+        }
+      ],
+      "observedGeneration": 1,
+      "phase": "Running",
+      "podIP": "10.244.1.9",
+      "podIPs": [
+        {
+          "ip": "10.244.1.9"
+        }
+      ],
+      "qosClass": "Burstable",
+      "startTime": "2026-11-15T09:01:48Z"
+    }
+  },
+  "pvc_after": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+      "annotations": {
+        "pv.kubernetes.io/bind-completed": "yes",
+        "pv.kubernetes.io/bound-by-controller": "yes",
+        "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+        "volume.kubernetes.io/selected-node": "venue-lab2-worker2",
+        "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T09:00:11Z",
+      "finalizers": [
+        "kubernetes.io/pvc-protection"
+      ],
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking"
+      },
+      "name": "postgres-data-database-0",
+      "namespace": "venue-booking",
+      "resourceVersion": "1447",
+      "uid": "aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "resources": {
+        "requests": {
+          "storage": "1Gi"
+        }
+      },
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem",
+      "volumeName": "pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "status": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "1Gi"
+      },
+      "phase": "Bound"
+    }
+  },
+  "services": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"database\",\"namespace\":\"venue-booking\"},\"spec\":{\"ports\":[{\"name\":\"postgres\",\"port\":5432,\"targetPort\":\"postgres\"}],\"selector\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"type\":\"ClusterIP\"}}\n"
+          },
+          "creationTimestamp": "2026-11-15T09:00:11Z",
+          "labels": {
+            "app.kubernetes.io/component": "database",
+            "app.kubernetes.io/name": "venue-booking"
+          },
+          "name": "database",
+          "namespace": "venue-booking",
+          "resourceVersion": "1404",
+          "uid": "d2086cdc-b208-4349-ae92-6a2f08a7c712"
+        },
+        "spec": {
+          "clusterIP": "10.96.232.113",
+          "clusterIPs": [
+            "10.96.232.113"
+          ],
+          "internalTrafficPolicy": "Cluster",
+          "ipFamilies": [
+            "IPv4"
+          ],
+          "ipFamilyPolicy": "SingleStack",
+          "ports": [
+            {
+              "name": "postgres",
+              "port": 5432,
+              "protocol": "TCP",
+              "targetPort": "postgres"
+            }
+          ],
+          "selector": {
+            "app.kubernetes.io/component": "database",
+            "app.kubernetes.io/name": "venue-booking"
+          },
+          "sessionAffinity": "None",
+          "type": "ClusterIP"
+        },
+        "status": {
+          "loadBalancer": {}
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"database-headless\",\"namespace\":\"venue-booking\"},\"spec\":{\"clusterIP\":\"None\",\"ports\":[{\"name\":\"postgres\",\"port\":5432,\"targetPort\":\"postgres\"}],\"selector\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"}}}\n"
+          },
+          "creationTimestamp": "2026-11-15T09:00:11Z",
+          "labels": {
+            "app.kubernetes.io/component": "database",
+            "app.kubernetes.io/name": "venue-booking"
+          },
+          "name": "database-headless",
+          "namespace": "venue-booking",
+          "resourceVersion": "1407",
+          "uid": "e2185d41-eaa1-41e8-b1c4-1a702cf2836b"
+        },
+        "spec": {
+          "clusterIP": "None",
+          "clusterIPs": [
+            "None"
+          ],
+          "internalTrafficPolicy": "Cluster",
+          "ipFamilies": [
+            "IPv4"
+          ],
+          "ipFamilyPolicy": "SingleStack",
+          "ports": [
+            {
+              "name": "postgres",
+              "port": 5432,
+              "protocol": "TCP",
+              "targetPort": "postgres"
+            }
+          ],
+          "selector": {
+            "app.kubernetes.io/component": "database",
+            "app.kubernetes.io/name": "venue-booking"
+          },
+          "sessionAffinity": "None",
+          "type": "ClusterIP"
+        },
+        "status": {
+          "loadBalancer": {}
+        }
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  },
+  "endpointslices": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "addressType": "IPv4",
+        "apiVersion": "discovery.k8s.io/v1",
+        "endpoints": [
+          {
+            "addresses": [
+              "10.244.1.9"
+            ],
+            "conditions": {
+              "ready": true,
+              "serving": true,
+              "terminating": false
+            },
+            "nodeName": "venue-lab2-worker2",
+            "targetRef": {
+              "kind": "Pod",
+              "name": "database-0",
+              "namespace": "venue-booking",
+              "uid": "5090d2ee-b7ad-4881-9a79-d8c37034f589"
+            }
+          }
+        ],
+        "kind": "EndpointSlice",
+        "metadata": {
+          "annotations": {
+            "endpoints.kubernetes.io/last-change-trigger-time": "2026-11-15T09:01:54Z"
+          },
+          "creationTimestamp": "2026-11-15T09:00:11Z",
+          "generateName": "database-",
+          "generation": 7,
+          "labels": {
+            "app.kubernetes.io/component": "database",
+            "app.kubernetes.io/name": "venue-booking",
+            "endpointslice.kubernetes.io/managed-by": "endpointslice-controller.k8s.io",
+            "kubernetes.io/service-name": "database"
+          },
+          "name": "database-v8zv5",
+          "namespace": "venue-booking",
+          "ownerReferences": [
+            {
+              "apiVersion": "v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "Service",
+              "name": "database",
+              "uid": "d2086cdc-b208-4349-ae92-6a2f08a7c712"
+            }
+          ],
+          "resourceVersion": "1650",
+          "uid": "7dab3423-cbbe-423f-97fd-79ae3f23844e"
+        },
+        "ports": [
+          {
+            "name": "postgres",
+            "port": 5432,
+            "protocol": "TCP"
+          }
+        ]
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  },
+  "probe_schema_removed": true,
+  "client_removed": true,
+  "status": "PASS",
+  "secret_initialization_repeat_verified": true,
+  "final_workloads": "NAME                        READY   AGE     CONTAINERS   IMAGES\nstatefulset.apps/database   1/1     3m48s   database     postgres:16.15-bookworm\n\nNAME             READY   STATUS    RESTARTS   AGE     IP           NODE                 NOMINATED NODE   READINESS GATES\npod/database-0   1/1     Running   0          2m11s   10.244.1.9   venue-lab2-worker2   <none>           <none>\n\nNAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE     SELECTOR\nservice/database            ClusterIP   10.96.232.113   <none>        5432/TCP   3m48s   app.kubernetes.io/component=database,app.kubernetes.io/name=venue-booking\nservice/database-headless   ClusterIP   None            <none>        5432/TCP   3m48s   app.kubernetes.io/component=database,app.kubernetes.io/name=venue-booking\n\nNAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE     VOLUMEMODE\npersistentvolumeclaim/postgres-data-database-0   Bound    pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f   1Gi        RWO            standard       <unset>                 3m48s   Filesystem\n",
+  "final_events": ""
+}
