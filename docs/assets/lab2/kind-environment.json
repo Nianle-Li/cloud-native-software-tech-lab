@@ -1,0 +1,837 @@
+{
+  "checked_at_utc": "2026-11-15T08:54:31.626950+00:00",
+  "context": "kind-venue-lab2",
+  "cluster": "venue-lab2",
+  "checks": [
+    "Three Ready nodes, 1 control-plane + 2 workers",
+    "Local loaded image runs with imagePullPolicy Never on venue-lab2-worker",
+    "Local loaded image runs with imagePullPolicy Never on venue-lab2-worker2",
+    "standard PVC Bound; same data readable after writer Pod deletion and reader creation"
+  ],
+  "kind_version": "kind v0.33.0 go1.26.7 darwin/arm64",
+  "clusters": "venue-lab2",
+  "version": {
+    "clientVersion": {
+      "major": "1",
+      "minor": "34",
+      "gitVersion": "v1.34.1",
+      "gitCommit": "93248f9ae092f571eb870b7664c534bfc7d00f03",
+      "gitTreeState": "clean",
+      "buildDate": "2025-09-09T19:44:50Z",
+      "goVersion": "go1.24.6",
+      "compiler": "gc",
+      "platform": "darwin/arm64"
+    },
+    "kustomizeVersion": "v5.7.1",
+    "serverVersion": {
+      "major": "1",
+      "minor": "34",
+      "emulationMajor": "1",
+      "emulationMinor": "34",
+      "minCompatibilityMajor": "1",
+      "minCompatibilityMinor": "33",
+      "gitVersion": "v1.34.11",
+      "gitCommit": "3a634765b787dd069f7f714fa77d767cb7d43795",
+      "gitTreeState": "clean",
+      "buildDate": "2026-08-20T15:15:37Z",
+      "goVersion": "go1.26.5",
+      "compiler": "gc",
+      "platform": "linux/arm64"
+    }
+  },
+  "nodes": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "apiVersion": "v1",
+        "kind": "Node",
+        "metadata": {
+          "annotations": {
+            "node.alpha.kubernetes.io/ttl": "0",
+            "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+          },
+          "creationTimestamp": "2026-11-15T08:52:34Z",
+          "labels": {
+            "beta.kubernetes.io/arch": "arm64",
+            "beta.kubernetes.io/os": "linux",
+            "kubernetes.io/arch": "arm64",
+            "kubernetes.io/hostname": "venue-lab2-control-plane",
+            "kubernetes.io/os": "linux",
+            "node-role.kubernetes.io/control-plane": "",
+            "node.kubernetes.io/exclude-from-external-load-balancers": ""
+          },
+          "name": "venue-lab2-control-plane",
+          "resourceVersion": "554",
+          "uid": "ea802a3a-c04e-4554-a008-6c48d78a878f"
+        },
+        "spec": {
+          "podCIDR": "10.244.0.0/24",
+          "podCIDRs": [
+            "10.244.0.0/24"
+          ],
+          "providerID": "kind://docker/venue-lab2/venue-lab2-control-plane",
+          "taints": [
+            {
+              "effect": "NoSchedule",
+              "key": "node-role.kubernetes.io/control-plane"
+            }
+          ]
+        },
+        "status": {
+          "addresses": [
+            {
+              "address": "172.20.0.2",
+              "type": "InternalIP"
+            },
+            {
+              "address": "venue-lab2-control-plane",
+              "type": "Hostname"
+            }
+          ],
+          "allocatable": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "capacity": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "conditions": [
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:54Z",
+              "lastTransitionTime": "2026-11-15T08:52:33Z",
+              "message": "kubelet has sufficient memory available",
+              "reason": "KubeletHasSufficientMemory",
+              "status": "False",
+              "type": "MemoryPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:54Z",
+              "lastTransitionTime": "2026-11-15T08:52:33Z",
+              "message": "kubelet has no disk pressure",
+              "reason": "KubeletHasNoDiskPressure",
+              "status": "False",
+              "type": "DiskPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:54Z",
+              "lastTransitionTime": "2026-11-15T08:52:33Z",
+              "message": "kubelet has sufficient PID available",
+              "reason": "KubeletHasSufficientPID",
+              "status": "False",
+              "type": "PIDPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:54Z",
+              "lastTransitionTime": "2026-11-15T08:52:54Z",
+              "message": "kubelet is posting ready status",
+              "reason": "KubeletReady",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "daemonEndpoints": {
+            "kubeletEndpoint": {
+              "Port": 10250
+            }
+          },
+          "features": {
+            "supplementalGroupsPolicy": true
+          },
+          "images": [
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                "registry.k8s.io/kube-apiserver:v1.34.11"
+              ],
+              "sizeBytes": 84226419
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                "registry.k8s.io/kube-proxy:v1.34.11"
+              ],
+              "sizeBytes": 78172361
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                "registry.k8s.io/kube-controller-manager:v1.34.11"
+              ],
+              "sizeBytes": 72233573
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                "registry.k8s.io/kube-scheduler:v1.34.11"
+              ],
+              "sizeBytes": 51720412
+            },
+            {
+              "names": [
+                "docker.io/kindest/kindnetd:v20260820-69b56db7"
+              ],
+              "sizeBytes": 35652389
+            },
+            {
+              "names": [
+                "registry.k8s.io/etcd:3.6.5-0"
+              ],
+              "sizeBytes": 21136588
+            },
+            {
+              "names": [
+                "registry.k8s.io/coredns/coredns:v1.12.1"
+              ],
+              "sizeBytes": 20392204
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+              ],
+              "sizeBytes": 14217939
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+              ],
+              "sizeBytes": 2740462
+            },
+            {
+              "names": [
+                "registry.k8s.io/pause:3.10"
+              ],
+              "sizeBytes": 267933
+            }
+          ],
+          "nodeInfo": {
+            "architecture": "arm64",
+            "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+            "containerRuntimeVersion": "containerd://2.3.4",
+            "kernelVersion": "6.12.72-linuxkit",
+            "kubeProxyVersion": "",
+            "kubeletVersion": "v1.34.11",
+            "machineID": "30037510e3184e02816e224e10a564c2",
+            "operatingSystem": "linux",
+            "osImage": "Debian GNU/Linux 13 (trixie)",
+            "swap": {
+              "capacity": 1073737728
+            },
+            "systemUUID": "30037510e3184e02816e224e10a564c2"
+          },
+          "runtimeHandlers": [
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": ""
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "runc"
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "test-handler"
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Node",
+        "metadata": {
+          "annotations": {
+            "node.alpha.kubernetes.io/ttl": "0",
+            "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+          },
+          "creationTimestamp": "2026-11-15T08:52:44Z",
+          "labels": {
+            "beta.kubernetes.io/arch": "arm64",
+            "beta.kubernetes.io/os": "linux",
+            "kubernetes.io/arch": "arm64",
+            "kubernetes.io/hostname": "venue-lab2-worker",
+            "kubernetes.io/os": "linux"
+          },
+          "name": "venue-lab2-worker",
+          "resourceVersion": "552",
+          "uid": "9e829dfd-cba5-470e-8666-bbc6a5655c76"
+        },
+        "spec": {
+          "podCIDR": "10.244.2.0/24",
+          "podCIDRs": [
+            "10.244.2.0/24"
+          ],
+          "providerID": "kind://docker/venue-lab2/venue-lab2-worker"
+        },
+        "status": {
+          "addresses": [
+            {
+              "address": "172.20.0.3",
+              "type": "InternalIP"
+            },
+            {
+              "address": "venue-lab2-worker",
+              "type": "Hostname"
+            }
+          ],
+          "allocatable": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "capacity": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "conditions": [
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:44Z",
+              "message": "kubelet has sufficient memory available",
+              "reason": "KubeletHasSufficientMemory",
+              "status": "False",
+              "type": "MemoryPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:44Z",
+              "message": "kubelet has no disk pressure",
+              "reason": "KubeletHasNoDiskPressure",
+              "status": "False",
+              "type": "DiskPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:44Z",
+              "message": "kubelet has sufficient PID available",
+              "reason": "KubeletHasSufficientPID",
+              "status": "False",
+              "type": "PIDPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:56Z",
+              "message": "kubelet is posting ready status",
+              "reason": "KubeletReady",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "daemonEndpoints": {
+            "kubeletEndpoint": {
+              "Port": 10250
+            }
+          },
+          "features": {
+            "supplementalGroupsPolicy": true
+          },
+          "images": [
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                "registry.k8s.io/kube-apiserver:v1.34.11"
+              ],
+              "sizeBytes": 84226803
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                "registry.k8s.io/kube-proxy:v1.34.11"
+              ],
+              "sizeBytes": 78172361
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                "registry.k8s.io/kube-controller-manager:v1.34.11"
+              ],
+              "sizeBytes": 72233180
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                "registry.k8s.io/kube-scheduler:v1.34.11"
+              ],
+              "sizeBytes": 51720412
+            },
+            {
+              "names": [
+                "docker.io/kindest/kindnetd:v20260820-69b56db7"
+              ],
+              "sizeBytes": 35652389
+            },
+            {
+              "names": [
+                "registry.k8s.io/etcd:3.6.5-0"
+              ],
+              "sizeBytes": 21136588
+            },
+            {
+              "names": [
+                "registry.k8s.io/coredns/coredns:v1.12.1"
+              ],
+              "sizeBytes": 20392204
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+              ],
+              "sizeBytes": 14217939
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+              ],
+              "sizeBytes": 2740462
+            },
+            {
+              "names": [
+                "registry.k8s.io/pause:3.10"
+              ],
+              "sizeBytes": 267933
+            }
+          ],
+          "nodeInfo": {
+            "architecture": "arm64",
+            "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+            "containerRuntimeVersion": "containerd://2.3.4",
+            "kernelVersion": "6.12.72-linuxkit",
+            "kubeProxyVersion": "",
+            "kubeletVersion": "v1.34.11",
+            "machineID": "42b4896bf4aa4c0b8decf95eef29cc1b",
+            "operatingSystem": "linux",
+            "osImage": "Debian GNU/Linux 13 (trixie)",
+            "swap": {
+              "capacity": 1073737728
+            },
+            "systemUUID": "42b4896bf4aa4c0b8decf95eef29cc1b"
+          },
+          "runtimeHandlers": [
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": ""
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "runc"
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "test-handler"
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Node",
+        "metadata": {
+          "annotations": {
+            "node.alpha.kubernetes.io/ttl": "0",
+            "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+          },
+          "creationTimestamp": "2026-11-15T08:52:43Z",
+          "labels": {
+            "beta.kubernetes.io/arch": "arm64",
+            "beta.kubernetes.io/os": "linux",
+            "kubernetes.io/arch": "arm64",
+            "kubernetes.io/hostname": "venue-lab2-worker2",
+            "kubernetes.io/os": "linux"
+          },
+          "name": "venue-lab2-worker2",
+          "resourceVersion": "548",
+          "uid": "4baf29d6-c2f7-4d9a-8ac5-8bcf3124efa0"
+        },
+        "spec": {
+          "podCIDR": "10.244.1.0/24",
+          "podCIDRs": [
+            "10.244.1.0/24"
+          ],
+          "providerID": "kind://docker/venue-lab2/venue-lab2-worker2"
+        },
+        "status": {
+          "addresses": [
+            {
+              "address": "172.20.0.4",
+              "type": "InternalIP"
+            },
+            {
+              "address": "venue-lab2-worker2",
+              "type": "Hostname"
+            }
+          ],
+          "allocatable": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "capacity": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "conditions": [
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:43Z",
+              "message": "kubelet has sufficient memory available",
+              "reason": "KubeletHasSufficientMemory",
+              "status": "False",
+              "type": "MemoryPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:43Z",
+              "message": "kubelet has no disk pressure",
+              "reason": "KubeletHasNoDiskPressure",
+              "status": "False",
+              "type": "DiskPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:43Z",
+              "message": "kubelet has sufficient PID available",
+              "reason": "KubeletHasSufficientPID",
+              "status": "False",
+              "type": "PIDPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-15T08:52:56Z",
+              "lastTransitionTime": "2026-11-15T08:52:56Z",
+              "message": "kubelet is posting ready status",
+              "reason": "KubeletReady",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "daemonEndpoints": {
+            "kubeletEndpoint": {
+              "Port": 10250
+            }
+          },
+          "features": {
+            "supplementalGroupsPolicy": true
+          },
+          "images": [
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                "registry.k8s.io/kube-apiserver:v1.34.11"
+              ],
+              "sizeBytes": 84226419
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                "registry.k8s.io/kube-proxy:v1.34.11"
+              ],
+              "sizeBytes": 78172361
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                "registry.k8s.io/kube-controller-manager:v1.34.11"
+              ],
+              "sizeBytes": 72233180
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                "registry.k8s.io/kube-scheduler:v1.34.11"
+              ],
+              "sizeBytes": 51720412
+            },
+            {
+              "names": [
+                "docker.io/kindest/kindnetd:v20260820-69b56db7"
+              ],
+              "sizeBytes": 35652389
+            },
+            {
+              "names": [
+                "registry.k8s.io/etcd:3.6.5-0"
+              ],
+              "sizeBytes": 21136588
+            },
+            {
+              "names": [
+                "registry.k8s.io/coredns/coredns:v1.12.1"
+              ],
+              "sizeBytes": 20392204
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+              ],
+              "sizeBytes": 14217939
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+              ],
+              "sizeBytes": 2740462
+            },
+            {
+              "names": [
+                "registry.k8s.io/pause:3.10"
+              ],
+              "sizeBytes": 267933
+            }
+          ],
+          "nodeInfo": {
+            "architecture": "arm64",
+            "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+            "containerRuntimeVersion": "containerd://2.3.4",
+            "kernelVersion": "6.12.72-linuxkit",
+            "kubeProxyVersion": "",
+            "kubeletVersion": "v1.34.11",
+            "machineID": "b685b50cc0414b8e9d9466cce495a157",
+            "operatingSystem": "linux",
+            "osImage": "Debian GNU/Linux 13 (trixie)",
+            "swap": {
+              "capacity": 1073737728
+            },
+            "systemUUID": "b685b50cc0414b8e9d9466cce495a157"
+          },
+          "runtimeHandlers": [
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": ""
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "runc"
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "test-handler"
+            }
+          ]
+        }
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  },
+  "storageclasses": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "apiVersion": "storage.k8s.io/v1",
+        "kind": "StorageClass",
+        "metadata": {
+          "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"storage.k8s.io/v1\",\"kind\":\"StorageClass\",\"metadata\":{\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"},\"name\":\"standard\"},\"provisioner\":\"rancher.io/local-path\",\"reclaimPolicy\":\"Delete\",\"volumeBindingMode\":\"WaitForFirstConsumer\"}\n",
+            "storageclass.kubernetes.io/is-default-class": "true"
+          },
+          "creationTimestamp": "2026-11-15T08:52:38Z",
+          "name": "standard",
+          "resourceVersion": "283",
+          "uid": "661743a3-d0e8-42ea-b974-74440527fe39"
+        },
+        "provisioner": "rancher.io/local-path",
+        "reclaimPolicy": "Delete",
+        "volumeBindingMode": "WaitForFirstConsumer"
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  },
+  "system_pods": "NAMESPACE            NAME                                               READY   STATUS    RESTARTS   AGE    IP           NODE                       NOMINATED NODE   READINESS GATES\nkube-system          coredns-66bc5c9577-6tm6j                           1/1     Running   0          108s   10.244.0.2   venue-lab2-control-plane   <none>           <none>\nkube-system          coredns-66bc5c9577-sxlfx                           1/1     Running   0          108s   10.244.0.3   venue-lab2-control-plane   <none>           <none>\nkube-system          etcd-venue-lab2-control-plane                      1/1     Running   0          116s   172.20.0.2   venue-lab2-control-plane   <none>           <none>\nkube-system          kindnet-c4bj2                                      1/1     Running   0          107s   172.20.0.3   venue-lab2-worker          <none>           <none>\nkube-system          kindnet-swvwg                                      1/1     Running   0          109s   172.20.0.2   venue-lab2-control-plane   <none>           <none>\nkube-system          kindnet-wzpn6                                      1/1     Running   0          108s   172.20.0.4   venue-lab2-worker2         <none>           <none>\nkube-system          kube-apiserver-venue-lab2-control-plane            1/1     Running   0          116s   172.20.0.2   venue-lab2-control-plane   <none>           <none>\nkube-system          kube-controller-manager-venue-lab2-control-plane   1/1     Running   0          115s   172.20.0.2   venue-lab2-control-plane   <none>           <none>\nkube-system          kube-proxy-28q7t                                   1/1     Running   0          107s   172.20.0.3   venue-lab2-worker          <none>           <none>\nkube-system          kube-proxy-425fv                                   1/1     Running   0          109s   172.20.0.2   venue-lab2-control-plane   <none>           <none>\nkube-system          kube-proxy-s9pb6                                   1/1     Running   0          108s   172.20.0.4   venue-lab2-worker2         <none>           <none>\nkube-system          kube-scheduler-venue-lab2-control-plane            1/1     Running   0          116s   172.20.0.2   venue-lab2-control-plane   <none>           <none>\nlocal-path-storage   local-path-provisioner-57f858859-2z6pp             1/1     Running   0          108s   10.244.0.4   venue-lab2-control-plane   <none>           <none>",
+  "host_memory": "19327352832",
+  "docker_resources": "CPUs=11 Memory=8216915968 Arch=aarch64",
+  "disk": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   460Gi   405Gi    12Gi    98%    3.1M  130M    2%   /System/Volumes/Data",
+  "test_image_build": "",
+  "test_image": "lab2-env-check:22e0c990",
+  "image_load": "",
+  "node_image_checks": {
+    "venue-lab2-control-plane": "IMAGE                                           TAG                  IMAGE ID            SIZE\ndocker.io/kindest/kindnetd                      v20260820-69b56db7   8e13ccc0aaa68       35.7MB\ndocker.io/kindest/local-path-helper             v20260131-7181c60a   8f375e9f93513       2.74MB\ndocker.io/kindest/local-path-provisioner        v20260820-69b56db7   0771a8a05619f       14.2MB\ndocker.io/library/lab2-env-check                22e0c990             3273f1ca10a86       25.8MB\nregistry.k8s.io/coredns/coredns                 v1.12.1              138784d87c9c5       20.4MB\nregistry.k8s.io/etcd                            3.6.5-0              2c5f0dedd21c2       21.1MB\nregistry.k8s.io/kube-apiserver-arm64            v1.34.11             74889536a4c2b       84.2MB\nregistry.k8s.io/kube-apiserver                  v1.34.11             74889536a4c2b       84.2MB\nregistry.k8s.io/kube-controller-manager-arm64   v1.34.11             06f514b243555       72.2MB\nregistry.k8s.io/kube-controller-manager         v1.34.11             06f514b243555       72.2MB\nregistry.k8s.io/kube-proxy-arm64                v1.34.11             aa7699b2285dd       78.2MB\nregistry.k8s.io/kube-proxy                      v1.34.11             aa7699b2285dd       78.2MB\nregistry.k8s.io/kube-scheduler-arm64            v1.34.11             0a58a7b8803e2       51.7MB\nregistry.k8s.io/kube-scheduler                  v1.34.11             0a58a7b8803e2       51.7MB\nregistry.k8s.io/pause                           3.10                 afb61768ce381       268kB",
+    "venue-lab2-worker": "IMAGE                                           TAG                  IMAGE ID            SIZE\ndocker.io/kindest/kindnetd                      v20260820-69b56db7   8e13ccc0aaa68       35.7MB\ndocker.io/kindest/local-path-helper             v20260131-7181c60a   8f375e9f93513       2.74MB\ndocker.io/kindest/local-path-provisioner        v20260820-69b56db7   0771a8a05619f       14.2MB\ndocker.io/library/lab2-env-check                22e0c990             3273f1ca10a86       25.8MB\nregistry.k8s.io/coredns/coredns                 v1.12.1              138784d87c9c5       20.4MB\nregistry.k8s.io/etcd                            3.6.5-0              2c5f0dedd21c2       21.1MB\nregistry.k8s.io/kube-apiserver-arm64            v1.34.11             74889536a4c2b       84.2MB\nregistry.k8s.io/kube-apiserver                  v1.34.11             74889536a4c2b       84.2MB\nregistry.k8s.io/kube-controller-manager-arm64   v1.34.11             06f514b243555       72.2MB\nregistry.k8s.io/kube-controller-manager         v1.34.11             06f514b243555       72.2MB\nregistry.k8s.io/kube-proxy-arm64                v1.34.11             aa7699b2285dd       78.2MB\nregistry.k8s.io/kube-proxy                      v1.34.11             aa7699b2285dd       78.2MB\nregistry.k8s.io/kube-scheduler-arm64            v1.34.11             0a58a7b8803e2       51.7MB\nregistry.k8s.io/kube-scheduler                  v1.34.11             0a58a7b8803e2       51.7MB\nregistry.k8s.io/pause                           3.10                 afb61768ce381       268kB",
+    "venue-lab2-worker2": "IMAGE                                           TAG                  IMAGE ID            SIZE\ndocker.io/kindest/kindnetd                      v20260820-69b56db7   8e13ccc0aaa68       35.7MB\ndocker.io/kindest/local-path-helper             v20260131-7181c60a   8f375e9f93513       2.74MB\ndocker.io/kindest/local-path-provisioner        v20260820-69b56db7   0771a8a05619f       14.2MB\ndocker.io/library/lab2-env-check                22e0c990             3273f1ca10a86       25.8MB\nregistry.k8s.io/coredns/coredns                 v1.12.1              138784d87c9c5       20.4MB\nregistry.k8s.io/etcd                            3.6.5-0              2c5f0dedd21c2       21.1MB\nregistry.k8s.io/kube-apiserver-arm64            v1.34.11             74889536a4c2b       84.2MB\nregistry.k8s.io/kube-apiserver                  v1.34.11             74889536a4c2b       84.2MB\nregistry.k8s.io/kube-controller-manager-arm64   v1.34.11             06f514b243555       72.2MB\nregistry.k8s.io/kube-controller-manager         v1.34.11             06f514b243555       72.2MB\nregistry.k8s.io/kube-proxy-arm64                v1.34.11             aa7699b2285dd       78.2MB\nregistry.k8s.io/kube-proxy                      v1.34.11             aa7699b2285dd       78.2MB\nregistry.k8s.io/kube-scheduler-arm64            v1.34.11             0a58a7b8803e2       51.7MB\nregistry.k8s.io/kube-scheduler                  v1.34.11             0a58a7b8803e2       51.7MB\nregistry.k8s.io/pause                           3.10                 afb61768ce381       268kB"
+  },
+  "pvc": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"PersistentVolumeClaim\",\"metadata\":{\"annotations\":{},\"name\":\"check-data\",\"namespace\":\"lab2-env-check-9b8d7e2e\"},\"spec\":{\"accessModes\":[\"ReadWriteOnce\"],\"resources\":{\"requests\":{\"storage\":\"64Mi\"}},\"storageClassName\":\"standard\"}}\n",
+        "pv.kubernetes.io/bind-completed": "yes",
+        "pv.kubernetes.io/bound-by-controller": "yes",
+        "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+        "volume.kubernetes.io/selected-node": "venue-lab2-worker2",
+        "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T08:54:39Z",
+      "finalizers": [
+        "kubernetes.io/pvc-protection"
+      ],
+      "name": "check-data",
+      "namespace": "lab2-env-check-9b8d7e2e",
+      "resourceVersion": "756",
+      "uid": "b0f60547-35b2-46f9-9d50-065119c261ab"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "resources": {
+        "requests": {
+          "storage": "64Mi"
+        }
+      },
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem",
+      "volumeName": "pvc-b0f60547-35b2-46f9-9d50-065119c261ab"
+    },
+    "status": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "64Mi"
+      },
+      "phase": "Bound"
+    }
+  },
+  "pv": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolume",
+    "metadata": {
+      "annotations": {
+        "local.path.provisioner/selected-node": "venue-lab2-worker2",
+        "pv.kubernetes.io/provisioned-by": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T08:54:41Z",
+      "finalizers": [
+        "kubernetes.io/pv-protection"
+      ],
+      "name": "pvc-b0f60547-35b2-46f9-9d50-065119c261ab",
+      "resourceVersion": "754",
+      "uid": "b38e9d4f-9559-452d-a02d-c4ce91f574c4"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "64Mi"
+      },
+      "claimRef": {
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "name": "check-data",
+        "namespace": "lab2-env-check-9b8d7e2e",
+        "resourceVersion": "736",
+        "uid": "b0f60547-35b2-46f9-9d50-065119c261ab"
+      },
+      "hostPath": {
+        "path": "/var/local-path-provisioner/pvc-b0f60547-35b2-46f9-9d50-065119c261ab_lab2-env-check-9b8d7e2e_check-data",
+        "type": "DirectoryOrCreate"
+      },
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "kubernetes.io/hostname",
+                  "operator": "In",
+                  "values": [
+                    "venue-lab2-worker2"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "persistentVolumeReclaimPolicy": "Delete",
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem"
+    },
+    "status": {
+      "lastPhaseTransitionTime": "2026-11-15T08:54:41Z",
+      "phase": "Bound"
+    }
+  },
+  "writer_node": "venue-lab2-worker2",
+  "reader_node": "venue-lab2-worker2",
+  "scope": "Temporary infrastructure checks only; PostgreSQL/business persistence still requires acceptance. Local volume is node-bound, not cross-node recovery.",
+  "status": "PASS",
+  "temporary_namespace_removed": true
+}
