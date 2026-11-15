@@ -7,6 +7,7 @@ describe('页面地址', () => {
     expect(parseRoute('#/')).toEqual({ kind: 'home' })
     expect(parseRoute('#/venues/12/book')).toEqual({ kind: 'booking', venueId: 12 })
     expect(parseRoute('#/reservations')).toEqual({ kind: 'reservations' })
+    expect(parseRoute('#/reports')).toEqual({ kind: 'reports' })
   })
 
   it('解析公开的场地创建页', () => {

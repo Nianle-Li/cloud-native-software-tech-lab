@@ -24,6 +24,17 @@ afterEach(() => {
 })
 
 describe('独立页面导航', () => {
+  it('报告页可从导航进入和直接刷新地址，打开页面本身不会创建任务', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    render(<App />)
+    await user.click(screen.getByRole('link', { name: '报告查询' }))
+    expect(window.location.hash).toBe('#/reports')
+    expect(screen.getByRole('heading', { level: 1, name: '查询报告' })).toBeInTheDocument()
+    expect(document.title).toContain('报告查询')
+    expect(fetchMock.mock.calls.some(([path]) => String(path).includes('/api/reports/'))).toBe(false)
+  })
+
   it('概览页选择开放场地后进入预约页，记录页独立显示', async () => {
     const user = userEvent.setup()
     render(<App />)

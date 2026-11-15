@@ -120,6 +120,24 @@ button.secondary:hover:not(:disabled) { border-color: var(--accent); background:
 .create-venue-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0.6rem 0.9rem; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font-size: 0.86rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .create-venue-link:hover { background: var(--accent-hover); }
 
+.reports-panel { margin-top: 1.35rem; }
+.report-query-form { margin-bottom: 1.25rem; }
+.report-query-form label { display: block; margin-bottom: 0.45rem; font-weight: 700; }
+.report-query-controls { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+.report-query-controls input { flex: 1 1 17rem; min-width: 0; min-height: 44px; padding: 0.65rem 0.8rem; border: 1px solid var(--border); border-radius: 9px; background: #fff; color: var(--ink); }
+.report-query-controls button:not(.secondary) { min-height: 44px; padding: 0.65rem 1rem; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: #fff; font-weight: 700; }
+.report-query-controls button:not(.secondary):hover:not(:disabled) { background: var(--accent-hover); }
+.reports-result { margin-top: 1.35rem; }
+.report-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; margin: 0 0 1.25rem; }
+.report-summary div { min-width: 0; padding: 0.8rem; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-soft); }
+.report-summary dt { color: var(--ink-muted); font-size: 0.8rem; }
+.report-summary dd { margin: 0.3rem 0 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; font-weight: 700; }
+.report-table-scroll { overflow-x: auto; }
+.report-table { width: 100%; border-collapse: collapse; text-align: left; font-variant-numeric: tabular-nums; }
+.report-table caption { padding-bottom: 0.5rem; text-align: left; color: var(--ink-muted); font-size: 0.8rem; }
+.report-table th, .report-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+.report-table thead th { background: var(--surface-soft); }
+
 .venue-list, .reservation-list { display: grid; gap: 0.9rem; margin: 0; padding: 0; list-style: none; }
 .venue-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .venue-card { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--border); border-radius: 13px; background: #fff; transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
@@ -281,6 +299,7 @@ button.secondary.cancel-button:hover:not(:disabled) { border-color: #bf7969; bac
   .reservation-card dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .reservation-actions { justify-content: flex-start; }
   .detail-list { grid-template-columns: 1fr; }
+  .report-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .overlay-backdrop { padding: 0; }
   .overlay-panel, .overlay-form .overlay-panel { width: 100%; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
 }
@@ -301,6 +320,7 @@ button.secondary.cancel-button:hover:not(:disabled) { border-color: #bf7969; bac
   .hero-stats strong { font-size: 1.6rem; }
   .hero-stats span { font-size: 0.78rem; }
   .reservation-card dl { grid-template-columns: 1fr; }
+  .report-summary { grid-template-columns: 1fr; }
   .pagination { flex-wrap: wrap; }
   .pagination > span { flex-basis: 100%; order: -1; text-align: center; }
   .pagination > button { flex: 1 1 7rem; min-width: 0; }
