@@ -29,6 +29,7 @@ def main() -> None:
     parser.add_argument("start_date", type=date)
     parser.add_argument("end_date", type=date)
     parser.add_argument("--image", required=True, help="与当前 API Deployment 相同的镜像标签或摘要")
+    parser.add_argument("--context", default="kind-venue-lab2", help="目标 kubectl context")
     parser.add_argument("--namespace", default="venue-booking")
     parser.add_argument("--name", help="重试时可复用先前的 Job 名称")
     parser.add_argument("--dry-run", action="store_true", help="只输出生成的清单")
@@ -44,6 +45,8 @@ def main() -> None:
         parser.error("命名空间必须是小写 DNS 名称")
     if not IMAGE.fullmatch(args.image):
         parser.error("镜像名称包含不支持的字符")
+    if not args.context.startswith("kind-") or not JOB_ID.fullmatch(args.context[5:]):
+        parser.error("context 必须是 kind 集群的 context 名称")
 
     manifest = TEMPLATE.read_text(encoding="utf-8")
     for marker, value in {
@@ -58,7 +61,8 @@ def main() -> None:
     if args.dry_run:
         print(manifest, end="")
     else:
-        subprocess.run(["kubectl", "-n", args.namespace, "apply", "-f", "-"],
+        subprocess.run(["kubectl", "--context", args.context, "-n", args.namespace,
+                        "apply", "-f", "-"],
                        input=manifest, text=True, check=True)
         print("job_id=" + name)
 
