@@ -8,10 +8,10 @@
 | --- | --- | --- |
 | 业务与 API | 报告数据口径、JSON 字段、状态和错误码；现有七个业务接口继续兼容 | 页面视觉细节、报告中图表样式 |
 | 任务执行 | 报告镜像启动命令、环境变量、任务 ID、退出码、同一 ID 重试规则、正式/演示日期模式 | 演示的具体触发时刻 |
-| 组件连接 | 命名空间、Service 名称/端口、ConfigMap/Secret 名称与键、标签选择器 | 镜像加载命令、StorageClass 名称和资源配额数值 |
+| 组件连接 | kind 集群名 `venue-lab2`、context `kind-venue-lab2`、命名空间、Service 名称/端口、ConfigMap/Secret 名称与键、标签选择器 | kind/节点镜像实测版本、StorageClass 名称和资源配额数值 |
 | 验证 | 谁提供固定响应样例、谁提供测试数据库、谁提供集群入口；证据记录格式 | 最终截图排版与报告文字 |
 
-“必须固定的内容”确定后，页面可用固定 JSON 样例开发，报告程序可用本地数据库开发，集群资源也可独立准备。集群发行版、镜像装载和存储驱动未知时，不阻止这三条开发线；它们只阻止最终清单定值与真实集群验收。
+“必须固定的内容”确定后，页面可用固定 JSON 样例开发，报告程序可用本地数据库开发，集群资源也可独立准备。集群发行版已确定为 **kind**；实际 kind/Kubernetes 版本、节点镜像、镜像装载结果和存储驱动仍须由 C 实测，不能从本文推断已部署。
 
 ## 2. 跨组件接口：当前采用的约定
 
@@ -92,6 +92,39 @@ Kubernetes Secret 的 Base64 编码不提供保密性；谁能读取 Secret、�
 
 真实业务回归会创建持久数据，而现有 API 不提供删除场地/预约的接口。独立开发使用本地测试数据库；真实集群验收统一使用 `venue-booking` 命名空间，在测试数据中加入唯一批次标识，记录场地/预约 ID、时间与状态，并在报告核对时纳入这些记录。不能在未说明数据来源的情况下，把多次测试后的数据库当成空库；验收过程不得删除有真实证据的 PVC。
 
+### 2.6 kind 运行与跨成员交付
+
+| 项目 | 必须执行的约定 | 交付人 → 接收人 |
+| --- | --- | --- |
+| 唯一验收环境 | C 指定一台承载 Docker 与 kind 的机器，维护名为 `venue-lab2` 的集群；context 为 `kind-venue-lab2`，命名空间为 `venue-booking`。集群配置放在 `k8s/kind/cluster.yaml`，基准为 1 control-plane + 2 worker，不配置对外端口映射；优先选支持 CronJob `timeZone` 的 Kubernetes v1.27 或更新节点镜像。C 记录 kind 版本、节点镜像标签/摘要、Kubernetes 版本、三个节点的名称/架构/污点/可调度状态及宿主机可用资源。 | C → A/B |
+| 操作入口 | 对共同验收集群执行的 `kubectl` 命令显式加 `--context kind-venue-lab2`，命名空间资源命令另加 `-n venue-booking`。kind 的 kubeconfig 通常指向承载机器的本地 API 入口；A/B 在其他机器上拥有同名 context 或复制 kubeconfig，不等于正在操作 C 的集群。C 提供同一台机器的共享终端/现场操作入口，让 A/B 各自执行并保存主责检查。 | C → A/B；A/B 回传操作证据 |
+| 镜像交付 | A 准备 frontend/node-check 镜像，B 构建 API 镜像；双方交付镜像名、唯一标签、来源或构建提交、架构与命令。C 在该 kind 所在的 Docker 环境构建或接收镜像，用 `kind load docker-image <镜像:标签> --name venue-lab2` 装载，并核对清单引用完全一致。API、手动 Job、CronJob 使用相同的 API 镜像；不要重用旧标签或依靠宿主机镜像缓存。 | A/B → C；C 回传装载结果与节点检查 |
+| 数据与访问 | C 先确认实际 StorageClass，部署数据库并验证 PVC Bound；B 再部署 API 与手动 Job；A 随后部署前端、CronJob 和 DaemonSet。浏览器通过 `kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend 8080:80` 访问；API/数据库仍为集群内部 Service。 | C → B → A |
+| 证据范围 | 统一记录 context、集群承载机器、命名空间、镜像标签、节点、时间、测试数据 ID 和命令输出。其他成员本机的 kind/Compose/Testcontainers 结果只能作为独立开发证据，不能与共同集群截图拼接为一次验收。 | 三人共同核对 |
+
+C 提交的 `k8s/kind/cluster.yaml` 至少包含下列拓扑；创建前按实际宿主机架构固定各节点可用的 `kindest/node` 镜像版本或摘要，并将实用值写进文件。当前仓库尚无此文件，下面是 C 的交付格式，不代表集群已经创建。
+
+```yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
+```
+
+C 创建或复用集群前先执行 `kind get clusters`，已有 `venue-lab2` 时先核对配置和数据，不通过删除重建来“修复”有证据的数据库。新建时从仓库根目录执行：
+
+```sh
+kind create cluster --name venue-lab2 --config k8s/kind/cluster.yaml --wait 5m
+kubectl --context kind-venue-lab2 get nodes -o wide
+kubectl --context kind-venue-lab2 get storageclass
+```
+
+上述命令是操作规范，不是已执行记录。C 在创建前提交与实际环境一致的集群配置，固定节点镜像版本/摘要并核查宿主机容量；若没有默认可用 StorageClass，先提交并验证存储适配方案再部署数据库。两个 worker 用于验证 DaemonSet 跨工作节点覆盖；control-plane 是否可调度由实测污点决定，不预设有第三个业务 Pod。API 两副本要证明两个不同 Pod 回应请求，但现有 Deployment **没有**规定它们必须落在不同节点。[kind 创建、命名集群与镜像装载](https://kind.sigs.k8s.io/docs/user/quick-start/)
+
+每轮镜像变更后，A/B 分别更新自己负责的 Deployment/Job/CronJob 清单，C 核对装载到 `venue-lab2` 的同名同标签镜像，再执行 apply 和 rollout 检查。`imagePullPolicy: IfNotPresent` 配合本地装载时，原标签不变的 `kubectl apply` 不会触发更新，故**新内容必须使用新标签**；报告模式的手动触发脚本 `--image` 也必须传同一标签。镜像装载失败时核对标签、节点架构、目标集群名与 Pod 事件，不先改变业务代码。[kind 镜像装载说明](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster)
+
 ## 3. 已确定的设计选择与环境适配
 
 以下选择是本组实现基线，A/B/C 按同一语义开发。环境实测值由 C 记录，A/B 核对其对各自资源的影响；不把未知环境值写成已验证事实。
@@ -107,7 +140,7 @@ Kubernetes Secret 的 Base64 编码不提供保密性；谁能读取 Secret、�
 | 健康检查 | API 显式启用 Actuator probes；startup/liveness 使用 `/actuator/health/liveness`，readiness 使用 `/actuator/health/readiness`，不把数据库检查加入 liveness。数据库用 `pg_isready`，前端检查本地 HTTP。阈值由 C 根据实测启动时间和节点容量定值。 | 避免数据库短时故障触发所有 API 副本反复重启；readiness 默认不包含外部依赖，因此数据库可用性仍须在联调中通过业务请求核验。[Spring Boot 3.4 探针说明](https://docs.spring.io/spring-boot/3.4/reference/actuator/endpoints.html) |
 | 验收数据 | 独立开发用本地测试库；真实集群在 `venue-booking` 中使用唯一批次标识并记录 ID、时间、状态及预期统计值。 | 让业务回归、Job 结果与 PVC 重建证据对应同一部署，避免多份环境或遗留数据混淆。 |
 
-**环境适配只填事实：**C 在部署前记录发行版/版本、可调度节点及污点、CPU/内存、StorageClass/PVC 访问模式、镜像拉取或装载方式、实际命名空间与访问入口；A/B 根据这些值调整各自清单中的镜像标识、资源额度和探针阈值。若没有动态供卷能力，C 选择课程环境支持且可验证 Pod 重建后数据保留的持久卷方案，并同步部署步骤。单节点环境只证明单节点 DaemonSet 覆盖；若 `timeZone` 不支持，按上表生成并验证适配清单。改变本节已确定的业务语义时，先共同修订契约、响应样例和验收项，再修改代码。
+**环境适配只填事实：**C 在部署前记录 kind/Kubernetes 版本、节点镜像、可调度节点及污点、CPU/内存、StorageClass/PVC 访问模式、镜像装载结果、实际命名空间与访问入口；A/B 根据这些值调整各自清单中的镜像标识、资源额度和探针阈值。若没有动态供卷能力，C 选择能验证 Pod 重建后数据保留的持久卷方案，并同步部署步骤。若基准双 worker 因宿主资源限制而缩减，先三人修订验收范围；单 worker 只能证明单节点 DaemonSet 覆盖。若 `timeZone` 不支持，按上表生成并验证适配清单。改变本节已确定的业务语义时，先共同修订契约、响应样例和验收项，再修改代码。
 
 ## 4. 联调与变更规则
 

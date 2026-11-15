@@ -23,7 +23,14 @@
 | `report` | Job / CronJob | 使用同一个报告执行程序与数据库 Service；任务 Pod 不创建 Service | 一次性或周期性执行，结果持久保存而非留在 Job Pod 文件系统。 |
 | `node-check` | DaemonSet | 每个符合调度条件的节点一个 Pod；无需 Service | 持续输出节点身份与检查结果，供节点级任务和调度验证。 |
 
-目标命名空间为 `venue-booking`。常规资源清单放在 `k8s/base/`，手动 Job 模板放在 `k8s/jobs/`，短周期 CronJob 覆盖清单放在 `k8s/demo/`；真实 Secret 只由部署环境创建，不放入清单目录。README 按依赖关系列出应用顺序，**不对整个 `k8s/` 目录直接执行 `kubectl apply`**，以免误创建手动 Job 或启用演示周期。资源名称与本表保持一致；若环境不允许创建命名空间，则在记录实际命名空间的前提下调整。`frontend` 对外访问采用 `kubectl port-forward service/frontend 8080:80` 作为通用实验方式；如使用 NodePort/Ingress，需说明实际控制器和入口。`api`、`database` 不因演示而发布到集群外。集群内连接使用 Service 名称，不写 Pod IP。
+本组**确定使用 kind** 作为 Lab 2 的 Kubernetes 实验环境；这是本组实现选择，不是任务书限定的发行版。唯一共同验收集群名为 `venue-lab2`，kubectl context 为 `kind-venue-lab2`，目标命名空间为 `venue-booking`。C 负责提交 `k8s/kind/cluster.yaml`，基准拓扑为 1 个 control-plane 和 2 个 worker；A/B 可在自己的 kind 集群开发，但最终证据必须来自这个指定集群。kind 的节点是容器，多个节点不代表多台物理机器。C 在创建前核对宿主机资源并固定可用的 kind 节点镜像版本或摘要；若资源不足以运行基准拓扑，先记录限制、同步三人并修订验收范围，不把单 worker 结果写作跨节点覆盖。[kind 多节点配置](https://kind.sigs.k8s.io/docs/user/quick-start/#multi-node-clusters)
+
+常规资源清单放在 `k8s/base/`，手动 Job 模板放在 `k8s/jobs/`，短周期 CronJob 覆盖清单放在 `k8s/demo/`；真实 Secret 只由部署环境创建，不放入清单目录。README 按依赖关系列出应用顺序，**不对整个 `k8s/` 目录直接执行 `kubectl apply`**，以免误创建手动 Job 或启用演示周期。所有 `kubectl` 操作显式指定 `--context kind-venue-lab2`，命名空间资源另加 `-n venue-booking`；先确认节点及版本，不将另一台机器上的同名 kind 集群混作同一环境。`frontend` 对外访问采用 `kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend 8080:80`；当前基线不需要 NodePort、Ingress 或 kind 的 `extraPortMappings`。`api`、`database` 不因演示而发布到集群外。集群内连接使用 Service 名称，不写 Pod IP。
+
+### kind 的镜像与存储边界
+
+- 前后端镜像先在**承载该 kind 集群的 Docker 环境**构建，再由 C 使用 `kind load docker-image <镜像:固定标签> --name venue-lab2` 装入指定集群；Pod 清单的镜像名称和标签须逐字相同。`kind load` 会向命名集群节点装载镜像，宿主机 `docker images` 有镜像本身不证明节点可用。API、手动 Job、CronJob 必须使用同一轮的同一个 API 镜像标签；A/B 每次修改镜像内容后使用新的可追踪标签，更新自己的清单并通知依赖方，避免 `IfNotPresent` 继续运行旧内容。禁止用隐含的 `latest` 作为本地装载基线。[kind 镜像装载说明](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster)
+- C 在部署数据库前实测并记录 `kubectl --context kind-venue-lab2 get storageclass` 的名称、默认类、provisioner 与绑定模式，确认数据库 PVC 实际 `Bound`；不把 `standard` 等名称写成未经检查的事实。kind 的本地节点存储可用于**同一集群内删除数据库 Pod 后重建**的保留数据演示，不自动提供跨节点、跨宿主机或删除 kind 集群后的恢复。验收前不得删除集群、PVC 或相关节点容器；若要展示更强的持久性，须另行设计外部存储并记录。[kind 节点挂载配置](https://kind.sigs.k8s.io/docs/user/configuration/#extra-mounts)
 
 以下名称和端口已作为三人并行开发的统一基线；调整任一项都要通知依赖方并修改清单与文档。
 
