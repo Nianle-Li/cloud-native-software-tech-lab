@@ -7,6 +7,7 @@
 API/任务由 B 部署，前端/CronJob/DaemonSet 由 A 部署并保留各自验证证据。
 前端镜像构建、清单应用与入口核查见[前端部署说明](frontend.md)。
 节点 DNS 检查的镜像、DaemonSet 与覆盖核查见[节点检查说明](node-check.md)。
+正式与演示定时报告的切换、核查和恢复见[定时报告说明](report-cronjob.md)。
 
 ## 1. 核对环境与数据库镜像
 
