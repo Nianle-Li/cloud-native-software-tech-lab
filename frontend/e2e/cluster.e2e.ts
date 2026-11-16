@@ -9,7 +9,7 @@ function futureShanghaiDate(daysAhead: number): string {
   return new Date(Date.parse(`${today}T00:00:00Z`) + daysAhead * 86_400_000).toISOString().slice(0, 10)
 }
 
-test('共同集群前端完成场地、预约、冲突、详情与取消', async ({ page }) => {
+test('集群前端完成场地、预约、冲突、详情与取消', async ({ page }) => {
   const batch = `lab2-a-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
   const venueName = `回归场地 ${batch}`
   const date = futureShanghaiDate(2)
@@ -79,9 +79,9 @@ test('共同集群前端完成场地、预约、冲突、详情与取消', async
   await expect(page.getByRole('status')).toContainText(`预约 ${reservation.id} 已取消`)
 })
 
-test('共同集群前端查询已持久化的成功报告和零值场地', async ({ page }) => {
+test('集群前端查询已持久化的成功报告、零值与非零值场地', async ({ page }) => {
   const jobId = process.env.LAB2_REPORT_JOB_ID
-  expect(jobId, '请设置 LAB2_REPORT_JOB_ID 为共同集群中已成功的 Job 名称').toMatch(/^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/)
+  expect(jobId, '请设置 LAB2_REPORT_JOB_ID 为目标集群中已成功的 Job 名称').toMatch(/^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/)
   await page.goto('/#/reports')
   await page.getByRole('textbox', { name: 'Job ID' }).fill(jobId!)
   const [response] = await Promise.all([
@@ -97,11 +97,17 @@ test('共同集群前端查询已持久化的成功报告和零值场地', async
   expect(report.job_id).toBe(jobId)
   expect(report.status).toBe('SUCCEEDED')
   const zero = report.items.find((item) => item.reservation_count === 0 && item.reserved_minutes === 0)
+  const positive = report.items.find((item) => item.reservation_count > 0 && item.reserved_minutes > 0)
   expect(zero, '报告应包含零值场地').toBeDefined()
+  expect(positive, '报告应包含非零值场地').toBeDefined()
   await expect(page.getByRole('heading', { name: '报告结果' })).toBeVisible()
   await expect(page.getByText('已成功', { exact: true })).toBeVisible()
   await expect(page.locator('.report-table tbody tr')).toHaveCount(report.items.length)
   const zeroRow = page.locator('.report-table tbody tr').filter({ hasText: `（#${zero!.venue_id}）` })
   await expect(zeroRow.locator('td')).toHaveText(['0', '0'])
-  console.log(`job_id=${jobId} status=${report.status} zero_venue_id=${zero!.venue_id}`)
+  const positiveRow = page.locator('.report-table tbody tr').filter({ hasText: `（#${positive!.venue_id}）` })
+  await expect(positiveRow.locator('td')).toHaveText([
+    String(positive!.reservation_count), String(positive!.reserved_minutes),
+  ])
+  console.log(`job_id=${jobId} status=${report.status} zero_venue_id=${zero!.venue_id} positive_venue_id=${positive!.venue_id}`)
 })
