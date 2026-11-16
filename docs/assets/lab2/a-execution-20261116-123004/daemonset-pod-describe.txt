@@ -1,0 +1,126 @@
+Name:             node-check-mxkrx
+Namespace:        venue-booking
+Priority:         0
+Service Account:  default
+Node:             venue-lab2-worker/172.20.0.3
+Start Time:       Mon, 16 Nov 2026 12:25:21 +0800
+Labels:           app.kubernetes.io/component=node-check
+                  app.kubernetes.io/name=venue-booking
+                  controller-revision-hash=6f47c5f66f
+                  pod-template-generation=1
+Annotations:      <none>
+Status:           Running
+IP:               10.244.2.6
+IPs:
+  IP:           10.244.2.6
+Controlled By:  DaemonSet/node-check
+Containers:
+  node-check:
+    Container ID:   containerd://fc83c53df5328fe4cecf2e530af07eaa9523175ccb1bb52979dcb5fe9cbc7043
+    Image:          venue-booking-node-check:lab2-20261115-01
+    Image ID:       docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Mon, 16 Nov 2026 12:25:21 +0800
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     100m
+      memory:  64Mi
+    Requests:
+      cpu:      10m
+      memory:   16Mi
+    Readiness:  exec [sh -c nslookup kubernetes.default.svc >/dev/null 2>&1] delay=0s timeout=3s period=10s #success=1 #failure=2
+    Environment:
+      NODE_NAME:   (v1:spec.nodeName)
+      HOST_IP:     (v1:status.hostIP)
+    Mounts:       <none>
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:                      <none>
+QoS Class:                    Burstable
+Node-Selectors:               <none>
+Tolerations:                  node.kubernetes.io/disk-pressure:NoSchedule op=Exists
+                              node.kubernetes.io/memory-pressure:NoSchedule op=Exists
+                              node.kubernetes.io/not-ready:NoExecute op=Exists
+                              node.kubernetes.io/pid-pressure:NoSchedule op=Exists
+                              node.kubernetes.io/unreachable:NoExecute op=Exists
+                              node.kubernetes.io/unschedulable:NoSchedule op=Exists
+Events:
+  Type     Reason     Age                     From               Message
+  ----     ------     ----                    ----               -------
+  Normal   Scheduled  9m31s                   default-scheduler  Successfully assigned venue-booking/node-check-mxkrx to venue-lab2-worker
+  Normal   Pulled     9m31s                   kubelet            Container image "venue-booking-node-check:lab2-20261115-01" already present on machine
+  Normal   Created    9m31s                   kubelet            Created container: node-check
+  Normal   Started    9m31s                   kubelet            Started container node-check
+  Warning  Unhealthy  4m23s (x36 over 9m30s)  kubelet            Readiness probe failed:
+
+
+Name:             node-check-xvbqn
+Namespace:        venue-booking
+Priority:         0
+Service Account:  default
+Node:             venue-lab2-worker2/172.20.0.4
+Start Time:       Mon, 16 Nov 2026 12:25:21 +0800
+Labels:           app.kubernetes.io/component=node-check
+                  app.kubernetes.io/name=venue-booking
+                  controller-revision-hash=6f47c5f66f
+                  pod-template-generation=1
+Annotations:      <none>
+Status:           Running
+IP:               10.244.1.11
+IPs:
+  IP:           10.244.1.11
+Controlled By:  DaemonSet/node-check
+Containers:
+  node-check:
+    Container ID:   containerd://03e105231598a2285cf0e4e6f0ced8db73be2dfc45f953750cbe584a6292de52
+    Image:          venue-booking-node-check:lab2-20261115-01
+    Image ID:       docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Mon, 16 Nov 2026 12:25:21 +0800
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     100m
+      memory:  64Mi
+    Requests:
+      cpu:      10m
+      memory:   16Mi
+    Readiness:  exec [sh -c nslookup kubernetes.default.svc >/dev/null 2>&1] delay=0s timeout=3s period=10s #success=1 #failure=2
+    Environment:
+      NODE_NAME:   (v1:spec.nodeName)
+      HOST_IP:     (v1:status.hostIP)
+    Mounts:       <none>
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:                      <none>
+QoS Class:                    Burstable
+Node-Selectors:               <none>
+Tolerations:                  node.kubernetes.io/disk-pressure:NoSchedule op=Exists
+                              node.kubernetes.io/memory-pressure:NoSchedule op=Exists
+                              node.kubernetes.io/not-ready:NoExecute op=Exists
+                              node.kubernetes.io/pid-pressure:NoSchedule op=Exists
+                              node.kubernetes.io/unreachable:NoExecute op=Exists
+                              node.kubernetes.io/unschedulable:NoSchedule op=Exists
+Events:
+  Type     Reason     Age                     From               Message
+  ----     ------     ----                    ----               -------
+  Normal   Scheduled  9m31s                   default-scheduler  Successfully assigned venue-booking/node-check-xvbqn to venue-lab2-worker2
+  Normal   Pulled     9m31s                   kubelet            Container image "venue-booking-node-check:lab2-20261115-01" already present on machine
+  Normal   Created    9m31s                   kubelet            Created container: node-check
+  Normal   Started    9m31s                   kubelet            Started container node-check
+  Warning  Unhealthy  4m27s (x33 over 9m31s)  kubelet            Readiness probe failed:

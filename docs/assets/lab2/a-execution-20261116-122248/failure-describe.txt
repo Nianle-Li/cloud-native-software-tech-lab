@@ -1,0 +1,258 @@
+Name:             api-d866875dd-jtlfr
+Namespace:        venue-booking
+Priority:         0
+Service Account:  default
+Node:             venue-lab2-worker/172.20.0.3
+Start Time:       Mon, 16 Nov 2026 11:35:03 +0800
+Labels:           app.kubernetes.io/component=api
+                  app.kubernetes.io/name=venue-booking
+                  pod-template-hash=d866875dd
+Annotations:      <none>
+Status:           Running
+IP:               10.244.2.4
+IPs:
+  IP:           10.244.2.4
+Controlled By:  ReplicaSet/api-d866875dd
+Containers:
+  api:
+    Container ID:   containerd://43f0c464e10f2db102a2d204ef3b4782a2ef01e24a226befc406f3a1aecb1f22
+    Image:          venue-booking-api:lab2-20261113
+    Image ID:       docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e
+    Port:           8080/TCP (http)
+    Host Port:      0/TCP (http)
+    State:          Running
+      Started:      Mon, 16 Nov 2026 11:35:03 +0800
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:      100m
+      memory:   256Mi
+    Liveness:   http-get http://:http/actuator/health/liveness delay=0s timeout=1s period=10s #success=1 #failure=3
+    Readiness:  http-get http://:http/actuator/health/readiness delay=0s timeout=1s period=5s #success=1 #failure=3
+    Startup:    http-get http://:http/actuator/health/liveness delay=0s timeout=1s period=5s #success=1 #failure=30
+    Environment:
+      SPRING_DATASOURCE_URL:       <set to the key 'SPRING_DATASOURCE_URL' of config map 'venue-config'>  Optional: false
+      SPRING_DATASOURCE_USERNAME:  <set to the key 'POSTGRES_USER' in secret 'venue-db-credentials'>      Optional: false
+      SPRING_DATASOURCE_PASSWORD:  <set to the key 'POSTGRES_PASSWORD' in secret 'venue-db-credentials'>  Optional: false
+      POD_NAME:                    api-d866875dd-jtlfr (v1:metadata.name)
+    Mounts:                        <none>
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:                      <none>
+QoS Class:                    Burstable
+Node-Selectors:               <none>
+Tolerations:                  node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  48m                default-scheduler  Successfully assigned venue-booking/api-d866875dd-jtlfr to venue-lab2-worker
+  Normal   Pulled     48m                kubelet            Container image "venue-booking-api:lab2-20261113" already present on machine
+  Normal   Created    48m                kubelet            Created container: api
+  Normal   Started    48m                kubelet            Started container api
+  Warning  Unhealthy  47m (x5 over 48m)  kubelet            Startup probe failed: Get "http://10.244.2.4:8080/actuator/health/liveness": dial tcp 10.244.2.4:8080: connect: connection refused
+
+
+Name:             api-d866875dd-ndq66
+Namespace:        venue-booking
+Priority:         0
+Service Account:  default
+Node:             venue-lab2-worker2/172.20.0.4
+Start Time:       Mon, 16 Nov 2026 11:35:03 +0800
+Labels:           app.kubernetes.io/component=api
+                  app.kubernetes.io/name=venue-booking
+                  pod-template-hash=d866875dd
+Annotations:      <none>
+Status:           Running
+IP:               10.244.1.10
+IPs:
+  IP:           10.244.1.10
+Controlled By:  ReplicaSet/api-d866875dd
+Containers:
+  api:
+    Container ID:   containerd://8c0b0e9defaa7795f2f83e75c85e3cb3c8cffd5265298860ebfd99f78aae7ec7
+    Image:          venue-booking-api:lab2-20261113
+    Image ID:       docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e
+    Port:           8080/TCP (http)
+    Host Port:      0/TCP (http)
+    State:          Running
+      Started:      Mon, 16 Nov 2026 11:35:03 +0800
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:      100m
+      memory:   256Mi
+    Liveness:   http-get http://:http/actuator/health/liveness delay=0s timeout=1s period=10s #success=1 #failure=3
+    Readiness:  http-get http://:http/actuator/health/readiness delay=0s timeout=1s period=5s #success=1 #failure=3
+    Startup:    http-get http://:http/actuator/health/liveness delay=0s timeout=1s period=5s #success=1 #failure=30
+    Environment:
+      SPRING_DATASOURCE_URL:       <set to the key 'SPRING_DATASOURCE_URL' of config map 'venue-config'>  Optional: false
+      SPRING_DATASOURCE_USERNAME:  <set to the key 'POSTGRES_USER' in secret 'venue-db-credentials'>      Optional: false
+      SPRING_DATASOURCE_PASSWORD:  <set to the key 'POSTGRES_PASSWORD' in secret 'venue-db-credentials'>  Optional: false
+      POD_NAME:                    api-d866875dd-ndq66 (v1:metadata.name)
+    Mounts:                        <none>
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:                      <none>
+QoS Class:                    Burstable
+Node-Selectors:               <none>
+Tolerations:                  node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  48m                default-scheduler  Successfully assigned venue-booking/api-d866875dd-ndq66 to venue-lab2-worker2
+  Normal   Pulled     48m                kubelet            Container image "venue-booking-api:lab2-20261113" already present on machine
+  Normal   Created    48m                kubelet            Created container: api
+  Normal   Started    48m                kubelet            Started container api
+  Warning  Unhealthy  47m (x5 over 48m)  kubelet            Startup probe failed: Get "http://10.244.1.10:8080/actuator/health/liveness": dial tcp 10.244.1.10:8080: connect: connection refused
+
+
+Name:             database-0
+Namespace:        venue-booking
+Priority:         0
+Service Account:  default
+Node:             venue-lab2-worker2/172.20.0.4
+Start Time:       Sun, 15 Nov 2026 17:01:48 +0800
+Labels:           app.kubernetes.io/component=database
+                  app.kubernetes.io/name=venue-booking
+                  apps.kubernetes.io/pod-index=0
+                  controller-revision-hash=database-f74bb59bf
+                  statefulset.kubernetes.io/pod-name=database-0
+Annotations:      <none>
+Status:           Running
+IP:               10.244.1.9
+IPs:
+  IP:           10.244.1.9
+Controlled By:  StatefulSet/database
+Containers:
+  database:
+    Container ID:   containerd://cb0bd1fa5b99d4a87c3701da430815642de037189054e8485954a22d7e4706ee
+    Image:          postgres:16.15-bookworm
+    Image ID:       docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c
+    Port:           5432/TCP (postgres)
+    Host Port:      0/TCP (postgres)
+    State:          Running
+      Started:      Sun, 15 Nov 2026 17:01:49 +0800
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:      100m
+      memory:   128Mi
+    Liveness:   exec [sh -ec pg_isready -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"] delay=0s timeout=3s period=10s #success=1 #failure=6
+    Readiness:  exec [sh -ec pg_isready -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"] delay=0s timeout=3s period=5s #success=1 #failure=3
+    Startup:    exec [sh -ec pg_isready -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"] delay=0s timeout=3s period=5s #success=1 #failure=30
+    Environment:
+      POSTGRES_DB:        <set to the key 'POSTGRES_DB' of config map 'venue-config'>            Optional: false
+      PGDATA:             <set to the key 'PGDATA' of config map 'venue-config'>                 Optional: false
+      POSTGRES_USER:      <set to the key 'POSTGRES_USER' in secret 'venue-db-credentials'>      Optional: false
+      POSTGRES_PASSWORD:  <set to the key 'POSTGRES_PASSWORD' in secret 'venue-db-credentials'>  Optional: false
+    Mounts:
+      /var/lib/postgresql/data from postgres-data (rw)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  postgres-data:
+    Type:        PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:   postgres-data-database-0
+    ReadOnly:    false
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:          <none>
+
+
+Name:             venue-report-manual-20261116033534-9f4175-ttpfx
+Namespace:        venue-booking
+Priority:         0
+Service Account:  default
+Node:             venue-lab2-worker/172.20.0.3
+Start Time:       Mon, 16 Nov 2026 11:35:34 +0800
+Labels:           app.kubernetes.io/component=report
+                  app.kubernetes.io/name=venue-booking
+                  batch.kubernetes.io/controller-uid=0fd3a67a-ad3b-4068-a9fd-a56750c7f200
+                  batch.kubernetes.io/job-name=venue-report-manual-20261116033534-9f4175
+                  controller-uid=0fd3a67a-ad3b-4068-a9fd-a56750c7f200
+                  job-name=venue-report-manual-20261116033534-9f4175
+Annotations:      <none>
+Status:           Succeeded
+IP:               10.244.2.5
+IPs:
+  IP:           10.244.2.5
+Controlled By:  Job/venue-report-manual-20261116033534-9f4175
+Containers:
+  report:
+    Container ID:  containerd://20ffa8f249210699c6e98ad5718b7efa469b9ca5c928e587af84bc5de8019a17
+    Image:         venue-booking-api:lab2-20261113
+    Image ID:      docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e
+    Port:          <none>
+    Host Port:     <none>
+    Args:
+      --spring.main.web-application-type=none
+      --report.run=true
+    State:          Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Mon, 16 Nov 2026 11:35:35 +0800
+      Finished:     Mon, 16 Nov 2026 11:36:00 +0800
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:     100m
+      memory:  256Mi
+    Environment:
+      REPORT_JOB_ID:                (v1:metadata.labels['batch.kubernetes.io/job-name'])
+      REPORT_SOURCE:               MANUAL
+      REPORT_START_DATE:           2026-11-01
+      REPORT_END_DATE:             2026-11-06
+      SPRING_DATASOURCE_URL:       <set to the key 'SPRING_DATASOURCE_URL' of config map 'venue-config'>  Optional: false
+      SPRING_DATASOURCE_USERNAME:  <set to the key 'POSTGRES_USER' in secret 'venue-db-credentials'>      Optional: false
+      SPRING_DATASOURCE_PASSWORD:  <set to the key 'POSTGRES_PASSWORD' in secret 'venue-db-credentials'>  Optional: false
+    Mounts:                        <none>
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   False 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:                      <none>
+QoS Class:                    Burstable
+Node-Selectors:               <none>
+Tolerations:                  node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  47m   default-scheduler  Successfully assigned venue-booking/venue-report-manual-20261116033534-9f4175-ttpfx to venue-lab2-worker
+  Normal  Pulled     47m   kubelet            Container image "venue-booking-api:lab2-20261113" already present on machine
+  Normal  Created    47m   kubelet            Created container: report
+  Normal  Started    47m   kubelet            Started container report

@@ -1,0 +1,39 @@
+LAST SEEN   TYPE      REASON              OBJECT                                                MESSAGE
+54m         Normal    Pulled              pod/api-d866875dd-ndq66                               Container image "venue-booking-api:lab2-20261113" already present on machine
+54m         Normal    Pulled              pod/api-d866875dd-jtlfr                               Container image "venue-booking-api:lab2-20261113" already present on machine
+54m         Normal    Created             pod/api-d866875dd-jtlfr                               Created container: api
+54m         Normal    Started             pod/api-d866875dd-jtlfr                               Started container api
+54m         Normal    Scheduled           pod/api-d866875dd-ndq66                               Successfully assigned venue-booking/api-d866875dd-ndq66 to venue-lab2-worker2
+54m         Normal    ScalingReplicaSet   deployment/api                                        Scaled up replica set api-d866875dd from 0 to 2
+54m         Normal    Created             pod/api-d866875dd-ndq66                               Created container: api
+54m         Normal    Started             pod/api-d866875dd-ndq66                               Started container api
+54m         Normal    Scheduled           pod/api-d866875dd-jtlfr                               Successfully assigned venue-booking/api-d866875dd-jtlfr to venue-lab2-worker
+54m         Normal    SuccessfulCreate    replicaset/api-d866875dd                              Created pod: api-d866875dd-jtlfr
+54m         Normal    SuccessfulCreate    replicaset/api-d866875dd                              Created pod: api-d866875dd-ndq66
+53m         Warning   Unhealthy           pod/api-d866875dd-jtlfr                               Startup probe failed: Get "http://10.244.2.4:8080/actuator/health/liveness": dial tcp 10.244.2.4:8080: connect: connection refused
+53m         Warning   Unhealthy           pod/api-d866875dd-ndq66                               Startup probe failed: Get "http://10.244.1.10:8080/actuator/health/liveness": dial tcp 10.244.1.10:8080: connect: connection refused
+53m         Normal    SuccessfulCreate    job/venue-report-manual-20261116033534-9f4175         Created pod: venue-report-manual-20261116033534-9f4175-ttpfx
+53m         Normal    Scheduled           pod/venue-report-manual-20261116033534-9f4175-ttpfx   Successfully assigned venue-booking/venue-report-manual-20261116033534-9f4175-ttpfx to venue-lab2-worker
+53m         Normal    Started             pod/venue-report-manual-20261116033534-9f4175-ttpfx   Started container report
+53m         Normal    Created             pod/venue-report-manual-20261116033534-9f4175-ttpfx   Created container: report
+53m         Normal    Pulled              pod/venue-report-manual-20261116033534-9f4175-ttpfx   Container image "venue-booking-api:lab2-20261113" already present on machine
+53m         Normal    Completed           job/venue-report-manual-20261116033534-9f4175         Job completed
+4m19s       Warning   Unhealthy           pod/api-d866875dd-ndq66                               Readiness probe failed: Get "http://10.244.1.10:8080/actuator/health/readiness": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+4m3s        Normal    Created             pod/node-check-xvbqn                                  Created container: node-check
+4m3s        Normal    SuccessfulCreate    daemonset/node-check                                  Created pod: node-check-xvbqn
+4m3s        Normal    Created             pod/node-check-mxkrx                                  Created container: node-check
+4m3s        Normal    Started             pod/node-check-mxkrx                                  Started container node-check
+4m3s        Normal    Pulled              pod/node-check-mxkrx                                  Container image "venue-booking-node-check:lab2-20261115-01" already present on machine
+4m3s        Normal    Scheduled           pod/node-check-xvbqn                                  Successfully assigned venue-booking/node-check-xvbqn to venue-lab2-worker2
+4m3s        Normal    Pulled              pod/node-check-xvbqn                                  Container image "venue-booking-node-check:lab2-20261115-01" already present on machine
+4m3s        Normal    Scheduled           pod/node-check-mxkrx                                  Successfully assigned venue-booking/node-check-mxkrx to venue-lab2-worker
+4m3s        Normal    Started             pod/node-check-xvbqn                                  Started container node-check
+4m3s        Normal    SuccessfulCreate    daemonset/node-check                                  Created pod: node-check-mxkrx
+97s         Normal    SuccessfulCreate    replicaset/frontend-5dbcc7f84                         Created pod: frontend-5dbcc7f84-ww4xm
+97s         Normal    ScalingReplicaSet   deployment/frontend                                   Scaled up replica set frontend-5dbcc7f84 from 0 to 1
+97s         Normal    Started             pod/frontend-5dbcc7f84-ww4xm                          Started container frontend
+97s         Normal    Created             pod/frontend-5dbcc7f84-ww4xm                          Created container: frontend
+97s         Normal    Pulled              pod/frontend-5dbcc7f84-ww4xm                          Container image "venue-booking-frontend:lab2-eda8edd" already present on machine
+97s         Normal    Scheduled           pod/frontend-5dbcc7f84-ww4xm                          Successfully assigned venue-booking/frontend-5dbcc7f84-ww4xm to venue-lab2-worker
+27s         Warning   Unhealthy           pod/node-check-mxkrx                                  Readiness probe failed:
+16s         Warning   Unhealthy           pod/node-check-xvbqn                                  Readiness probe failed:

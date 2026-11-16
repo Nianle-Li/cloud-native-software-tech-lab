@@ -1,0 +1,16 @@
+{
+  "status": 200,
+  "body": {
+    "id": 2,
+    "venue_id": 4,
+    "booked_by": "a-execution-20261116-123004",
+    "reservation_date": "2026-11-16",
+    "start_time": "14:40",
+    "end_time": "15:10",
+    "attendee_count": 2,
+    "purpose": "A统计验收 cancelled",
+    "status": "CANCELLED",
+    "created_at": "2026-11-16T12:30:18.471217+08:00",
+    "cancelled_at": "2026-11-16T12:30:18.756749+08:00"
+  }
+}
