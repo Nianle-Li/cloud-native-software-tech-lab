@@ -1,0 +1,2 @@
+NAME        ADDRESSTYPE   PORTS   ENDPOINTS                AGE
+api-p4plf   IPv4          8080    10.244.1.10,10.244.2.4   62s

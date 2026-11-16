@@ -1,0 +1,22 @@
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                            SELECTOR
+deployment.apps/api   2/2     2            2           62s   api          venue-booking-api:lab2-20261113   app.kubernetes.io/component=api,app.kubernetes.io/name=venue-booking
+
+NAME                        READY   AGE   CONTAINERS   IMAGES
+statefulset.apps/database   1/1     18h   database     postgres:16.15-bookworm
+
+NAME                                                  READY   STATUS      RESTARTS   AGE   IP            NODE                 NOMINATED NODE   READINESS GATES
+pod/api-d866875dd-jtlfr                               1/1     Running     0          62s   10.244.2.4    venue-lab2-worker    <none>           <none>
+pod/api-d866875dd-ndq66                               1/1     Running     0          62s   10.244.1.10   venue-lab2-worker2   <none>           <none>
+pod/database-0                                        1/1     Running     0          18h   10.244.1.9    venue-lab2-worker2   <none>           <none>
+pod/venue-report-manual-20261116033534-9f4175-ttpfx   0/1     Completed   0          31s   10.244.2.5    venue-lab2-worker    <none>           <none>
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+service/api                 ClusterIP   10.96.182.229   <none>        8080/TCP   62s   app.kubernetes.io/component=api,app.kubernetes.io/name=venue-booking
+service/database            ClusterIP   10.96.232.113   <none>        5432/TCP   18h   app.kubernetes.io/component=database,app.kubernetes.io/name=venue-booking
+service/database-headless   ClusterIP   None            <none>        5432/TCP   18h   app.kubernetes.io/component=database,app.kubernetes.io/name=venue-booking
+
+NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE   VOLUMEMODE
+persistentvolumeclaim/postgres-data-database-0   Bound    pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f   1Gi        RWO            standard       <unset>                 18h   Filesystem
+
+NAME                                                  STATUS     COMPLETIONS   DURATION   AGE   CONTAINERS   IMAGES                            SELECTOR
+job.batch/venue-report-manual-20261116033534-9f4175   Complete   1/1           29s        31s   report       venue-booking-api:lab2-20261113   batch.kubernetes.io/controller-uid=0fd3a67a-ad3b-4068-a9fd-a56750c7f200

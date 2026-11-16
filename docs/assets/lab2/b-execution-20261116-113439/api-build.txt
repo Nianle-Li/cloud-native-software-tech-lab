@@ -1,0 +1,166 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 463B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-17
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/eclipse-temurin:17-jre-jammy
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 109B done
+#4 DONE 0.0s
+
+#5 [build 1/6] FROM docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc
+#5 resolve docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc done
+#5 DONE 0.0s
+
+#6 [stage-1 1/5] FROM docker.io/library/eclipse-temurin:17-jre-jammy@sha256:c35794d1348777e6bc310b9b7f420098ef8f37e988199549b545fded79a895a2
+#6 resolve docker.io/library/eclipse-temurin:17-jre-jammy@sha256:c35794d1348777e6bc310b9b7f420098ef8f37e988199549b545fded79a895a2 done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 120.93kB done
+#7 DONE 0.0s
+
+#8 [build 2/6] WORKDIR /build
+#8 CACHED
+
+#9 [build 3/6] COPY pom.xml .
+#9 CACHED
+
+#10 [build 4/6] RUN mvn -B -DskipTests dependency:go-offline
+#10 CACHED
+
+#11 [build 5/6] COPY src ./src
+#11 DONE 0.0s
+
+#12 [build 6/6] RUN mvn -B -DskipTests package
+#12 1.368 [INFO] Scanning for projects...
+#12 1.526 [INFO] 
+#12 1.526 [INFO] -------------------< com.example:venue-booking-api >--------------------
+#12 1.526 [INFO] Building venue-booking-api 0.0.1-SNAPSHOT
+#12 1.526 [INFO]   from pom.xml
+#12 1.526 [INFO] --------------------------------[ jar ]---------------------------------
+#12 1.884 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.1.Final/jboss-logging-3.6.1.Final.pom
+#12 2.979 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.1.Final/jboss-logging-3.6.1.Final.pom (18 kB at 17 kB/s)
+#12 2.988 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jboss/logging/logging-parent/1.0.3.Final/logging-parent-1.0.3.Final.pom
+#12 3.143 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jboss/logging/logging-parent/1.0.3.Final/logging-parent-1.0.3.Final.pom (5.7 kB at 36 kB/s)
+#12 3.146 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jboss/jboss-parent/42/jboss-parent-42.pom
+#12 3.297 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jboss/jboss-parent/42/jboss-parent-42.pom (76 kB at 500 kB/s)
+#12 3.306 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.0/classmate-1.7.0.pom
+#12 3.480 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.0/classmate-1.7.0.pom (7.0 kB at 40 kB/s)
+#12 3.481 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/56/oss-parent-56.pom
+#12 3.622 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/56/oss-parent-56.pom (24 kB at 169 kB/s)
+#12 3.685 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.pom
+#12 3.821 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.pom (11 kB at 80 kB/s)
+#12 3.824 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/mvn/jaxb-runtime-parent/4.0.5/jaxb-runtime-parent-4.0.5.pom
+#12 4.009 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/mvn/jaxb-runtime-parent/4.0.5/jaxb-runtime-parent-4.0.5.pom (1.2 kB at 6.4 kB/s)
+#12 4.012 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/mvn/jaxb-parent/4.0.5/jaxb-parent-4.0.5.pom
+#12 4.150 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/mvn/jaxb-parent/4.0.5/jaxb-parent-4.0.5.pom (35 kB at 256 kB/s)
+#12 4.152 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/jaxb-bom-ext/4.0.5/jaxb-bom-ext-4.0.5.pom
+#12 4.283 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/jaxb-bom-ext/4.0.5/jaxb-bom-ext-4.0.5.pom (3.5 kB at 27 kB/s)
+#12 4.288 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.pom
+#12 4.419 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.pom (3.7 kB at 29 kB/s)
+#12 4.424 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.pom
+#12 4.556 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.pom (4.0 kB at 30 kB/s)
+#12 4.558 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/eclipse/angus/angus-activation-project/2.0.2/angus-activation-project-2.0.2.pom
+#12 4.687 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/eclipse/angus/angus-activation-project/2.0.2/angus-activation-project-2.0.2.pom (21 kB at 162 kB/s)
+#12 4.690 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.pom
+#12 4.829 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.pom (1.8 kB at 13 kB/s)
+#12 4.834 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/mvn/jaxb-txw-parent/4.0.5/jaxb-txw-parent-4.0.5.pom
+#12 5.057 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/sun/xml/bind/mvn/jaxb-txw-parent/4.0.5/jaxb-txw-parent-4.0.5.pom (1.2 kB at 5.4 kB/s)
+#12 5.065 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.pom
+#12 5.199 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.pom (1.6 kB at 12 kB/s)
+#12 5.205 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/sun/istack/istack-commons/4.1.2/istack-commons-4.1.2.pom
+#12 5.348 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/sun/istack/istack-commons/4.1.2/istack-commons-4.1.2.pom (26 kB at 184 kB/s)
+#12 5.377 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/aspectj/aspectjweaver/1.9.24/aspectjweaver-1.9.24.pom
+#12 5.577 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/aspectj/aspectjweaver/1.9.24/aspectjweaver-1.9.24.pom (2.2 kB at 11 kB/s)
+#12 5.602 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-toml/2.18.3/jackson-dataformat-toml-2.18.3.pom
+#12 5.734 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-toml/2.18.3/jackson-dataformat-toml-2.18.3.pom (3.5 kB at 26 kB/s)
+#12 5.736 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformats-text/2.18.3/jackson-dataformats-text-2.18.3.pom
+#12 5.916 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformats-text/2.18.3/jackson-dataformats-text-2.18.3.pom (3.7 kB at 20 kB/s)
+#12 5.978 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.pom
+#12 6.121 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.pom (12 kB at 82 kB/s)
+#12 6.139 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.pom
+#12 6.264 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.pom (1.4 kB at 11 kB/s)
+#12 6.328 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.1.Final/jboss-logging-3.6.1.Final.jar
+#12 6.514 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.6.1.Final/jboss-logging-3.6.1.Final.jar (62 kB at 333 kB/s)
+#12 6.515 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar
+#12 6.516 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar
+#12 6.516 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar
+#12 6.517 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar
+#12 6.518 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar
+#12 6.844 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-runtime/4.0.5/jaxb-runtime-4.0.5.jar (920 kB at 2.8 MB/s)
+#12 6.844 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar
+#12 6.975 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/sun/istack/istack-commons-runtime/4.1.2/istack-commons-runtime-4.1.2.jar (26 kB at 56 kB/s)
+#12 6.975 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/aspectj/aspectjweaver/1.9.24/aspectjweaver-1.9.24.jar
+#12 6.990 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar (27 kB at 57 kB/s)
+#12 6.990 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-toml/2.18.3/jackson-dataformat-toml-2.18.3.jar
+#12 6.991 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/txw2/4.0.5/txw2-4.0.5.jar (73 kB at 154 kB/s)
+#12 6.991 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar
+#12 6.998 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/glassfish/jaxb/jaxb-core/4.0.5/jaxb-core-4.0.5.jar (139 kB at 288 kB/s)
+#12 6.998 [INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.jar
+#12 7.022 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar (69 kB at 136 kB/s)
+#12 7.150 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-toml/2.18.3/jackson-dataformat-toml-2.18.3.jar (56 kB at 89 kB/s)
+#12 7.160 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.jar (1.5 kB at 2.3 kB/s)
+#12 7.193 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar (365 kB at 541 kB/s)
+#12 7.269 [INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/aspectj/aspectjweaver/1.9.24/aspectjweaver-1.9.24.jar (2.2 MB at 2.9 MB/s)
+#12 7.275 [INFO] 
+#12 7.275 [INFO] --- resources:3.3.1:resources (default-resources) @ venue-booking-api ---
+#12 7.373 [INFO] Copying 1 resource from src/main/resources to target/classes
+#12 7.381 [INFO] Copying 4 resources from src/main/resources to target/classes
+#12 7.383 [INFO] 
+#12 7.383 [INFO] --- compiler:3.13.0:compile (default-compile) @ venue-booking-api ---
+#12 7.456 [INFO] Recompiling the module because of changed source code.
+#12 7.461 [INFO] Compiling 46 source files with javac [debug parameters release 17] to target/classes
+#12 8.517 [INFO] 
+#12 8.517 [INFO] --- resources:3.3.1:testResources (default-testResources) @ venue-booking-api ---
+#12 8.520 [INFO] skip non existing resourceDirectory /build/src/test/resources
+#12 8.520 [INFO] 
+#12 8.520 [INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ venue-booking-api ---
+#12 8.525 [INFO] Recompiling the module because of changed dependency.
+#12 8.525 [INFO] Compiling 3 source files with javac [debug parameters release 17] to target/test-classes
+#12 9.295 [INFO] 
+#12 9.295 [INFO] --- surefire:3.5.3:test (default-test) @ venue-booking-api ---
+#12 9.388 [INFO] Tests are skipped.
+#12 9.388 [INFO] 
+#12 9.388 [INFO] --- jar:3.4.2:jar (default-jar) @ venue-booking-api ---
+#12 9.505 [INFO] Building jar: /build/target/venue-booking-api-0.0.1-SNAPSHOT.jar
+#12 9.530 [INFO] 
+#12 9.530 [INFO] --- spring-boot:3.4.5:repackage (repackage) @ venue-booking-api ---
+#12 10.14 [INFO] Replacing main artifact /build/target/venue-booking-api-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+#12 10.14 [INFO] The original artifact has been renamed to /build/target/venue-booking-api-0.0.1-SNAPSHOT.jar.original
+#12 10.14 [INFO] ------------------------------------------------------------------------
+#12 10.14 [INFO] BUILD SUCCESS
+#12 10.14 [INFO] ------------------------------------------------------------------------
+#12 10.14 [INFO] Total time:  8.782 s
+#12 10.14 [INFO] Finished at: 2026-11-16T03:34:50Z
+#12 10.14 [INFO] ------------------------------------------------------------------------
+#12 DONE 10.2s
+
+#13 [stage-1 2/5] RUN groupadd --system app && useradd --system --gid app app
+#13 CACHED
+
+#14 [stage-1 3/5] WORKDIR /app
+#14 CACHED
+
+#15 [stage-1 4/5] COPY --from=build /build/target/*.jar /app/app.jar
+#15 DONE 0.0s
+
+#16 [stage-1 5/5] RUN chown app:app /app/app.jar
+#16 DONE 0.2s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 1.1s done
+#17 exporting manifest sha256:c98babd1c4abe2cf630c446edc5c8fe788cf6453fda5001c347fc380275d587b
+#17 exporting manifest sha256:c98babd1c4abe2cf630c446edc5c8fe788cf6453fda5001c347fc380275d587b done
+#17 exporting config sha256:75ce8f34d3081cdec54562658b156818f3b40b88104538700a35c010967ccd03 done
+#17 naming to docker.io/library/venue-booking-api:lab2-20261113 done
+#17 unpacking to docker.io/library/venue-booking-api:lab2-20261113
+#17 unpacking to docker.io/library/venue-booking-api:lab2-20261113 0.5s done
+#17 DONE 1.6s

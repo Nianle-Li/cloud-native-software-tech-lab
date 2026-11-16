@@ -1,0 +1,1283 @@
+{
+  "batch": "b-execution-20261116-113439",
+  "started_at": "2026-11-16T11:34:39.567758+08:00",
+  "source_commit": "70c266e",
+  "handoff_commit": "ca6412b",
+  "image": "venue-booking-api:lab2-20261113",
+  "platform": "linux/arm64",
+  "context": "kind-venue-lab2",
+  "namespace": "venue-booking",
+  "status": "SUCCESS",
+  "steps": [
+    {
+      "name": "checkout",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "started_at": "2026-11-16T03:34:39.568349+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/checkout.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "source-diff",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "70c266e",
+        "HEAD",
+        "--",
+        "api",
+        "k8s/base/api-deployment.yaml",
+        "k8s/base/api-service.yaml",
+        "scripts/create-report-job.py",
+        "k8s/jobs/venue-report-manual.yaml.tpl"
+      ],
+      "started_at": "2026-11-16T03:34:39.581337+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/source-diff.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "host",
+      "command": [
+        "hostname"
+      ],
+      "started_at": "2026-11-16T03:34:39.590283+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/host.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "database-before",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pod",
+        "database-0",
+        "-o",
+        "json"
+      ],
+      "started_at": "2026-11-16T03:34:39.593937+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/database-before.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "pvc-before",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pvc",
+        "postgres-data-database-0",
+        "-o",
+        "json"
+      ],
+      "started_at": "2026-11-16T03:34:39.780185+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/pvc-before.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "secret-metadata-before",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "secret",
+        "venue-db-credentials",
+        "-o",
+        "jsonpath={.metadata.uid}/{.metadata.resourceVersion}"
+      ],
+      "started_at": "2026-11-16T03:34:39.821948+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/secret-metadata-before.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-build",
+      "command": [
+        "docker",
+        "build",
+        "--platform",
+        "linux/arm64",
+        "--provenance=false",
+        "--load",
+        "-t",
+        "venue-booking-api:lab2-20261113",
+        "api"
+      ],
+      "started_at": "2026-11-16T03:34:39.866157+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-build.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-image",
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "venue-booking-api:lab2-20261113",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}},\"digests\":{{json .RepoDigests}}}"
+      ],
+      "started_at": "2026-11-16T03:34:53.070108+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-image.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "kind-load",
+      "command": [
+        "kind",
+        "load",
+        "docker-image",
+        "venue-booking-api:lab2-20261113",
+        "--name",
+        "venue-lab2"
+      ],
+      "started_at": "2026-11-16T03:34:53.100804+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/kind-load.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "image-venue-lab2-control-plane",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-control-plane",
+        "crictl",
+        "images",
+        "venue-booking-api:lab2-20261113"
+      ],
+      "started_at": "2026-11-16T03:35:02.814692+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/image-venue-lab2-control-plane.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "image-venue-lab2-worker",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-worker",
+        "crictl",
+        "images",
+        "venue-booking-api:lab2-20261113"
+      ],
+      "started_at": "2026-11-16T03:35:02.898184+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/image-venue-lab2-worker.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "image-venue-lab2-worker2",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-worker2",
+        "crictl",
+        "images",
+        "venue-booking-api:lab2-20261113"
+      ],
+      "started_at": "2026-11-16T03:35:02.959906+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/image-venue-lab2-worker2.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-dry-run",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "apply",
+        "--dry-run=server",
+        "-f",
+        "k8s/base/api-service.yaml",
+        "-f",
+        "k8s/base/api-deployment.yaml"
+      ],
+      "started_at": "2026-11-16T03:35:03.018021+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-dry-run.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-apply",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "apply",
+        "-f",
+        "k8s/base/api-service.yaml",
+        "-f",
+        "k8s/base/api-deployment.yaml"
+      ],
+      "started_at": "2026-11-16T03:35:03.281010+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-apply.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-rollout",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "rollout",
+        "status",
+        "deployment/api",
+        "--timeout=180s"
+      ],
+      "started_at": "2026-11-16T03:35:03.375052+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-rollout.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-pods-wide",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pods",
+        "-l",
+        "app.kubernetes.io/component=api",
+        "-o",
+        "wide"
+      ],
+      "started_at": "2026-11-16T03:35:34.382900+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-pods-wide.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-pods-json",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pods",
+        "-l",
+        "app.kubernetes.io/component=api",
+        "-o",
+        "json"
+      ],
+      "started_at": "2026-11-16T03:35:34.440100+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-pods-json.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-startup-0",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "logs",
+        "api-d866875dd-jtlfr",
+        "--timestamps=true"
+      ],
+      "started_at": "2026-11-16T03:35:34.488018+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-startup-0.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-startup-1",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "logs",
+        "api-d866875dd-ndq66",
+        "--timestamps=true"
+      ],
+      "started_at": "2026-11-16T03:35:34.548896+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-startup-1.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "flyway-version",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "-i",
+        "database-0",
+        "--",
+        "sh",
+        "-ec",
+        "exec psql -X -At -v ON_ERROR_STOP=1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+      ],
+      "started_at": "2026-11-16T03:35:34.597779+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/flyway-version.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "manual-job-create",
+      "command": [
+        "python3",
+        "scripts/create-report-job.py",
+        "2026-11-01",
+        "2026-11-06",
+        "--image",
+        "venue-booking-api:lab2-20261113"
+      ],
+      "started_at": "2026-11-16T03:35:34.730319+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/manual-job-create.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "manual-job-wait",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "wait",
+        "--for=condition=complete",
+        "job/venue-report-manual-20261116033534-9f4175",
+        "--timeout=180s"
+      ],
+      "started_at": "2026-11-16T03:35:34.895124+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/manual-job-wait.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "manual-job-json",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "job",
+        "venue-report-manual-20261116033534-9f4175",
+        "-o",
+        "json"
+      ],
+      "started_at": "2026-11-16T03:36:03.774248+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/manual-job-json.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "manual-job-pods",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pods",
+        "-l",
+        "batch.kubernetes.io/job-name=venue-report-manual-20261116033534-9f4175",
+        "-o",
+        "wide"
+      ],
+      "started_at": "2026-11-16T03:36:03.840399+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/manual-job-pods.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "manual-job-log",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "logs",
+        "job/venue-report-manual-20261116033534-9f4175",
+        "--timestamps=true"
+      ],
+      "started_at": "2026-11-16T03:36:03.886873+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/manual-job-log.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "report-response",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "api-d866875dd-jtlfr",
+        "--",
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "10",
+        "http://api:8080/api/reports/venue-report-manual-20261116033534-9f4175"
+      ],
+      "started_at": "2026-11-16T03:36:03.942204+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/report-response.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "report-sql-cross-check",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "-i",
+        "database-0",
+        "--",
+        "sh",
+        "-ec",
+        "exec psql -X -At -v ON_ERROR_STOP=1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+      ],
+      "started_at": "2026-11-16T03:36:05.037758+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/report-sql-cross-check.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "instance-0",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "api-d866875dd-jtlfr",
+        "--",
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "10",
+        "http://api:8080/api/instance"
+      ],
+      "started_at": "2026-11-16T03:36:05.167376+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/instance-0.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "instance-1",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "api-d866875dd-jtlfr",
+        "--",
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "10",
+        "http://api:8080/api/instance"
+      ],
+      "started_at": "2026-11-16T03:36:05.346499+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/instance-1.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "instance-2",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "api-d866875dd-jtlfr",
+        "--",
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "10",
+        "http://api:8080/api/instance"
+      ],
+      "started_at": "2026-11-16T03:36:05.433260+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/instance-2.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-endpoints",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "endpointslice",
+        "-l",
+        "kubernetes.io/service-name=api",
+        "-o",
+        "wide"
+      ],
+      "started_at": "2026-11-16T03:36:05.512527+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/api-endpoints.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "pvc-after",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pvc",
+        "postgres-data-database-0",
+        "-o",
+        "json"
+      ],
+      "started_at": "2026-11-16T03:36:05.559799+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/pvc-after.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "secret-metadata-after",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "secret",
+        "venue-db-credentials",
+        "-o",
+        "jsonpath={.metadata.uid}/{.metadata.resourceVersion}"
+      ],
+      "started_at": "2026-11-16T03:36:05.604879+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/secret-metadata-after.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "final-status",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "deploy,sts,pods,svc,pvc,job,cronjob,ds",
+        "-o",
+        "wide"
+      ],
+      "started_at": "2026-11-16T03:36:05.644074+00:00",
+      "log": "docs/assets/lab2/b-execution-20261116-113439/final-status.txt",
+      "exit_code": 0
+    }
+  ],
+  "actual_checkout": "ca6412b9ba939d56b2452b0fd8ea429615e3d6e6",
+  "hostname": "wukediedeMacBook-Pro.local",
+  "database_before": {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+      "creationTimestamp": "2026-11-15T09:01:48Z",
+      "generateName": "database-",
+      "generation": 1,
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking",
+        "apps.kubernetes.io/pod-index": "0",
+        "controller-revision-hash": "database-f74bb59bf",
+        "statefulset.kubernetes.io/pod-name": "database-0"
+      },
+      "name": "database-0",
+      "namespace": "venue-booking",
+      "ownerReferences": [
+        {
+          "apiVersion": "apps/v1",
+          "blockOwnerDeletion": true,
+          "controller": true,
+          "kind": "StatefulSet",
+          "name": "database",
+          "uid": "95091eca-c10d-4165-9b07-3b0dc177b842"
+        }
+      ],
+      "resourceVersion": "1649",
+      "uid": "5090d2ee-b7ad-4881-9a79-d8c37034f589"
+    },
+    "spec": {
+      "automountServiceAccountToken": false,
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "POSTGRES_DB",
+              "valueFrom": {
+                "configMapKeyRef": {
+                  "key": "POSTGRES_DB",
+                  "name": "venue-config"
+                }
+              }
+            },
+            {
+              "name": "PGDATA",
+              "valueFrom": {
+                "configMapKeyRef": {
+                  "key": "PGDATA",
+                  "name": "venue-config"
+                }
+              }
+            },
+            {
+              "name": "POSTGRES_USER",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "key": "POSTGRES_USER",
+                  "name": "venue-db-credentials"
+                }
+              }
+            },
+            {
+              "name": "POSTGRES_PASSWORD",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "key": "POSTGRES_PASSWORD",
+                  "name": "venue-db-credentials"
+                }
+              }
+            }
+          ],
+          "image": "postgres:16.15-bookworm",
+          "imagePullPolicy": "IfNotPresent",
+          "livenessProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 6,
+            "periodSeconds": 10,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "name": "database",
+          "ports": [
+            {
+              "containerPort": 5432,
+              "name": "postgres",
+              "protocol": "TCP"
+            }
+          ],
+          "readinessProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 3,
+            "periodSeconds": 5,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "resources": {
+            "limits": {
+              "cpu": "500m",
+              "memory": "512Mi"
+            },
+            "requests": {
+              "cpu": "100m",
+              "memory": "128Mi"
+            }
+          },
+          "startupProbe": {
+            "exec": {
+              "command": [
+                "sh",
+                "-ec",
+                "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+              ]
+            },
+            "failureThreshold": 30,
+            "periodSeconds": 5,
+            "successThreshold": 1,
+            "timeoutSeconds": 3
+          },
+          "terminationMessagePath": "/dev/termination-log",
+          "terminationMessagePolicy": "File",
+          "volumeMounts": [
+            {
+              "mountPath": "/var/lib/postgresql/data",
+              "name": "postgres-data"
+            }
+          ]
+        }
+      ],
+      "dnsPolicy": "ClusterFirst",
+      "enableServiceLinks": true,
+      "hostname": "database-0",
+      "nodeName": "venue-lab2-worker2",
+      "preemptionPolicy": "PreemptLowerPriority",
+      "priority": 0,
+      "restartPolicy": "Always",
+      "schedulerName": "default-scheduler",
+      "securityContext": {},
+      "serviceAccount": "default",
+      "serviceAccountName": "default",
+      "subdomain": "database-headless",
+      "terminationGracePeriodSeconds": 30,
+      "tolerations": [
+        {
+          "effect": "NoExecute",
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "tolerationSeconds": 300
+        },
+        {
+          "effect": "NoExecute",
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "tolerationSeconds": 300
+        }
+      ],
+      "volumes": [
+        {
+          "name": "postgres-data",
+          "persistentVolumeClaim": {
+            "claimName": "postgres-data-database-0"
+          }
+        }
+      ]
+    },
+    "status": {
+      "conditions": [
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:49Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "PodReadyToStartContainers"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:48Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "Initialized"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:54Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:54Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "ContainersReady"
+        },
+        {
+          "lastProbeTime": null,
+          "lastTransitionTime": "2026-11-15T09:01:48Z",
+          "observedGeneration": 1,
+          "status": "True",
+          "type": "PodScheduled"
+        }
+      ],
+      "containerStatuses": [
+        {
+          "allocatedResources": {
+            "cpu": "100m",
+            "memory": "128Mi"
+          },
+          "containerID": "containerd://cb0bd1fa5b99d4a87c3701da430815642de037189054e8485954a22d7e4706ee",
+          "image": "docker.io/library/postgres:16.15-bookworm",
+          "imageID": "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+          "lastState": {},
+          "name": "database",
+          "ready": true,
+          "resources": {
+            "limits": {
+              "cpu": "500m",
+              "memory": "512Mi"
+            },
+            "requests": {
+              "cpu": "100m",
+              "memory": "128Mi"
+            }
+          },
+          "restartCount": 0,
+          "started": true,
+          "state": {
+            "running": {
+              "startedAt": "2026-11-15T09:01:49Z"
+            }
+          },
+          "user": {
+            "linux": {
+              "gid": 0,
+              "supplementalGroups": [
+                0
+              ],
+              "uid": 0
+            }
+          },
+          "volumeMounts": [
+            {
+              "mountPath": "/var/lib/postgresql/data",
+              "name": "postgres-data"
+            }
+          ]
+        }
+      ],
+      "hostIP": "172.20.0.4",
+      "hostIPs": [
+        {
+          "ip": "172.20.0.4"
+        }
+      ],
+      "observedGeneration": 1,
+      "phase": "Running",
+      "podIP": "10.244.1.9",
+      "podIPs": [
+        {
+          "ip": "10.244.1.9"
+        }
+      ],
+      "qosClass": "Burstable",
+      "startTime": "2026-11-15T09:01:48Z"
+    }
+  },
+  "pvc_before": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+      "annotations": {
+        "pv.kubernetes.io/bind-completed": "yes",
+        "pv.kubernetes.io/bound-by-controller": "yes",
+        "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+        "volume.kubernetes.io/selected-node": "venue-lab2-worker2",
+        "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T09:00:11Z",
+      "finalizers": [
+        "kubernetes.io/pvc-protection"
+      ],
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking"
+      },
+      "name": "postgres-data-database-0",
+      "namespace": "venue-booking",
+      "resourceVersion": "1447",
+      "uid": "aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "resources": {
+        "requests": {
+          "storage": "1Gi"
+        }
+      },
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem",
+      "volumeName": "pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "status": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "1Gi"
+      },
+      "phase": "Bound"
+    }
+  },
+  "secret_metadata_before": "cca39143-439d-4df3-93df-908e75e5a8d4/1410",
+  "image_inspect": {
+    "id": "sha256:c98babd1c4abe2cf630c446edc5c8fe788cf6453fda5001c347fc380275d587b",
+    "os": "linux",
+    "architecture": "arm64",
+    "digests": [
+      "venue-booking-api@sha256:c98babd1c4abe2cf630c446edc5c8fe788cf6453fda5001c347fc380275d587b"
+    ]
+  },
+  "api_pods": [
+    {
+      "name": "api-d866875dd-jtlfr",
+      "node": "venue-lab2-worker",
+      "ready": true,
+      "image": "venue-booking-api:lab2-20261113",
+      "imageID": "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e"
+    },
+    {
+      "name": "api-d866875dd-ndq66",
+      "node": "venue-lab2-worker2",
+      "ready": true,
+      "image": "venue-booking-api:lab2-20261113",
+      "imageID": "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e"
+    }
+  ],
+  "flyway": [
+    {
+      "installed_rank": 1,
+      "version": "1",
+      "description": "create booking tables",
+      "checksum": 1339655604,
+      "success": true
+    },
+    {
+      "installed_rank": 2,
+      "version": "2",
+      "description": "seed venues",
+      "checksum": 1252966318,
+      "success": true
+    },
+    {
+      "installed_rank": 3,
+      "version": "3",
+      "description": "align blank text constraints",
+      "checksum": 592474482,
+      "success": true
+    },
+    {
+      "installed_rank": 4,
+      "version": "4",
+      "description": "create report tables",
+      "checksum": 998172440,
+      "success": true
+    }
+  ],
+  "job_id": "venue-report-manual-20261116033534-9f4175",
+  "job": {
+    "apiVersion": "batch/v1",
+    "kind": "Job",
+    "metadata": {
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"Job\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"venue-report-manual-20261116033534-9f4175\",\"namespace\":\"venue-booking\"},\"spec\":{\"activeDeadlineSeconds\":1800,\"backoffLimit\":1,\"completions\":1,\"parallelism\":1,\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"args\":[\"--spring.main.web-application-type=none\",\"--report.run=true\"],\"env\":[{\"name\":\"REPORT_JOB_ID\",\"valueFrom\":{\"fieldRef\":{\"fieldPath\":\"metadata.labels['batch.kubernetes.io/job-name']\"}}},{\"name\":\"REPORT_SOURCE\",\"value\":\"MANUAL\"},{\"name\":\"REPORT_START_DATE\",\"value\":\"2026-11-01\"},{\"name\":\"REPORT_END_DATE\",\"value\":\"2026-11-06\"},{\"name\":\"SPRING_DATASOURCE_URL\",\"valueFrom\":{\"configMapKeyRef\":{\"key\":\"SPRING_DATASOURCE_URL\",\"name\":\"venue-config\"}}},{\"name\":\"SPRING_DATASOURCE_USERNAME\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_USER\",\"name\":\"venue-db-credentials\"}}},{\"name\":\"SPRING_DATASOURCE_PASSWORD\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_PASSWORD\",\"name\":\"venue-db-credentials\"}}}],\"image\":\"venue-booking-api:lab2-20261113\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"report\",\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"256Mi\"}}}],\"restartPolicy\":\"Never\"}}}}\n"
+      },
+      "creationTimestamp": "2026-11-16T03:35:34Z",
+      "generation": 1,
+      "labels": {
+        "app.kubernetes.io/component": "report",
+        "app.kubernetes.io/name": "venue-booking"
+      },
+      "name": "venue-report-manual-20261116033534-9f4175",
+      "namespace": "venue-booking",
+      "resourceVersion": "10428",
+      "uid": "0fd3a67a-ad3b-4068-a9fd-a56750c7f200"
+    },
+    "spec": {
+      "activeDeadlineSeconds": 1800,
+      "backoffLimit": 1,
+      "completionMode": "NonIndexed",
+      "completions": 1,
+      "manualSelector": false,
+      "parallelism": 1,
+      "podReplacementPolicy": "TerminatingOrFailed",
+      "selector": {
+        "matchLabels": {
+          "batch.kubernetes.io/controller-uid": "0fd3a67a-ad3b-4068-a9fd-a56750c7f200"
+        }
+      },
+      "suspend": false,
+      "template": {
+        "metadata": {
+          "labels": {
+            "app.kubernetes.io/component": "report",
+            "app.kubernetes.io/name": "venue-booking",
+            "batch.kubernetes.io/controller-uid": "0fd3a67a-ad3b-4068-a9fd-a56750c7f200",
+            "batch.kubernetes.io/job-name": "venue-report-manual-20261116033534-9f4175",
+            "controller-uid": "0fd3a67a-ad3b-4068-a9fd-a56750c7f200",
+            "job-name": "venue-report-manual-20261116033534-9f4175"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "args": [
+                "--spring.main.web-application-type=none",
+                "--report.run=true"
+              ],
+              "env": [
+                {
+                  "name": "REPORT_JOB_ID",
+                  "valueFrom": {
+                    "fieldRef": {
+                      "apiVersion": "v1",
+                      "fieldPath": "metadata.labels['batch.kubernetes.io/job-name']"
+                    }
+                  }
+                },
+                {
+                  "name": "REPORT_SOURCE",
+                  "value": "MANUAL"
+                },
+                {
+                  "name": "REPORT_START_DATE",
+                  "value": "2026-11-01"
+                },
+                {
+                  "name": "REPORT_END_DATE",
+                  "value": "2026-11-06"
+                },
+                {
+                  "name": "SPRING_DATASOURCE_URL",
+                  "valueFrom": {
+                    "configMapKeyRef": {
+                      "key": "SPRING_DATASOURCE_URL",
+                      "name": "venue-config"
+                    }
+                  }
+                },
+                {
+                  "name": "SPRING_DATASOURCE_USERNAME",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "POSTGRES_USER",
+                      "name": "venue-db-credentials"
+                    }
+                  }
+                },
+                {
+                  "name": "SPRING_DATASOURCE_PASSWORD",
+                  "valueFrom": {
+                    "secretKeyRef": {
+                      "key": "POSTGRES_PASSWORD",
+                      "name": "venue-db-credentials"
+                    }
+                  }
+                }
+              ],
+              "image": "venue-booking-api:lab2-20261113",
+              "imagePullPolicy": "IfNotPresent",
+              "name": "report",
+              "resources": {
+                "limits": {
+                  "cpu": "500m",
+                  "memory": "512Mi"
+                },
+                "requests": {
+                  "cpu": "100m",
+                  "memory": "256Mi"
+                }
+              },
+              "terminationMessagePath": "/dev/termination-log",
+              "terminationMessagePolicy": "File"
+            }
+          ],
+          "dnsPolicy": "ClusterFirst",
+          "restartPolicy": "Never",
+          "schedulerName": "default-scheduler",
+          "securityContext": {},
+          "terminationGracePeriodSeconds": 30
+        }
+      }
+    },
+    "status": {
+      "completionTime": "2026-11-16T03:36:03Z",
+      "conditions": [
+        {
+          "lastProbeTime": "2026-11-16T03:36:03Z",
+          "lastTransitionTime": "2026-11-16T03:36:03Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-11-16T03:36:03Z",
+          "lastTransitionTime": "2026-11-16T03:36:03Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ],
+      "ready": 0,
+      "startTime": "2026-11-16T03:35:34Z",
+      "succeeded": 1,
+      "terminating": 0,
+      "uncountedTerminatedPods": {}
+    }
+  },
+  "report": {
+    "job_id": "venue-report-manual-20261116033534-9f4175",
+    "source": "MANUAL",
+    "start_date": "2026-11-01",
+    "end_date": "2026-11-06",
+    "status": "SUCCEEDED",
+    "started_at": "2026-11-16T11:36:00.517134+08:00",
+    "finished_at": "2026-11-16T11:36:00.771154+08:00",
+    "generated_at": "2026-11-16T11:36:00.771154+08:00",
+    "error_summary": null,
+    "items": [
+      {
+        "venue_id": 1,
+        "venue_name": "羽毛球馆 A",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 2,
+        "venue_name": "多功能教室 B",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 3,
+        "venue_name": "会议室 C",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      }
+    ]
+  },
+  "expected_report_items": [
+    {
+      "venue_id": 1,
+      "venue_name": "羽毛球馆 A",
+      "reservation_count": 0,
+      "reserved_minutes": 0
+    },
+    {
+      "venue_id": 2,
+      "venue_name": "多功能教室 B",
+      "reservation_count": 0,
+      "reserved_minutes": 0
+    },
+    {
+      "venue_id": 3,
+      "venue_name": "会议室 C",
+      "reservation_count": 0,
+      "reserved_minutes": 0
+    }
+  ],
+  "instance_ids": [
+    "api-d866875dd-ndq66",
+    "api-d866875dd-ndq66",
+    "api-d866875dd-jtlfr"
+  ],
+  "pvc_after": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+      "annotations": {
+        "pv.kubernetes.io/bind-completed": "yes",
+        "pv.kubernetes.io/bound-by-controller": "yes",
+        "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+        "volume.kubernetes.io/selected-node": "venue-lab2-worker2",
+        "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T09:00:11Z",
+      "finalizers": [
+        "kubernetes.io/pvc-protection"
+      ],
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking"
+      },
+      "name": "postgres-data-database-0",
+      "namespace": "venue-booking",
+      "resourceVersion": "1447",
+      "uid": "aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "resources": {
+        "requests": {
+          "storage": "1Gi"
+        }
+      },
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem",
+      "volumeName": "pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "status": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "1Gi"
+      },
+      "phase": "Bound"
+    }
+  },
+  "secret_metadata_after": "cca39143-439d-4df3-93df-908e75e5a8d4/1410",
+  "finished_at": "2026-11-16T11:36:05.703683+08:00",
+  "job_exit_codes": [
+    0
+  ],
+  "report_http_status": 200,
+  "additional_read_only_commands": [
+    [
+      "kubectl",
+      "--context",
+      "kind-venue-lab2",
+      "-n",
+      "venue-booking",
+      "get",
+      "pods",
+      "-l",
+      "batch.kubernetes.io/job-name=venue-report-manual-20261116033534-9f4175",
+      "-o",
+      "json"
+    ],
+    [
+      "kubectl",
+      "--context",
+      "kind-venue-lab2",
+      "-n",
+      "venue-booking",
+      "exec",
+      "api-d866875dd-jtlfr",
+      "--",
+      "curl",
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--max-time",
+      "10",
+      "--include",
+      "http://api:8080/api/reports/venue-report-manual-20261116033534-9f4175"
+    ]
+  ]
+}

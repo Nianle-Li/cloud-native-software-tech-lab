@@ -1,0 +1,1 @@
+SELECT json_agg(row_to_json(h) ORDER BY installed_rank) FROM (SELECT installed_rank, version, description, checksum, success FROM flyway_schema_history WHERE version IS NOT NULL) h;

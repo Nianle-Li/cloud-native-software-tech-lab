@@ -1,0 +1,6 @@
+HTTP/1.1 200 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Mon, 16 Nov 2026 03:37:31 GMT
+
+{"job_id":"venue-report-manual-20261116033534-9f4175","source":"MANUAL","start_date":"2026-11-01","end_date":"2026-11-06","status":"SUCCEEDED","started_at":"2026-11-16T11:36:00.517134+08:00","finished_at":"2026-11-16T11:36:00.771154+08:00","generated_at":"2026-11-16T11:36:00.771154+08:00","error_summary":null,"items":[{"venue_id":1,"venue_name":"羽毛球馆 A","reservation_count":0,"reserved_minutes":0},{"venue_id":2,"venue_name":"多功能教室 B","reservation_count":0,"reserved_minutes":0},{"venue_id":3,"venue_name":"会议室 C","reservation_count":0,"reserved_minutes":0}]}
