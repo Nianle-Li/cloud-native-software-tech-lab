@@ -7,12 +7,14 @@ export type Route =
   | { kind: 'venueDetail'; venueId: number }
   | { kind: 'reservationDetail'; reservationId: number }
   | { kind: 'reservations' }
+  | { kind: 'reports' }
   | { kind: 'notFound' }
 
 export function parseRoute(hash: string): Route {
   const path = hash.startsWith('#') ? hash.slice(1) : hash
   if (path === '' || path === '/') return { kind: 'home' }
   if (path === '/reservations') return { kind: 'reservations' }
+  if (path === '/reports') return { kind: 'reports' }
   if (path === '/venues/new') return { kind: 'createVenue' }
 
   const booking = /^\/venues\/([1-9]\d*)\/book$/.exec(path)
