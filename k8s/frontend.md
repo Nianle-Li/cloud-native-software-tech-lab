@@ -48,6 +48,20 @@ kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend
 用真实 Job ID 查询报告；同时检查原有场地和预约页面。可用
 `curl -i http://127.0.0.1:8080/api/instance` 核对代理已到达 API。
 这个检查依赖 B 的 API 已就绪；仅有首页 HTTP 200 不足以证明代理可用。
+在 B 的手动 Job 已成功、报告可查询后，从同一台机器另开终端运行真实浏览器
+回归。`LAB2_REPORT_JOB_ID` 填共同集群中已成功、含零值场地的 Job 名称。
+该测试不启动模拟 API，也不拦截请求；它会在数据库中创建带唯一批次标识的
+场地和预约，并取消该预约，保留记录便于追踪。报告测试所用的成功 Job 须
+事先准备好有效预约和零值场地。命令在 `frontend/` 目录执行：
+
+```sh
+LAB2_BASE_URL=http://127.0.0.1:8080 \
+LAB2_REPORT_JOB_ID=your-successful-job-id npm run test:cluster
+```
+
+测试分别核对场地创建/详情、预约成功/冲突/详情/取消，以及现有报告在页面上
+的查询。记录测试批次、场地/预约 ID、Job ID、镜像标签和运行时间；不能把本地
+模拟 API 的 Playwright 测试结果记为共同集群验收。
 若前端 Pod 启动失败，核对 `api` Service 是否已创建、镜像标签是否已装载、
 ConfigMap 的 `default.conf` 键及 Pod 事件。若 ConfigMap 变更，执行：
 
