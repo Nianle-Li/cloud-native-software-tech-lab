@@ -148,3 +148,20 @@ kubectl --context kind-venue-lab2 get storageclass
 2. **集成顺序**：C 提供数据库、PVC、ConfigMap/Secret 与 Services → B 验证迁移、双 API Pod、手动 Job → A 验证前端、浏览器回归和 CronJob。DaemonSet 的调度与 DNS 检查可独立验证。
 3. **完成证据**：每项保存集群/命名空间、镜像版本、资源名、命令、时间、响应或日志；业务成功、统计正确、多副本、持久化和节点覆盖分别核对。`kubectl apply` 成功或 Pod 处于 Running 不代替业务验收。
 4. **契约变更**：提出者说明变更原因与影响面；受影响成员核对字段、清单、测试和报告；更新主契约与本文后再修改实现。共享文件按分工文档协作，避免并行覆盖。
+
+### 4.1 固定交接文件与沟通格式
+
+三人统一使用 [`docs/lab2-handoff.md`](lab2-handoff.md) 记录交接。聊天消息只用于提醒，不能替代文件中的交付和执行回传。每次交接必须新增带时间和批次的记录，不覆盖历史结果；未执行的项目写 `NOT_RUN`，不能把计划命令写成实测结果。
+
+**A/B 负责更新交付区**，每次同时填写：
+
+- 源码版本：分支、提交 ID、是否已合入 `develop`；
+- 镜像标签：完整镜像名、标签、`linux/arm64` 或 `linux/amd64` 架构、构建源提交，以及所有引用该镜像的清单；
+- 执行命令：从仓库根目录开始的完整命令和执行顺序，包含 kind 集群名、kubectl context、命名空间、脚本参数和等待命令；
+- 依赖条件：上游成员交付的资源、ConfigMap/Secret 名称、Service、PVC、节点或镜像装载条件；
+- 预期结果：成功状态、Pod/Job/迁移/API 响应等可观察条件；
+- 需要 C 回传的输出：资源状态、日志位置、Job ID、API 响应、数据库版本或失败诊断。
+
+**C 负责更新执行回传区**，每次同时填写：执行时间、实际执行的命令、`SUCCESS/FAILED/PARTIAL/NOT_RUN`、资源状态、日志或证据位置、待处理问题和下一步负责人。失败时必须保留失败命令、错误摘要以及相关 `describe`、events、Pod 日志；成功只在预期结果全部满足后填写 `SUCCESS`。
+
+共同环境字段固定为 `cluster=venue-lab2`、`context=kind-venue-lab2`、`namespace=venue-booking`。真实 Secret 值、密码和令牌不得写入交接文件。B 的 API 双副本与手动 Job 交接样例已写入该文件，C 执行后直接填写对应回传区；A 以同一文件中的 API 镜像标签和 Job 结果接入 CronJob 与报告页面。

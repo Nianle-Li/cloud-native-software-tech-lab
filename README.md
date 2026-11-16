@@ -47,4 +47,5 @@ docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 | `docs/lab2-contract.md`、`docs/lab2-acceptance.md` | Lab 2 开发约定与待验证的验收项 |
 | `docs/lab2-shared-contract.md` | Lab 2 跨成员接口、确定的设计选择与环境适配规则 |
 | `docs/lab2-team-plan.md` | Lab 2 三人分工、统一契约和联调顺序 |
+| `docs/lab2-handoff.md` | A/B 交付信息与 C 执行回传的唯一记录 |
 | `docs/assets/lab1-report/` | 报告引用的截图与验收记录 |
