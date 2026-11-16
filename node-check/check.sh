@@ -3,14 +3,15 @@ set -eu
 
 : "${NODE_NAME:?NODE_NAME is required}"
 : "${HOST_IP:?HOST_IP is required}"
+dns_name=kubernetes.default.svc.cluster.local
 
 check_dns() {
   checked_at=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-  if lookup_output=$(nslookup kubernetes.default.svc 2>&1); then
-    printf '%s node=%s host_ip=%s dns=ok target=kubernetes.default.svc\n' "$checked_at" "$NODE_NAME" "$HOST_IP"
+  if lookup_output=$(nslookup "$dns_name" 2>&1); then
+    printf '%s node=%s host_ip=%s dns=ok target=%s\n' "$checked_at" "$NODE_NAME" "$HOST_IP" "$dns_name"
     printf '%s\n' "$lookup_output"
   else
-    printf '%s node=%s host_ip=%s dns=failed target=kubernetes.default.svc\n' "$checked_at" "$NODE_NAME" "$HOST_IP"
+    printf '%s node=%s host_ip=%s dns=failed target=%s\n' "$checked_at" "$NODE_NAME" "$HOST_IP" "$dns_name"
     printf '%s\n' "$lookup_output"
     return 1
   fi

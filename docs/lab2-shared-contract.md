@@ -88,7 +88,7 @@ Kubernetes Secret 的 Base64 编码不提供保密性；谁能读取 Secret、�
 
 ### 2.5 节点任务与测试数据
 
-`node-check` 每个符合调度条件的节点一个 Pod，从 Downward API 取得 `NODE_NAME`、`HOST_IP`，定期记录时间和对 `kubernetes.default.svc` 的 DNS 检查。它不依赖预约 API，也不挂载宿主机目录或使用特权；Pod 内部资源使用量不冒充节点指标。测试需对照可调度节点、DaemonSet 期望/就绪数及每个 Pod 的节点名。[Kubernetes Downward API 字段](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/)
+`node-check` 每个符合调度条件的节点一个 Pod，从 Downward API 取得 `NODE_NAME`、`HOST_IP`，定期记录时间和对 `kubernetes.default.svc.cluster.local` 的 DNS 检查；readiness 探针使用同一查询目标。它不依赖预约 API，也不挂载宿主机目录或使用特权；Pod 内部资源使用量不冒充节点指标。测试需对照可调度节点、DaemonSet 期望/就绪数及每个 Pod 的节点名。[Kubernetes Downward API 字段](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/)
 
 真实业务回归会创建持久数据，而现有 API 不提供删除场地/预约的接口。独立开发使用本地测试数据库；真实集群验收统一使用 `venue-booking` 命名空间，在测试数据中加入唯一批次标识，记录场地/预约 ID、时间与状态，并在报告核对时纳入这些记录。不能在未说明数据来源的情况下，把多次测试后的数据库当成空库；验收过程不得删除有真实证据的 PVC。
 

@@ -99,6 +99,6 @@ Lab 1 的七个业务接口、`snake_case` JSON、`ACTIVE/CANCELLED` 语义、`A
 
 ## 5. DaemonSet 与资源证据
 
-`node-check` 采用独立于预约业务的只读节点检查：在每个符合条件的节点定期记录由 Downward API 注入的 `NODE_NAME`、`HOST_IP`、时间，并检查集群内 `kubernetes.default.svc` 的 DNS 解析结果。它验证每节点都有检查进程及从该节点的 Pod 到集群 DNS 的连通性，**不把 Pod 内部资源指标冒称节点指标**。不挂载宿主机敏感目录、不授予特权或多余 RBAC。DNS 失败与节点自身故障须分开说明。单节点环境只能证明该节点运行了一个 Pod；要证明跨节点覆盖，需有多个可调度节点或如实说明环境限制。
+`node-check` 采用独立于预约业务的只读节点检查：在每个符合条件的节点定期记录由 Downward API 注入的 `NODE_NAME`、`HOST_IP`、时间，并检查集群内 `kubernetes.default.svc.cluster.local` 的 DNS 解析结果；readiness 探针使用同一查询目标。它验证每节点都有检查进程及从该节点的 Pod 到集群 DNS 的连通性，**不把 Pod 内部资源指标冒称节点指标**。不挂载宿主机敏感目录、不授予特权或多余 RBAC。DNS 失败与节点自身故障须分开说明。单节点环境只能证明该节点运行了一个 Pod；要证明跨节点覆盖，需有多个可调度节点或如实说明环境限制。
 
 验收证据至少包含：`kubectl get nodes -o wide`、命名空间资源与 Pod 分布、Service/Endpoints、PVC/PV、两个 API Pod 的实例响应、Job/CronJob 的运行状态及对应报告查询、DaemonSet 期望数/就绪数与各节点 Pod、数据库 Pod 重建前后业务记录。所有命令和截图应注明同一集群与命名空间，不把计划、模拟输出或其他环境结果写成实测。

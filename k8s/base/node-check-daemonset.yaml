@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: node-check
-          image: venue-booking-node-check:lab2-20261115-01
+          image: venue-booking-node-check:lab2-20261116-01
           imagePullPolicy: IfNotPresent
           env:
             - name: NODE_NAME
@@ -34,7 +34,7 @@ spec:
                   fieldPath: status.hostIP
           readinessProbe:
             exec:
-              command: [sh, -c, 'nslookup kubernetes.default.svc >/dev/null 2>&1']
+              command: [sh, -c, 'nslookup kubernetes.default.svc.cluster.local >/dev/null 2>&1']
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 2

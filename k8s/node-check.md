@@ -2,8 +2,11 @@
 
 `node-check` 在每个符合调度条件的节点运行一个 Pod。Pod 从 Downward API
 读取 `NODE_NAME` 和 `HOST_IP`，每 30 秒记录 UTC 时间与
-`kubernetes.default.svc` 的 DNS 查询结果。DNS 失败会写入日志，下一轮继续
-检查；readiness 探针也执行同一查询，因此 DNS 不可用时 Pod 不会显示为就绪。
+`kubernetes.default.svc.cluster.local` 的 DNS 查询结果。DNS 失败会写入日志，
+下一轮继续检查；readiness 探针也执行同一查询，因此 DNS 不可用时 Pod
+不会显示为就绪。
+使用完整名称是因为 BusyBox `nslookup` 在个人和共同 kind 集群中查询
+`kubernetes.default.svc` 均返回 `NXDOMAIN`，而完整名称均可解析。
 本任务不挂载宿主机目录，不使用特权或 Kubernetes API 凭据，也不提供 Service。
 
 ## 独立测试与镜像
@@ -12,18 +15,18 @@
 与失败，避免把外部网络状态当成脚本正确性的证据：
 
 ```sh
-docker run --rm --platform linux/amd64 -v "$PWD:/work:ro" \
+docker run --rm -v "$PWD:/work:ro" \
   busybox:1.37.0 sh /work/node-check/test-node-check.sh
 ```
 
-清单引用 `venue-booking-node-check:lab2-20261115-01`。在承载共同 kind 集群
+清单引用 `venue-booking-node-check:lab2-20261116-01`。在承载共同 kind 集群
 的 ARM64 Mac 上从仓库根目录构建、装载；脚本或 Dockerfile 改动后，必须
 更换标签并同步 DaemonSet 清单。
 
 ```sh
 docker build --platform linux/arm64 --provenance=false --load \
-  -t venue-booking-node-check:lab2-20261115-01 ./node-check
-kind load docker-image venue-booking-node-check:lab2-20261115-01 --name venue-lab2
+  -t venue-booking-node-check:lab2-20261116-01 ./node-check
+kind load docker-image venue-booking-node-check:lab2-20261116-01 --name venue-lab2
 kubectl --context kind-venue-lab2 -n venue-booking apply --dry-run=server \
   -f k8s/base/node-check-daemonset.yaml
 kubectl --context kind-venue-lab2 -n venue-booking apply \
