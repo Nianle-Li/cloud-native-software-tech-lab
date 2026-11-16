@@ -1,0 +1,41 @@
+2026-11-16T04:30:22.280296507Z 
+2026-11-16T04:30:22.280402382Z   .   ____          _            __ _ _
+2026-11-16T04:30:22.280409091Z  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+2026-11-16T04:30:22.280410174Z ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+2026-11-16T04:30:22.280411341Z  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+2026-11-16T04:30:22.280412257Z   '  |____| .__|_| |_|_| |_\__, | / / / /
+2026-11-16T04:30:22.280413174Z  =========|_|==============|___/=/_/_/_/
+2026-11-16T04:30:22.280414007Z 
+2026-11-16T04:30:22.280692632Z  :: Spring Boot ::                (v3.4.5)
+2026-11-16T04:30:22.280696549Z 
+2026-11-16T04:30:22.490931007Z 2026-11-16T04:30:22.489Z  INFO 1 --- [venue-booking-api] [           main] c.e.v.VenueBookingApplication            : Starting VenueBookingApplication v0.0.1-SNAPSHOT using Java 17.0.20.1 with PID 1 (/app/app.jar started by app in /app)
+2026-11-16T04:30:22.491512757Z 2026-11-16T04:30:22.491Z  INFO 1 --- [venue-booking-api] [           main] c.e.v.VenueBookingApplication            : No active profile set, falling back to 1 default profile: "default"
+2026-11-16T04:30:26.071262134Z 2026-11-16T04:30:25.991Z  INFO 1 --- [venue-booking-api] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-16T04:30:26.373698301Z 2026-11-16T04:30:26.373Z  INFO 1 --- [venue-booking-api] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 292 ms. Found 4 JPA repository interfaces.
+2026-11-16T04:30:29.483746719Z 2026-11-16T04:30:29.482Z  INFO 1 --- [venue-booking-api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-16T04:30:30.274754011Z 2026-11-16T04:30:30.274Z  INFO 1 --- [venue-booking-api] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6f3bd37f
+2026-11-16T04:30:30.276106969Z 2026-11-16T04:30:30.275Z  INFO 1 --- [venue-booking-api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-16T04:30:30.374992844Z 2026-11-16T04:30:30.374Z  INFO 1 --- [venue-booking-api] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://database:5432/venue_booking (PostgreSQL 16.15)
+2026-11-16T04:30:30.675582595Z 2026-11-16T04:30:30.675Z  INFO 1 --- [venue-booking-api] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 4 migrations (execution time 00:00.197s)
+2026-11-16T04:30:30.687036136Z 2026-11-16T04:30:30.686Z  INFO 1 --- [venue-booking-api] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 4
+2026-11-16T04:30:30.688563303Z 2026-11-16T04:30:30.688Z  INFO 1 --- [venue-booking-api] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-11-16T04:30:31.276728428Z 2026-11-16T04:30:31.276Z  INFO 1 --- [venue-booking-api] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-16T04:30:31.481988053Z 2026-11-16T04:30:31.481Z  INFO 1 --- [venue-booking-api] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
+2026-11-16T04:30:31.592414928Z 2026-11-16T04:30:31.592Z  INFO 1 --- [venue-booking-api] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-11-16T04:30:32.585976554Z 2026-11-16T04:30:32.585Z  INFO 1 --- [venue-booking-api] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-16T04:30:32.882290429Z 2026-11-16T04:30:32.881Z  INFO 1 --- [venue-booking-api] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+2026-11-16T04:30:32.882351512Z 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+2026-11-16T04:30:32.882354387Z 	Database driver: undefined/unknown
+2026-11-16T04:30:32.882356887Z 	Database version: 16.15
+2026-11-16T04:30:32.882357804Z 	Autocommit mode: undefined/unknown
+2026-11-16T04:30:32.882358637Z 	Isolation level: undefined/unknown
+2026-11-16T04:30:32.882359429Z 	Minimum pool size: undefined/unknown
+2026-11-16T04:30:32.882360221Z 	Maximum pool size: undefined/unknown
+2026-11-16T04:30:36.791035708Z 2026-11-16T04:30:36.790Z  INFO 1 --- [venue-booking-api] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-16T04:30:36.875334625Z 2026-11-16T04:30:36.874Z  INFO 1 --- [venue-booking-api] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-16T04:30:38.085555751Z 2026-11-16T04:30:38.085Z  INFO 1 --- [venue-booking-api] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-16T04:30:43.184599836Z 2026-11-16T04:30:43.184Z  INFO 1 --- [venue-booking-api] [           main] c.e.v.VenueBookingApplication            : Started VenueBookingApplication in 22.397 seconds (process running for 24.007)
+2026-11-16T04:30:44.076566587Z 2026-11-16T04:30:44.076Z  INFO 1 --- [venue-booking-api] [           main] c.e.v.service.ReportJobLauncher          : Report job venue-report-manual-20261116043018-208e0f completed
+2026-11-16T04:30:44.082592545Z 2026-11-16T04:30:44.082Z  INFO 1 --- [venue-booking-api] [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-16T04:30:44.084267920Z 2026-11-16T04:30:44.084Z  INFO 1 --- [venue-booking-api] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-11-16T04:30:44.089558295Z 2026-11-16T04:30:44.089Z  INFO 1 --- [venue-booking-api] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

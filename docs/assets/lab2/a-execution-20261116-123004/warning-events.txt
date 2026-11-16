@@ -1,0 +1,6 @@
+LAST SEEN   TYPE      REASON      OBJECT                    MESSAGE
+59m         Warning   Unhealthy   pod/api-d866875dd-jtlfr   Startup probe failed: Get "http://10.244.2.4:8080/actuator/health/liveness": dial tcp 10.244.2.4:8080: connect: connection refused
+59m         Warning   Unhealthy   pod/api-d866875dd-ndq66   Startup probe failed: Get "http://10.244.1.10:8080/actuator/health/liveness": dial tcp 10.244.1.10:8080: connect: connection refused
+9m47s       Warning   Unhealthy   pod/api-d866875dd-ndq66   Readiness probe failed: Get "http://10.244.1.10:8080/actuator/health/readiness": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+4m23s       Warning   Unhealthy   pod/node-check-mxkrx      Readiness probe failed:
+4m27s       Warning   Unhealthy   pod/node-check-xvbqn      Readiness probe failed:

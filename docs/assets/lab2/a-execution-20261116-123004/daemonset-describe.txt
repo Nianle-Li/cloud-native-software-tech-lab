@@ -1,0 +1,40 @@
+Name:           node-check
+Namespace:      venue-booking
+Selector:       app.kubernetes.io/component=node-check,app.kubernetes.io/name=venue-booking
+Node-Selector:  <none>
+Labels:         app.kubernetes.io/component=node-check
+                app.kubernetes.io/name=venue-booking
+Annotations:    deprecated.daemonset.template.generation: 1
+Desired Number of Nodes Scheduled: 2
+Current Number of Nodes Scheduled: 2
+Number of Nodes Scheduled with Up-to-date Pods: 2
+Number of Nodes Scheduled with Available Pods: 0
+Number of Nodes Misscheduled: 0
+Pods Status:  2 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app.kubernetes.io/component=node-check
+           app.kubernetes.io/name=venue-booking
+  Containers:
+   node-check:
+    Image:      venue-booking-node-check:lab2-20261115-01
+    Port:       <none>
+    Host Port:  <none>
+    Limits:
+      cpu:     100m
+      memory:  64Mi
+    Requests:
+      cpu:      10m
+      memory:   16Mi
+    Readiness:  exec [sh -c nslookup kubernetes.default.svc >/dev/null 2>&1] delay=0s timeout=3s period=10s #success=1 #failure=2
+    Environment:
+      NODE_NAME:    (v1:spec.nodeName)
+      HOST_IP:      (v1:status.hostIP)
+    Mounts:        <none>
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Events:
+  Type    Reason            Age    From                  Message
+  ----    ------            ----   ----                  -------
+  Normal  SuccessfulCreate  9m31s  daemonset-controller  Created pod: node-check-xvbqn
+  Normal  SuccessfulCreate  9m31s  daemonset-controller  Created pod: node-check-mxkrx

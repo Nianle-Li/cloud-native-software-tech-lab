@@ -1,0 +1,1850 @@
+{
+  "batch": "a-execution-20261116-122736",
+  "started_at": "2026-11-16T12:27:36.560793+08:00",
+  "status": "PARTIAL",
+  "context": "kind-venue-lab2",
+  "namespace": "venue-booking",
+  "steps": [
+    {
+      "name": "source-commit",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/source-commit.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "hostname",
+      "command": [
+        "hostname"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/hostname.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "nodes",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "get",
+        "nodes",
+        "-o",
+        "json"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/nodes.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "pvc-before",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pvc",
+        "postgres-data-database-0",
+        "-o",
+        "json"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/pvc-before.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "secret-before",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "secret",
+        "venue-db-credentials",
+        "-o",
+        "jsonpath={.metadata.uid}/{.metadata.resourceVersion}"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/secret-before.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "api-before",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pods",
+        "-l",
+        "app.kubernetes.io/component=api",
+        "-o",
+        "json"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/api-before.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-build",
+      "command": [
+        "docker",
+        "build",
+        "--platform",
+        "linux/arm64",
+        "--provenance=false",
+        "--load",
+        "-t",
+        "venue-booking-node-check:lab2-20261115-01",
+        "node-check"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-build.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-load",
+      "command": [
+        "kind",
+        "load",
+        "docker-image",
+        "venue-booking-node-check:lab2-20261115-01",
+        "--name",
+        "venue-lab2"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-load.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-image",
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "venue-booking-node-check:lab2-20261115-01",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}}}"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-image.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-image-venue-lab2-control-plane",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-control-plane",
+        "crictl",
+        "images",
+        "venue-booking-node-check:lab2-20261115-01"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-image-venue-lab2-control-plane.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-image-venue-lab2-worker",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-worker",
+        "crictl",
+        "images",
+        "venue-booking-node-check:lab2-20261115-01"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-image-venue-lab2-worker.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-image-venue-lab2-worker2",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-worker2",
+        "crictl",
+        "images",
+        "venue-booking-node-check:lab2-20261115-01"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-image-venue-lab2-worker2.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-build",
+      "command": [
+        "docker",
+        "build",
+        "--platform",
+        "linux/arm64",
+        "--provenance=false",
+        "--load",
+        "-t",
+        "venue-booking-frontend:lab2-eda8edd",
+        "frontend"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-build.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-load",
+      "command": [
+        "kind",
+        "load",
+        "docker-image",
+        "venue-booking-frontend:lab2-eda8edd",
+        "--name",
+        "venue-lab2"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-load.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-image",
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "venue-booking-frontend:lab2-eda8edd",
+        "--format",
+        "{\"id\":{{json .Id}},\"os\":{{json .Os}},\"architecture\":{{json .Architecture}}}"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-image.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-image-venue-lab2-control-plane",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-control-plane",
+        "crictl",
+        "images",
+        "venue-booking-frontend:lab2-eda8edd"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-image-venue-lab2-control-plane.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-image-venue-lab2-worker",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-worker",
+        "crictl",
+        "images",
+        "venue-booking-frontend:lab2-eda8edd"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-image-venue-lab2-worker.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-image-venue-lab2-worker2",
+      "command": [
+        "docker",
+        "exec",
+        "venue-lab2-worker2",
+        "crictl",
+        "images",
+        "venue-booking-frontend:lab2-eda8edd"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-image-venue-lab2-worker2.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-dry-run",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "apply",
+        "--dry-run=server",
+        "-f",
+        "k8s/base/node-check-daemonset.yaml"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-dry-run.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-apply",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "apply",
+        "-f",
+        "k8s/base/node-check-daemonset.yaml"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-apply.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-rollout",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "rollout",
+        "status",
+        "daemonset/node-check",
+        "--timeout=5s"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-rollout.txt",
+      "exit_code": 1
+    },
+    {
+      "name": "frontend-dry-run",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "apply",
+        "--dry-run=server",
+        "-f",
+        "k8s/base/frontend-nginx-configmap.yaml",
+        "-f",
+        "k8s/base/frontend-service.yaml",
+        "-f",
+        "k8s/base/frontend-deployment.yaml"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-dry-run.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-apply",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "apply",
+        "-f",
+        "k8s/base/frontend-nginx-configmap.yaml",
+        "-f",
+        "k8s/base/frontend-service.yaml",
+        "-f",
+        "k8s/base/frontend-deployment.yaml"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-apply.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-rollout",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "rollout",
+        "status",
+        "deployment/frontend",
+        "--timeout=120s"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-rollout.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "daemonset-status",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "ds",
+        "node-check",
+        "-o",
+        "json"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/daemonset-status.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "daemonset-pods",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pods",
+        "-l",
+        "app.kubernetes.io/component=node-check",
+        "-o",
+        "json"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/daemonset-pods.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-log-0",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "logs",
+        "node-check-mxkrx",
+        "--timestamps=true"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-log-0.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-fqdn-0",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "node-check-mxkrx",
+        "--",
+        "nslookup",
+        "kubernetes.default.svc.cluster.local"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-fqdn-0.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-resolv-0",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "node-check-mxkrx",
+        "--",
+        "cat",
+        "/etc/resolv.conf"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-resolv-0.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-log-1",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "logs",
+        "node-check-xvbqn",
+        "--timestamps=true"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-log-1.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-fqdn-1",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "node-check-xvbqn",
+        "--",
+        "nslookup",
+        "kubernetes.default.svc.cluster.local"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-fqdn-1.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "node-check-resolv-1",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "node-check-xvbqn",
+        "--",
+        "cat",
+        "/etc/resolv.conf"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/node-check-resolv-1.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-pods",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pods",
+        "-l",
+        "app.kubernetes.io/component=frontend",
+        "-o",
+        "json"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-pods.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-endpoints",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "endpointslice",
+        "-l",
+        "kubernetes.io/service-name=frontend",
+        "-o",
+        "wide"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-endpoints.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "failure-events",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "events",
+        "--sort-by=.lastTimestamp"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/failure-events.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "failure-describe",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "describe",
+        "pods"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/failure-describe.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "failure-frontend-logs",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "logs",
+        "deployment/frontend",
+        "--tail=200"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/failure-frontend-logs.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "failure-cronjob",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "describe",
+        "cronjob",
+        "venue-report-daily"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/failure-cronjob.txt",
+      "exit_code": 1
+    },
+    {
+      "name": "pvc-after",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "pvc",
+        "postgres-data-database-0",
+        "-o",
+        "json"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/pvc-after.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "secret-after",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "secret",
+        "venue-db-credentials",
+        "-o",
+        "jsonpath={.metadata.uid}/{.metadata.resourceVersion}"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/secret-after.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "final-status",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "get",
+        "deploy,sts,ds,cronjob,job,pods,pvc",
+        "-o",
+        "wide"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/final-status.txt",
+      "exit_code": 0
+    },
+    {
+      "name": "frontend-final-logs",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "logs",
+        "deployment/frontend",
+        "--timestamps=true"
+      ],
+      "cwd": "/Users/kodia/Documents/临时中转/大三上/云原生软件技术/cloud-native-software-tech-lab",
+      "log": "docs/assets/lab2/a-execution-20261116-122736/frontend-final-logs.txt",
+      "exit_code": 0
+    }
+  ],
+  "failures": [
+    "Command failed: node-check-rollout",
+    "DaemonSet: 2 Pods scheduled but 0 Ready; short DNS name NXDOMAIN, full kubernetes.default.svc.cluster.local resolves on both workers. A fix required.",
+    "Frontend port-forward did not become ready"
+  ],
+  "api_image": "venue-booking-api:lab2-20261113",
+  "source_commit": "2e00bf1e87502190dfea13d671bc978b71c413cc",
+  "hostname": "wukediedeMacBook-Pro.local",
+  "nodes": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "apiVersion": "v1",
+        "kind": "Node",
+        "metadata": {
+          "annotations": {
+            "node.alpha.kubernetes.io/ttl": "0",
+            "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+          },
+          "creationTimestamp": "2026-11-15T08:52:34Z",
+          "labels": {
+            "beta.kubernetes.io/arch": "arm64",
+            "beta.kubernetes.io/os": "linux",
+            "kubernetes.io/arch": "arm64",
+            "kubernetes.io/hostname": "venue-lab2-control-plane",
+            "kubernetes.io/os": "linux",
+            "node-role.kubernetes.io/control-plane": "",
+            "node.kubernetes.io/exclude-from-external-load-balancers": ""
+          },
+          "name": "venue-lab2-control-plane",
+          "resourceVersion": "14925",
+          "uid": "ea802a3a-c04e-4554-a008-6c48d78a878f"
+        },
+        "spec": {
+          "podCIDR": "10.244.0.0/24",
+          "podCIDRs": [
+            "10.244.0.0/24"
+          ],
+          "providerID": "kind://docker/venue-lab2/venue-lab2-control-plane",
+          "taints": [
+            {
+              "effect": "NoSchedule",
+              "key": "node-role.kubernetes.io/control-plane"
+            }
+          ]
+        },
+        "status": {
+          "addresses": [
+            {
+              "address": "172.20.0.2",
+              "type": "InternalIP"
+            },
+            {
+              "address": "venue-lab2-control-plane",
+              "type": "Hostname"
+            }
+          ],
+          "allocatable": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "capacity": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "conditions": [
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:42Z",
+              "lastTransitionTime": "2026-11-15T08:52:33Z",
+              "message": "kubelet has sufficient memory available",
+              "reason": "KubeletHasSufficientMemory",
+              "status": "False",
+              "type": "MemoryPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:42Z",
+              "lastTransitionTime": "2026-11-15T08:52:33Z",
+              "message": "kubelet has no disk pressure",
+              "reason": "KubeletHasNoDiskPressure",
+              "status": "False",
+              "type": "DiskPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:42Z",
+              "lastTransitionTime": "2026-11-15T08:52:33Z",
+              "message": "kubelet has sufficient PID available",
+              "reason": "KubeletHasSufficientPID",
+              "status": "False",
+              "type": "PIDPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:42Z",
+              "lastTransitionTime": "2026-11-15T08:52:54Z",
+              "message": "kubelet is posting ready status",
+              "reason": "KubeletReady",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "daemonEndpoints": {
+            "kubeletEndpoint": {
+              "Port": 10250
+            }
+          },
+          "features": {
+            "supplementalGroupsPolicy": true
+          },
+          "images": [
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                "docker.io/library/venue-booking-api:lab2-20261113"
+              ],
+              "sizeBytes": 191687040
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                "docker.io/library/postgres:16.15-bookworm"
+              ],
+              "sizeBytes": 153148144
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                "registry.k8s.io/kube-apiserver:v1.34.11"
+              ],
+              "sizeBytes": 84226419
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                "registry.k8s.io/kube-proxy:v1.34.11"
+              ],
+              "sizeBytes": 78172361
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                "registry.k8s.io/kube-controller-manager:v1.34.11"
+              ],
+              "sizeBytes": 72233573
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                "registry.k8s.io/kube-scheduler:v1.34.11"
+              ],
+              "sizeBytes": 51720412
+            },
+            {
+              "names": [
+                "docker.io/kindest/kindnetd:v20260820-69b56db7"
+              ],
+              "sizeBytes": 35652389
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:0521d2c9b62c42e81942e9012d13f25cb6f79a35b8391b7eb28a29cfaa063fe8",
+                "docker.io/library/venue-booking-frontend:lab2-eda8edd"
+              ],
+              "sizeBytes": 27829593
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:010230232b8a98689d32a0210bc27e2340642039d9eb65b8fd7f779a83ffcfbe",
+                "docker.io/library/lab2-env-check:22e0c990"
+              ],
+              "sizeBytes": 25780629
+            },
+            {
+              "names": [
+                "registry.k8s.io/etcd:3.6.5-0"
+              ],
+              "sizeBytes": 21136588
+            },
+            {
+              "names": [
+                "registry.k8s.io/coredns/coredns:v1.12.1"
+              ],
+              "sizeBytes": 20392204
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+              ],
+              "sizeBytes": 14217939
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:2dac93009bda24147bf4c99455a92b3d0ffd13c00dc39b049ab9dfa3d4dad750"
+              ],
+              "sizeBytes": 5970602
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+              ],
+              "sizeBytes": 2740462
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387",
+                "docker.io/library/venue-booking-node-check:lab2-20261115-01"
+              ],
+              "sizeBytes": 1903443
+            },
+            {
+              "names": [
+                "registry.k8s.io/pause:3.10"
+              ],
+              "sizeBytes": 267933
+            }
+          ],
+          "nodeInfo": {
+            "architecture": "arm64",
+            "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+            "containerRuntimeVersion": "containerd://2.3.4",
+            "kernelVersion": "6.12.72-linuxkit",
+            "kubeProxyVersion": "",
+            "kubeletVersion": "v1.34.11",
+            "machineID": "30037510e3184e02816e224e10a564c2",
+            "operatingSystem": "linux",
+            "osImage": "Debian GNU/Linux 13 (trixie)",
+            "swap": {
+              "capacity": 1073737728
+            },
+            "systemUUID": "30037510e3184e02816e224e10a564c2"
+          },
+          "runtimeHandlers": [
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": ""
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "runc"
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "test-handler"
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Node",
+        "metadata": {
+          "annotations": {
+            "node.alpha.kubernetes.io/ttl": "0",
+            "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+          },
+          "creationTimestamp": "2026-11-15T08:52:44Z",
+          "labels": {
+            "beta.kubernetes.io/arch": "arm64",
+            "beta.kubernetes.io/os": "linux",
+            "kubernetes.io/arch": "arm64",
+            "kubernetes.io/hostname": "venue-lab2-worker",
+            "kubernetes.io/os": "linux"
+          },
+          "name": "venue-lab2-worker",
+          "resourceVersion": "14911",
+          "uid": "9e829dfd-cba5-470e-8666-bbc6a5655c76"
+        },
+        "spec": {
+          "podCIDR": "10.244.2.0/24",
+          "podCIDRs": [
+            "10.244.2.0/24"
+          ],
+          "providerID": "kind://docker/venue-lab2/venue-lab2-worker"
+        },
+        "status": {
+          "addresses": [
+            {
+              "address": "172.20.0.3",
+              "type": "InternalIP"
+            },
+            {
+              "address": "venue-lab2-worker",
+              "type": "Hostname"
+            }
+          ],
+          "allocatable": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "capacity": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "conditions": [
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:44Z",
+              "message": "kubelet has sufficient memory available",
+              "reason": "KubeletHasSufficientMemory",
+              "status": "False",
+              "type": "MemoryPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:44Z",
+              "message": "kubelet has no disk pressure",
+              "reason": "KubeletHasNoDiskPressure",
+              "status": "False",
+              "type": "DiskPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:44Z",
+              "message": "kubelet has sufficient PID available",
+              "reason": "KubeletHasSufficientPID",
+              "status": "False",
+              "type": "PIDPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:56Z",
+              "message": "kubelet is posting ready status",
+              "reason": "KubeletReady",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "daemonEndpoints": {
+            "kubeletEndpoint": {
+              "Port": 10250
+            }
+          },
+          "features": {
+            "supplementalGroupsPolicy": true
+          },
+          "images": [
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                "docker.io/library/venue-booking-api:lab2-20261113"
+              ],
+              "sizeBytes": 191687040
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                "docker.io/library/postgres:16.15-bookworm"
+              ],
+              "sizeBytes": 153148144
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                "registry.k8s.io/kube-apiserver:v1.34.11"
+              ],
+              "sizeBytes": 84226803
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                "registry.k8s.io/kube-proxy:v1.34.11"
+              ],
+              "sizeBytes": 78172361
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                "registry.k8s.io/kube-controller-manager:v1.34.11"
+              ],
+              "sizeBytes": 72233180
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                "registry.k8s.io/kube-scheduler:v1.34.11"
+              ],
+              "sizeBytes": 51720412
+            },
+            {
+              "names": [
+                "docker.io/kindest/kindnetd:v20260820-69b56db7"
+              ],
+              "sizeBytes": 35652389
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:0521d2c9b62c42e81942e9012d13f25cb6f79a35b8391b7eb28a29cfaa063fe8",
+                "docker.io/library/venue-booking-frontend:lab2-eda8edd"
+              ],
+              "sizeBytes": 27829593
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:010230232b8a98689d32a0210bc27e2340642039d9eb65b8fd7f779a83ffcfbe",
+                "docker.io/library/lab2-env-check:22e0c990"
+              ],
+              "sizeBytes": 25780629
+            },
+            {
+              "names": [
+                "registry.k8s.io/etcd:3.6.5-0"
+              ],
+              "sizeBytes": 21136588
+            },
+            {
+              "names": [
+                "registry.k8s.io/coredns/coredns:v1.12.1"
+              ],
+              "sizeBytes": 20392204
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+              ],
+              "sizeBytes": 14217939
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:2dac93009bda24147bf4c99455a92b3d0ffd13c00dc39b049ab9dfa3d4dad750"
+              ],
+              "sizeBytes": 5970602
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+              ],
+              "sizeBytes": 2740462
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387",
+                "docker.io/library/venue-booking-node-check:lab2-20261115-01"
+              ],
+              "sizeBytes": 1903443
+            },
+            {
+              "names": [
+                "registry.k8s.io/pause:3.10"
+              ],
+              "sizeBytes": 267933
+            }
+          ],
+          "nodeInfo": {
+            "architecture": "arm64",
+            "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+            "containerRuntimeVersion": "containerd://2.3.4",
+            "kernelVersion": "6.12.72-linuxkit",
+            "kubeProxyVersion": "",
+            "kubeletVersion": "v1.34.11",
+            "machineID": "42b4896bf4aa4c0b8decf95eef29cc1b",
+            "operatingSystem": "linux",
+            "osImage": "Debian GNU/Linux 13 (trixie)",
+            "swap": {
+              "capacity": 1073737728
+            },
+            "systemUUID": "42b4896bf4aa4c0b8decf95eef29cc1b"
+          },
+          "runtimeHandlers": [
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": ""
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "runc"
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "test-handler"
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Node",
+        "metadata": {
+          "annotations": {
+            "node.alpha.kubernetes.io/ttl": "0",
+            "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+          },
+          "creationTimestamp": "2026-11-15T08:52:43Z",
+          "labels": {
+            "beta.kubernetes.io/arch": "arm64",
+            "beta.kubernetes.io/os": "linux",
+            "kubernetes.io/arch": "arm64",
+            "kubernetes.io/hostname": "venue-lab2-worker2",
+            "kubernetes.io/os": "linux"
+          },
+          "name": "venue-lab2-worker2",
+          "resourceVersion": "14909",
+          "uid": "4baf29d6-c2f7-4d9a-8ac5-8bcf3124efa0"
+        },
+        "spec": {
+          "podCIDR": "10.244.1.0/24",
+          "podCIDRs": [
+            "10.244.1.0/24"
+          ],
+          "providerID": "kind://docker/venue-lab2/venue-lab2-worker2"
+        },
+        "status": {
+          "addresses": [
+            {
+              "address": "172.20.0.4",
+              "type": "InternalIP"
+            },
+            {
+              "address": "venue-lab2-worker2",
+              "type": "Hostname"
+            }
+          ],
+          "allocatable": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "capacity": {
+            "cpu": "11",
+            "ephemeral-storage": "474095688Ki",
+            "hugepages-1Gi": "0",
+            "hugepages-2Mi": "0",
+            "hugepages-32Mi": "0",
+            "hugepages-64Ki": "0",
+            "memory": "8024332Ki",
+            "pods": "110"
+          },
+          "conditions": [
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:43Z",
+              "message": "kubelet has sufficient memory available",
+              "reason": "KubeletHasSufficientMemory",
+              "status": "False",
+              "type": "MemoryPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:43Z",
+              "message": "kubelet has no disk pressure",
+              "reason": "KubeletHasNoDiskPressure",
+              "status": "False",
+              "type": "DiskPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:43Z",
+              "message": "kubelet has sufficient PID available",
+              "reason": "KubeletHasSufficientPID",
+              "status": "False",
+              "type": "PIDPressure"
+            },
+            {
+              "lastHeartbeatTime": "2026-11-16T04:25:33Z",
+              "lastTransitionTime": "2026-11-15T08:52:56Z",
+              "message": "kubelet is posting ready status",
+              "reason": "KubeletReady",
+              "status": "True",
+              "type": "Ready"
+            }
+          ],
+          "daemonEndpoints": {
+            "kubeletEndpoint": {
+              "Port": 10250
+            }
+          },
+          "features": {
+            "supplementalGroupsPolicy": true
+          },
+          "images": [
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                "docker.io/library/venue-booking-api:lab2-20261113"
+              ],
+              "sizeBytes": 191687040
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                "docker.io/library/postgres:16.15-bookworm"
+              ],
+              "sizeBytes": 153148144
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                "registry.k8s.io/kube-apiserver:v1.34.11"
+              ],
+              "sizeBytes": 84226419
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                "registry.k8s.io/kube-proxy:v1.34.11"
+              ],
+              "sizeBytes": 78172361
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                "registry.k8s.io/kube-controller-manager:v1.34.11"
+              ],
+              "sizeBytes": 72233180
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                "registry.k8s.io/kube-scheduler:v1.34.11"
+              ],
+              "sizeBytes": 51720412
+            },
+            {
+              "names": [
+                "docker.io/kindest/kindnetd:v20260820-69b56db7"
+              ],
+              "sizeBytes": 35652389
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:0521d2c9b62c42e81942e9012d13f25cb6f79a35b8391b7eb28a29cfaa063fe8",
+                "docker.io/library/venue-booking-frontend:lab2-eda8edd"
+              ],
+              "sizeBytes": 27829593
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:010230232b8a98689d32a0210bc27e2340642039d9eb65b8fd7f779a83ffcfbe",
+                "docker.io/library/lab2-env-check:22e0c990"
+              ],
+              "sizeBytes": 25780629
+            },
+            {
+              "names": [
+                "registry.k8s.io/etcd:3.6.5-0"
+              ],
+              "sizeBytes": 21136588
+            },
+            {
+              "names": [
+                "registry.k8s.io/coredns/coredns:v1.12.1"
+              ],
+              "sizeBytes": 20392204
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+              ],
+              "sizeBytes": 14217939
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-15@sha256:2dac93009bda24147bf4c99455a92b3d0ffd13c00dc39b049ab9dfa3d4dad750"
+              ],
+              "sizeBytes": 5970602
+            },
+            {
+              "names": [
+                "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+              ],
+              "sizeBytes": 2740462
+            },
+            {
+              "names": [
+                "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387",
+                "docker.io/library/venue-booking-node-check:lab2-20261115-01"
+              ],
+              "sizeBytes": 1903443
+            },
+            {
+              "names": [
+                "registry.k8s.io/pause:3.10"
+              ],
+              "sizeBytes": 267933
+            }
+          ],
+          "nodeInfo": {
+            "architecture": "arm64",
+            "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+            "containerRuntimeVersion": "containerd://2.3.4",
+            "kernelVersion": "6.12.72-linuxkit",
+            "kubeProxyVersion": "",
+            "kubeletVersion": "v1.34.11",
+            "machineID": "b685b50cc0414b8e9d9466cce495a157",
+            "operatingSystem": "linux",
+            "osImage": "Debian GNU/Linux 13 (trixie)",
+            "swap": {
+              "capacity": 1073737728
+            },
+            "systemUUID": "b685b50cc0414b8e9d9466cce495a157"
+          },
+          "runtimeHandlers": [
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": ""
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "runc"
+            },
+            {
+              "features": {
+                "recursiveReadOnlyMounts": true,
+                "userNamespaces": true
+              },
+              "name": "test-handler"
+            }
+          ]
+        }
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  },
+  "pvc_before": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+      "annotations": {
+        "pv.kubernetes.io/bind-completed": "yes",
+        "pv.kubernetes.io/bound-by-controller": "yes",
+        "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+        "volume.kubernetes.io/selected-node": "venue-lab2-worker2",
+        "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T09:00:11Z",
+      "finalizers": [
+        "kubernetes.io/pvc-protection"
+      ],
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking"
+      },
+      "name": "postgres-data-database-0",
+      "namespace": "venue-booking",
+      "resourceVersion": "1447",
+      "uid": "aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "resources": {
+        "requests": {
+          "storage": "1Gi"
+        }
+      },
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem",
+      "volumeName": "pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "status": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "1Gi"
+      },
+      "phase": "Bound"
+    }
+  },
+  "secret_before": "cca39143-439d-4df3-93df-908e75e5a8d4/1410",
+  "node-check_image": {
+    "id": "sha256:cece3b67a1b027b893a8f55e2d40d99263e8f360fffe7f886dd5547bf95e3dae",
+    "os": "linux",
+    "architecture": "arm64"
+  },
+  "frontend_image": {
+    "id": "sha256:b419b0651f154ecef2090a38deca1889d2ce65c418b93e0538a91e1e843da8a3",
+    "os": "linux",
+    "architecture": "arm64"
+  },
+  "daemonset_pods": [
+    {
+      "name": "node-check-mxkrx",
+      "node": "venue-lab2-worker",
+      "imageID": "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387"
+    },
+    {
+      "name": "node-check-xvbqn",
+      "node": "venue-lab2-worker2",
+      "imageID": "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387"
+    }
+  ],
+  "daemonset_verified": false,
+  "frontend_pods": {
+    "apiVersion": "v1",
+    "items": [
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "creationTimestamp": "2026-11-16T04:27:47Z",
+          "generateName": "frontend-5dbcc7f84-",
+          "generation": 1,
+          "labels": {
+            "app.kubernetes.io/component": "frontend",
+            "app.kubernetes.io/name": "venue-booking",
+            "pod-template-hash": "5dbcc7f84"
+          },
+          "name": "frontend-5dbcc7f84-ww4xm",
+          "namespace": "venue-booking",
+          "ownerReferences": [
+            {
+              "apiVersion": "apps/v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "ReplicaSet",
+              "name": "frontend-5dbcc7f84",
+              "uid": "b2047e32-b85f-481e-ad87-4eabf67f3a17"
+            }
+          ],
+          "resourceVersion": "15173",
+          "uid": "c1d4345b-7dc9-46c1-8b35-c5fc86adbe17"
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "image": "venue-booking-frontend:lab2-eda8edd",
+              "imagePullPolicy": "IfNotPresent",
+              "livenessProbe": {
+                "failureThreshold": 3,
+                "httpGet": {
+                  "path": "/",
+                  "port": "http",
+                  "scheme": "HTTP"
+                },
+                "periodSeconds": 10,
+                "successThreshold": 1,
+                "timeoutSeconds": 2
+              },
+              "name": "frontend",
+              "ports": [
+                {
+                  "containerPort": 80,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ],
+              "readinessProbe": {
+                "failureThreshold": 3,
+                "httpGet": {
+                  "path": "/",
+                  "port": "http",
+                  "scheme": "HTTP"
+                },
+                "periodSeconds": 5,
+                "successThreshold": 1,
+                "timeoutSeconds": 2
+              },
+              "resources": {
+                "limits": {
+                  "cpu": "250m",
+                  "memory": "256Mi"
+                },
+                "requests": {
+                  "cpu": "25m",
+                  "memory": "64Mi"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 12,
+                "httpGet": {
+                  "path": "/",
+                  "port": "http",
+                  "scheme": "HTTP"
+                },
+                "periodSeconds": 5,
+                "successThreshold": 1,
+                "timeoutSeconds": 2
+              },
+              "terminationMessagePath": "/dev/termination-log",
+              "terminationMessagePolicy": "File",
+              "volumeMounts": [
+                {
+                  "mountPath": "/etc/nginx/conf.d",
+                  "name": "nginx-config",
+                  "readOnly": true
+                }
+              ]
+            }
+          ],
+          "dnsPolicy": "ClusterFirst",
+          "enableServiceLinks": true,
+          "nodeName": "venue-lab2-worker",
+          "preemptionPolicy": "PreemptLowerPriority",
+          "priority": 0,
+          "restartPolicy": "Always",
+          "schedulerName": "default-scheduler",
+          "securityContext": {},
+          "serviceAccount": "default",
+          "serviceAccountName": "default",
+          "terminationGracePeriodSeconds": 30,
+          "tolerations": [
+            {
+              "effect": "NoExecute",
+              "key": "node.kubernetes.io/not-ready",
+              "operator": "Exists",
+              "tolerationSeconds": 300
+            },
+            {
+              "effect": "NoExecute",
+              "key": "node.kubernetes.io/unreachable",
+              "operator": "Exists",
+              "tolerationSeconds": 300
+            }
+          ],
+          "volumes": [
+            {
+              "configMap": {
+                "defaultMode": 420,
+                "items": [
+                  {
+                    "key": "default.conf",
+                    "path": "default.conf"
+                  }
+                ],
+                "name": "frontend-nginx"
+              },
+              "name": "nginx-config"
+            }
+          ]
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-11-16T04:27:48Z",
+              "observedGeneration": 1,
+              "status": "True",
+              "type": "PodReadyToStartContainers"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-11-16T04:27:47Z",
+              "observedGeneration": 1,
+              "status": "True",
+              "type": "Initialized"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-11-16T04:27:53Z",
+              "observedGeneration": 1,
+              "status": "True",
+              "type": "Ready"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-11-16T04:27:53Z",
+              "observedGeneration": 1,
+              "status": "True",
+              "type": "ContainersReady"
+            },
+            {
+              "lastProbeTime": null,
+              "lastTransitionTime": "2026-11-16T04:27:47Z",
+              "observedGeneration": 1,
+              "status": "True",
+              "type": "PodScheduled"
+            }
+          ],
+          "containerStatuses": [
+            {
+              "allocatedResources": {
+                "cpu": "25m",
+                "memory": "64Mi"
+              },
+              "containerID": "containerd://5e241a5aaf016c98353b6a03ee2693296c1fca9c0d2300de173c9b562dfd20fc",
+              "image": "docker.io/library/venue-booking-frontend:lab2-eda8edd",
+              "imageID": "docker.io/library/import-2026-11-16@sha256:0521d2c9b62c42e81942e9012d13f25cb6f79a35b8391b7eb28a29cfaa063fe8",
+              "lastState": {},
+              "name": "frontend",
+              "ready": true,
+              "resources": {
+                "limits": {
+                  "cpu": "250m",
+                  "memory": "256Mi"
+                },
+                "requests": {
+                  "cpu": "25m",
+                  "memory": "64Mi"
+                }
+              },
+              "restartCount": 0,
+              "started": true,
+              "state": {
+                "running": {
+                  "startedAt": "2026-11-16T04:27:47Z"
+                }
+              },
+              "user": {
+                "linux": {
+                  "gid": 0,
+                  "supplementalGroups": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    6,
+                    10,
+                    11,
+                    20,
+                    26,
+                    27
+                  ],
+                  "uid": 0
+                }
+              },
+              "volumeMounts": [
+                {
+                  "mountPath": "/etc/nginx/conf.d",
+                  "name": "nginx-config",
+                  "readOnly": true,
+                  "recursiveReadOnly": "Disabled"
+                }
+              ]
+            }
+          ],
+          "hostIP": "172.20.0.3",
+          "hostIPs": [
+            {
+              "ip": "172.20.0.3"
+            }
+          ],
+          "observedGeneration": 1,
+          "phase": "Running",
+          "podIP": "10.244.2.7",
+          "podIPs": [
+            {
+              "ip": "10.244.2.7"
+            }
+          ],
+          "qosClass": "Burstable",
+          "startTime": "2026-11-16T04:27:47Z"
+        }
+      }
+    ],
+    "kind": "List",
+    "metadata": {
+      "resourceVersion": ""
+    }
+  },
+  "port": 8080,
+  "pvc_after": {
+    "apiVersion": "v1",
+    "kind": "PersistentVolumeClaim",
+    "metadata": {
+      "annotations": {
+        "pv.kubernetes.io/bind-completed": "yes",
+        "pv.kubernetes.io/bound-by-controller": "yes",
+        "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+        "volume.kubernetes.io/selected-node": "venue-lab2-worker2",
+        "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+      },
+      "creationTimestamp": "2026-11-15T09:00:11Z",
+      "finalizers": [
+        "kubernetes.io/pvc-protection"
+      ],
+      "labels": {
+        "app.kubernetes.io/component": "database",
+        "app.kubernetes.io/name": "venue-booking"
+      },
+      "name": "postgres-data-database-0",
+      "namespace": "venue-booking",
+      "resourceVersion": "1447",
+      "uid": "aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "spec": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "resources": {
+        "requests": {
+          "storage": "1Gi"
+        }
+      },
+      "storageClassName": "standard",
+      "volumeMode": "Filesystem",
+      "volumeName": "pvc-aebde979-7e14-4e77-8590-1bfdc4afa95f"
+    },
+    "status": {
+      "accessModes": [
+        "ReadWriteOnce"
+      ],
+      "capacity": {
+        "storage": "1Gi"
+      },
+      "phase": "Bound"
+    }
+  },
+  "secret_after": "cca39143-439d-4df3-93df-908e75e5a8d4/1410",
+  "finished_at": "2026-11-16T12:29:24.843913+08:00"
+}

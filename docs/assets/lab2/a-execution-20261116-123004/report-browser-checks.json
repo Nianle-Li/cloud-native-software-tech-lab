@@ -1,0 +1,53 @@
+[
+  {
+    "job_id": "venue-report-manual-20261116043018-208e0f",
+    "source": "MANUAL",
+    "http_status": 200,
+    "status": "SUCCEEDED",
+    "date": "2026-11-16",
+    "positive": {
+      "venue_id": 4,
+      "count": 1,
+      "minutes": 30
+    },
+    "zero": {
+      "venue_id": 5,
+      "count": 0,
+      "minutes": 0
+    }
+  },
+  {
+    "job_id": "venue-report-daily-29913392",
+    "source": "SCHEDULED",
+    "http_status": 200,
+    "status": "SUCCEEDED",
+    "date": "2026-11-16",
+    "positive": {
+      "venue_id": 4,
+      "count": 1,
+      "minutes": 30
+    },
+    "zero": {
+      "venue_id": 5,
+      "count": 0,
+      "minutes": 0
+    }
+  },
+  {
+    "job_id": "venue-report-daily-29913394",
+    "source": "SCHEDULED",
+    "http_status": 200,
+    "status": "SUCCEEDED",
+    "date": "2026-11-16",
+    "positive": {
+      "venue_id": 4,
+      "count": 1,
+      "minutes": 30
+    },
+    "zero": {
+      "venue_id": 5,
+      "count": 0,
+      "minutes": 0
+    }
+  }
+]
