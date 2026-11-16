@@ -274,3 +274,61 @@ rollout 输出：[api-rollout.txt](assets/lab2/b-execution-20261116-113439/api-r
 - 最终资源状态：[final-status.txt](assets/lab2/a-execution-20261116-123004/final-status.txt)；浏览器运行器及静态检查依赖只在临时目录准备。
 - 待处理问题：A 修复 DaemonSet 查询名称与探针后交付新标签；其他失败见各批完整记录。
 - 下一步负责人：A 核对前端/CronJob 通过证据并修复 DaemonSet，C 按新提交复测；B/C 后续继续未覆盖的业务持久化、并发及失败重试验收。
+
+## A → C：DaemonSet DNS 修复复测（a-daemonset-retest-20261116-154006）
+
+本次为上一轮 DaemonSet DNS 失败的定向复测；保留前面 B 的记录及 A 首轮 PARTIAL 记录，不覆盖历史结果。
+
+- 交付人：A；执行人：C。
+- 交付分支：`feature/ui`，交付时最新提交为 `f7dee3f`；本次严格从指定修复提交 `a6f034e825418cc2e2f6e3188d496197d438d370` 创建 `integration/lab2-a-daemonset`，不包含其后的浏览器测试变更，也未重跑浏览器。
+- 时间：`2026-11-16T15:40:06.447294+08:00` 至 `2026-11-16T15:40:16.743797+08:00`（Asia/Shanghai）。
+- 环境：host=`wukediedeMacBook-Pro.local`，cluster=`venue-lab2`，context=`kind-venue-lab2`，namespace=`venue-booking`。
+- 结果：**SUCCESS**（仅指本次 DaemonSet 修复复测）。
+
+**执行与镜像**
+
+按 [节点检查部署说明](../k8s/node-check.md) 执行：先以 ARM64 BusyBox 运行脚本的模拟成功/失败测试，再构建、装载新镜像，server dry-run、apply 和 rollout。完整命令、退出码与日志索引：[execution.json](assets/lab2/a-daemonset-retest-20261116-154006/execution.json)。
+
+- 镜像：`venue-booking-node-check:lab2-20261116-01`，平台 `linux/arm64`。
+- 镜像摘要：`sha256:df7dfbf3f3464fb0d43158da978a58f0a81504e5069a9e028ad3b7ff1377e59f`；[image-inspect.txt](assets/lab2/a-daemonset-retest-20261116-154006/image-inspect.txt)。
+- 脚本测试：[node-check-script-tests.txt](assets/lab2/a-daemonset-retest-20261116-154006/node-check-script-tests.txt)。
+- 构建日志：[image-build.txt](assets/lab2/a-daemonset-retest-20261116-154006/image-build.txt)；装载日志：[kind-load.txt](assets/lab2/a-daemonset-retest-20261116-154006/kind-load.txt)。
+- 三节点镜像检查：本批 `node-image-venue-lab2-control-plane.txt`、`node-image-venue-lab2-worker.txt`、`node-image-venue-lab2-worker2.txt`。
+- rollout：[daemonset-rollout.txt](assets/lab2/a-daemonset-retest-20261116-154006/daemonset-rollout.txt)；DESIRED/CURRENT/UPDATED/READY/AVAILABLE 均为 **2**，[daemonset-after.txt](assets/lab2/a-daemonset-retest-20261116-154006/daemonset-after.txt)。
+
+**Pod 分布与 DNS 日志**
+
+| Pod | 节点 | READY / 重启数 | imageID |
+| --- | --- | --- | --- |
+| `node-check-624kr` | `venue-lab2-worker2` | 1/1 / 0 | `docker.io/library/import-2026-11-16@sha256:3da7d99a2383470f26d0ed587f43dbc59c25d2c8e3edba082dac1b7eea59662a` |
+| `node-check-wt4m6` | `venue-lab2-worker` | 1/1 / 0 | `docker.io/library/import-2026-11-16@sha256:3da7d99a2383470f26d0ed587f43dbc59c25d2c8e3edba082dac1b7eea59662a` |
+
+节点分布原始输出：[pod-distribution-wide.txt](assets/lab2/a-daemonset-retest-20261116-154006/pod-distribution-wide.txt)、[pod-distribution-json.txt](assets/lab2/a-daemonset-retest-20261116-154006/pod-distribution-json.txt)。control-plane 的 NoSchedule 污点未改变，未向其添加节点检查 Pod。
+
+- `venue-lab2-worker2` 日志：[pod-0-log.txt](assets/lab2/a-daemonset-retest-20261116-154006/pod-0-log.txt)；容器内 `check.sh --once`：[pod-0-check-once.txt](assets/lab2/a-daemonset-retest-20261116-154006/pod-0-check-once.txt)。
+- `venue-lab2-worker` 日志：[pod-1-log.txt](assets/lab2/a-daemonset-retest-20261116-154006/pod-1-log.txt)；容器内 `check.sh --once`：[pod-1-check-once.txt](assets/lab2/a-daemonset-retest-20261116-154006/pod-1-check-once.txt)。
+- 合并日志：[combined-logs.txt](assets/lab2/a-daemonset-retest-20261116-154006/combined-logs.txt)。两份新 Pod 日志均包含对应节点身份、`dns=ok target=kubernetes.default.svc.cluster.local` 和解析结果，未出现 `dns=failed`。脚本和 readiness 均使用修复后的完整名称。
+
+**范围与下一步**
+
+- 只更新 DaemonSet 镜像和探针，没有修改 A 的源码或其他资源清单。
+- 前后核对：前端/API Deployment spec 与 UID 不变；数据库 Pod/PVC UID 不变；Secret UID/resourceVersion 不变；CronJob spec 不变，仍为北京时间每日 00:10、PREVIOUS_DAY。对照见本批 `*-before.txt`、`*-after.txt` 与 execution.json。
+- 本次关闭上一轮 DaemonSet 查询名称/探针导致的失败项；不把历史 PARTIAL 改写为当时已成功。
+- 待处理问题：DaemonSet 本次无失败；`f7dee3f` 报告页补测另见下节，现已通过。
+- 下一步负责人：A 核对修复及回传，按协作流程合并代码与复测证据；B/C 继续其他未完成验收。
+
+## A → C：补跑 f7dee3f 报告页零值与非零值测试
+
+此为 DaemonSet 定向复测之后的补充执行，不修改前面各批次当时的执行范围与结果。
+
+- 执行时间：`2026-11-16T15:53:09.312640+08:00` 至 `2026-11-16T15:53:12.487050+08:00`（Asia/Shanghai）。
+- 源码：执行分支 `integration/lab2-a-daemonset` 从 `a6f034e` 快进到 A 的 `f7dee3faa11cc1ce5eea1d97ca713ddf2ab2c15b`，保留 C 的回传；应用代码未修改。
+- 环境：`kind-venue-lab2 / venue-booking`；通过前端 Service 临时端口转发访问真实 API，没有模拟或拦截 HTTP。
+- 结果：**SUCCESS，1 passed**。只运行新版报告页用例，未重复执行创建场地/预约的业务用例，也未重新部署工作负载。
+- 使用已有成功 Job：`venue-report-manual-20261116043018-208e0f`，报告 API 返回 HTTP 200、SUCCEEDED。
+- 新增断言已执行：报告同时含零值与非零值场地，两行页面次数/分钟数与 API 一致；本次选中零值场地 ID 1、非零场地 ID 4（1 次/30 分钟）。
+- 完整命令与退出码：[report-f7-execution.json](assets/lab2/a-daemonset-retest-20261116-154006/report-f7-execution.json)。
+- 浏览器原始输出：[report-f7-browser.txt](assets/lab2/a-daemonset-retest-20261116-154006/report-f7-browser.txt)。
+- 报告返回：[report-f7-api-response.json](assets/lab2/a-daemonset-retest-20261116-154006/report-f7-api-response.json)。
+- 本次未新增业务数据，临时 port-forward 已关闭；新镜像、DaemonSet READY=2 和正式 CronJob 配置均保持。
+- 待处理问题：此次补测无失败。A 可统一核对 DaemonSet 修复复测和本节新版报告页测试结果；整组其他验收项仍按原验收清单推进。

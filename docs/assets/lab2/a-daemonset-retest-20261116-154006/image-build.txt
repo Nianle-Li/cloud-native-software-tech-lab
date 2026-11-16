@@ -1,0 +1,31 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 158B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/busybox:1.37.0
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 752B done
+#4 DONE 0.0s
+
+#5 [1/2] FROM docker.io/library/busybox:1.37.0@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec
+#5 resolve docker.io/library/busybox:1.37.0@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec done
+#5 CACHED
+
+#6 [2/2] COPY check.sh /usr/local/bin/check.sh
+#6 DONE 0.0s
+
+#7 exporting to image
+#7 exporting layers 0.0s done
+#7 exporting manifest sha256:df7dfbf3f3464fb0d43158da978a58f0a81504e5069a9e028ad3b7ff1377e59f done
+#7 exporting config sha256:97f96fc88a85c78eb083999a5a32a07afc9ef01fa4c90178c1350617df079075 done
+#7 naming to docker.io/library/venue-booking-node-check:lab2-20261116-01 done
+#7 unpacking to docker.io/library/venue-booking-node-check:lab2-20261116-01 done
+#7 DONE 0.0s

@@ -1,0 +1,312 @@
+Forwarding from 127.0.0.1:61583 -> 80
+Handling connection for 61583
+I1116 15:53:10.341182   27054 log.go:245] (0x140001de630) (0x140007de000) Create stream
+I1116 15:53:10.341560   27054 log.go:245] (0x140001de630) (0x140007de000) Stream added, broadcasting: 1
+I1116 15:53:10.345050   27054 log.go:245] (0x140001de630) Reply frame received for 1
+I1116 15:53:10.345124   27054 log.go:245] (0x140007de000) (1) Writing data frame
+I1116 15:53:10.345206   27054 log.go:245] (0x140001de630) (0x140007de3c0) Create stream
+I1116 15:53:10.345216   27054 log.go:245] (0x140001de630) (0x140007de3c0) Stream added, broadcasting: 3
+I1116 15:53:10.346309   27054 log.go:245] (0x140001de630) Reply frame received for 3
+I1116 15:53:10.346352   27054 log.go:245] (0x140007de3c0) (3) Writing data frame
+I1116 15:53:10.347912   27054 log.go:245] (0x140001de630) Data frame received for 3
+I1116 15:53:10.347924   27054 log.go:245] (0x140007de3c0) (3) Data frame handling
+I1116 15:53:10.347930   27054 log.go:245] (0x140007de3c0) (3) Data frame sent
+I1116 15:53:10.347935   27054 log.go:245] (0x140001de630) Data frame received for 3
+I1116 15:53:10.347940   27054 log.go:245] (0x140007de3c0) (3) Data frame handling
+I1116 15:53:10.347950   27054 log.go:245] (0x140007de3c0) (3) Data frame sent
+E1116 15:53:10.348669   27054 portforward.go:404] "Unhandled Error" err="error copying from local connection to remote stream: writeto tcp4 127.0.0.1:61583->127.0.0.1:61596: read tcp4 127.0.0.1:61583->127.0.0.1:61596: read: connection reset by peer"
+I1116 15:53:10.348699   27054 log.go:245] (0x140007de3c0) (3) Writing data frame
+I1116 15:53:10.348726   27054 log.go:245] (0x140001de630) (0x140007de3c0) Stream removed, broadcasting: 3
+Handling connection for 61583
+I1116 15:53:10.348764   27054 log.go:245] (0x140001de630) (0x14000c86000) Create stream
+I1116 15:53:10.348774   27054 log.go:245] (0x140001de630) (0x14000c86000) Stream added, broadcasting: 5
+I1116 15:53:10.351849   27054 log.go:245] (0x140001de630) Data frame received for 1
+I1116 15:53:10.351867   27054 log.go:245] (0x140007de000) (1) Data frame handling
+I1116 15:53:10.351874   27054 log.go:245] (0x140001de630) Data frame received for 3
+I1116 15:53:10.351885   27054 log.go:245] (0x140001de630) (0x140007de000) Stream removed, broadcasting: 1
+I1116 15:53:10.351895   27054 log.go:245] (0x140001de630) Data frame gone away for 3
+I1116 15:53:10.351903   27054 log.go:245] (0x140001de630) Reply frame received for 5
+I1116 15:53:10.351911   27054 log.go:245] (0x14000c86000) (5) Writing data frame
+I1116 15:53:10.351939   27054 log.go:245] (0x140001de630) (0x14000772fa0) Create stream
+I1116 15:53:10.351944   27054 log.go:245] (0x140001de630) (0x14000772fa0) Stream added, broadcasting: 7
+I1116 15:53:10.353036   27054 log.go:245] (0x140001de630) Reply frame received for 7
+I1116 15:53:10.353070   27054 log.go:245] (0x14000772fa0) (7) Writing data frame
+I1116 15:53:10.394029   27054 log.go:245] (0x140001de630) Data frame received for 7
+I1116 15:53:10.394097   27054 log.go:245] (0x14000772fa0) (7) Data frame handling
+I1116 15:53:10.394109   27054 log.go:245] (0x14000772fa0) (7) Data frame sent
+I1116 15:53:10.394614   27054 log.go:245] (0x14000772fa0) (7) Writing data frame
+I1116 15:53:10.395417   27054 log.go:245] (0x140001de630) Data frame received for 7
+I1116 15:53:10.395434   27054 log.go:245] (0x14000772fa0) (7) Data frame handling
+I1116 15:53:10.395447   27054 log.go:245] (0x140001de630) (0x14000772fa0) Stream removed, broadcasting: 7
+I1116 15:53:10.395456   27054 log.go:245] (0x140001de630) (0x14000772fa0) Stream removed, broadcasting: 7
+I1116 15:53:10.395563   27054 log.go:245] (0x140001de630) Data frame received for 5
+I1116 15:53:10.395572   27054 log.go:245] (0x14000c86000) (5) Data frame handling
+I1116 15:53:10.395578   27054 log.go:245] (0x140001de630) (0x14000c86000) Stream removed, broadcasting: 5
+Handling connection for 61583
+I1116 15:53:11.966550   27054 log.go:245] (0x140001de630) (0x140007de460) Create stream
+I1116 15:53:11.966572   27054 log.go:245] (0x140001de630) (0x140007de460) Stream added, broadcasting: 9
+I1116 15:53:11.969146   27054 log.go:245] (0x140001de630) Reply frame received for 9
+I1116 15:53:11.969192   27054 log.go:245] (0x140007de460) (9) Writing data frame
+I1116 15:53:11.969223   27054 log.go:245] (0x140001de630) (0x14000773040) Create stream
+I1116 15:53:11.969235   27054 log.go:245] (0x140001de630) (0x14000773040) Stream added, broadcasting: 11
+I1116 15:53:11.970814   27054 log.go:245] (0x140001de630) Reply frame received for 11
+I1116 15:53:11.970841   27054 log.go:245] (0x14000773040) (11) Writing data frame
+I1116 15:53:11.976009   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.976023   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.976033   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.976037   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.976041   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.976048   27054 log.go:245] (0x14000773040) (11) Data frame sent
+Handling connection for 61583
+I1116 15:53:11.984080   27054 log.go:245] (0x14000773040) (11) Writing data frame
+I1116 15:53:11.984120   27054 log.go:245] (0x140001de630) (0x140003b43c0) Create stream
+I1116 15:53:11.984128   27054 log.go:245] (0x140001de630) (0x140003b43c0) Stream added, broadcasting: 13
+I1116 15:53:11.985360   27054 log.go:245] (0x140001de630) Reply frame received for 13
+I1116 15:53:11.985371   27054 log.go:245] (0x140003b43c0) (13) Writing data frame
+I1116 15:53:11.985391   27054 log.go:245] (0x140001de630) (0x140003b4780) Create stream
+I1116 15:53:11.985397   27054 log.go:245] (0x140001de630) (0x140003b4780) Stream added, broadcasting: 15
+I1116 15:53:11.985543   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.985551   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.985558   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.988820   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.988832   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.988838   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.989110   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.989120   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.989125   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.989742   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.989748   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.989753   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.989956   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.989962   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.989965   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.990404   27054 log.go:245] (0x140001de630) Reply frame received for 15
+I1116 15:53:11.990435   27054 log.go:245] (0x140003b4780) (15) Writing data frame
+I1116 15:53:11.990529   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.990535   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.990542   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.990601   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.990607   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.990611   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.990992   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.990998   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.991004   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.991110   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.991117   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.991121   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.991125   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:11.991144   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:11.991152   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:11.992357   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:11.992372   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:11.992377   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:11.992520   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:11.992529   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:11.992537   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.062158   27054 log.go:245] (0x140003b4780) (15) Writing data frame
+I1116 15:53:12.066030   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.066058   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.066066   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.072230   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.072254   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.072261   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.072821   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.072830   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.072835   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.072839   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.072843   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.072856   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.077371   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.077395   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.077403   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.077747   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.077756   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.077762   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.077767   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.077771   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.077783   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.078305   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.078313   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.078321   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.078631   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.078641   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.078646   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.080165   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.080176   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.080183   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.080219   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.080226   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.080262   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.080596   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.080605   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.080610   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.081138   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.081147   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.081154   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.081707   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.081766   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.081813   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.082169   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.082179   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.082186   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.082190   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.082194   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.082256   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.082739   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.082748   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.082757   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.083019   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.083083   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.083105   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.084007   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.084087   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.084093   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.084175   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.084264   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.084390   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.084544   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.084554   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.084559   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.085268   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.085281   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.085285   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.085448   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.085456   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.085460   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.085987   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.086079   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.086092   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.086216   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.086230   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.086236   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.086484   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.086506   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.086512   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.086934   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.086995   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.087011   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.087603   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.087614   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.087618   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.087623   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.087626   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.087682   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+Handling connection for 61583
+I1116 15:53:12.088088   27054 log.go:245] (0x14000773040) (11) Writing data frame
+I1116 15:53:12.088097   27054 log.go:245] (0x140001de630) (0x140007725a0) Create stream
+I1116 15:53:12.088115   27054 log.go:245] (0x140001de630) (0x140007725a0) Stream added, broadcasting: 17
+I1116 15:53:12.088310   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.088319   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.088350   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.089135   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.089198   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.089215   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.089616   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.089672   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.089689   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.089970   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.089986   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.089991   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.090368   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.090377   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.090381   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.092238   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.092262   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.092269   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.092999   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.093033   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.093039   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.095334   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.095404   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.095422   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.096344   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.096406   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.096425   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.096951   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.096963   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.096969   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.097434   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.097443   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.097449   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.097569   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.097579   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.097587   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.098022   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.098029   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.098034   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.098400   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.098408   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.098412   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.099064   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.099105   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.099154   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.100022   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.100038   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.100043   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.100232   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.100378   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.100387   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.102361   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.102416   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.102441   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.103099   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.103152   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.103177   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.103779   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.103842   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.103859   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.103915   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.103926   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.103933   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.104636   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.104700   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.104777   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.105552   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.105567   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.105576   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.106754   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.106805   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.106813   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.108502   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.108514   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.108520   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.108841   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.108850   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.108870   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.109168   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.109174   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.109179   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.110346   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.110399   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.110415   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.110546   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.110559   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.110564   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.110753   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.110765   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.110770   27054 log.go:245] (0x140001de630) Reply frame received for 17
+I1116 15:53:12.110788   27054 log.go:245] (0x140007725a0) (17) Writing data frame
+I1116 15:53:12.110826   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.110889   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.110904   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.110916   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.110931   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.110942   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.110951   27054 log.go:245] (0x140001de630) (0x140007de000) Create stream
+I1116 15:53:12.110963   27054 log.go:245] (0x140001de630) (0x140007de000) Stream added, broadcasting: 19
+I1116 15:53:12.111085   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.113267   27054 log.go:245] (0x140001de630) Reply frame received for 19
+I1116 15:53:12.113463   27054 log.go:245] (0x140007de000) (19) Writing data frame
+I1116 15:53:12.233404   27054 log.go:245] (0x140003b4780) (15) Writing data frame
+I1116 15:53:12.274833   27054 log.go:245] (0x140001de630) Data frame received for 11
+I1116 15:53:12.274893   27054 log.go:245] (0x14000773040) (11) Data frame handling
+I1116 15:53:12.274910   27054 log.go:245] (0x14000773040) (11) Data frame sent
+I1116 15:53:12.372435   27054 log.go:245] (0x140001de630) Data frame received for 19
+I1116 15:53:12.372479   27054 log.go:245] (0x140007de000) (19) Data frame handling
+I1116 15:53:12.372486   27054 log.go:245] (0x140007de000) (19) Data frame sent
+I1116 15:53:12.372496   27054 log.go:245] (0x140001de630) Data frame received for 15
+I1116 15:53:12.372512   27054 log.go:245] (0x140003b4780) (15) Data frame handling
+I1116 15:53:12.372519   27054 log.go:245] (0x140003b4780) (15) Data frame sent
+I1116 15:53:12.445426   27054 log.go:245] (0x14000773040) (11) Writing data frame
+I1116 15:53:12.445501   27054 log.go:245] (0x140003b4780) (15) Writing data frame
+I1116 15:53:12.445516   27054 log.go:245] (0x140007de000) (19) Writing data frame

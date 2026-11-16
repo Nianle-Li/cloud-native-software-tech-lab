@@ -1,0 +1,13 @@
+[pod/node-check-624kr/node-check] 2026-11-16T07:40:15Z node=venue-lab2-worker2 host_ip=172.20.0.4 dns=ok target=kubernetes.default.svc.cluster.local
+[pod/node-check-624kr/node-check] Server:		10.96.0.10
+[pod/node-check-624kr/node-check] Address:	10.96.0.10:53
+[pod/node-check-624kr/node-check] 
+[pod/node-check-624kr/node-check] Name:	kubernetes.default.svc.cluster.local
+[pod/node-check-624kr/node-check] Address: 10.96.0.1
+[pod/node-check-wt4m6/node-check] 2026-11-16T07:40:15Z node=venue-lab2-worker host_ip=172.20.0.3 dns=ok target=kubernetes.default.svc.cluster.local
+[pod/node-check-wt4m6/node-check] Server:		10.96.0.10
+[pod/node-check-wt4m6/node-check] Address:	10.96.0.10:53
+[pod/node-check-wt4m6/node-check] 
+[pod/node-check-wt4m6/node-check] 
+[pod/node-check-wt4m6/node-check] Name:	kubernetes.default.svc.cluster.local
+[pod/node-check-wt4m6/node-check] Address: 10.96.0.1

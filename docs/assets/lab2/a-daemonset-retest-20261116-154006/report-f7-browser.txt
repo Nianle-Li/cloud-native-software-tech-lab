@@ -1,0 +1,16 @@
+
+Running 1 test using 1 worker
+
+[1A[2K(node:27065) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K(node:27065) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1A[2K[1/1] e2e/cluster.e2e.ts:91:1 › 集群前端查询已持久化的成功报告、零值与非零值场地
+[1A[2Ke2e/cluster.e2e.ts:91:1 › 集群前端查询已持久化的成功报告、零值与非零值场地
+job_id=venue-report-manual-20261116043018-208e0f status=SUCCEEDED zero_venue_id=1 positive_venue_id=4
+
+[1A[2K  1 passed (1.4s)

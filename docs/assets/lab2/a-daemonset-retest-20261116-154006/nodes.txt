@@ -1,0 +1,770 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-11-15T08:52:34Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "arm64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "arm64",
+                    "kubernetes.io/hostname": "venue-lab2-control-plane",
+                    "kubernetes.io/os": "linux",
+                    "node-role.kubernetes.io/control-plane": "",
+                    "node.kubernetes.io/exclude-from-external-load-balancers": ""
+                },
+                "name": "venue-lab2-control-plane",
+                "resourceVersion": "19351",
+                "uid": "ea802a3a-c04e-4554-a008-6c48d78a878f"
+            },
+            "spec": {
+                "podCIDR": "10.244.0.0/24",
+                "podCIDRs": [
+                    "10.244.0.0/24"
+                ],
+                "providerID": "kind://docker/venue-lab2/venue-lab2-control-plane",
+                "taints": [
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node-role.kubernetes.io/control-plane"
+                    }
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.20.0.2",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "venue-lab2-control-plane",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "11",
+                    "ephemeral-storage": "474095688Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "hugepages-32Mi": "0",
+                    "hugepages-64Ki": "0",
+                    "memory": "8024332Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "11",
+                    "ephemeral-storage": "474095688Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "hugepages-32Mi": "0",
+                    "hugepages-64Ki": "0",
+                    "memory": "8024332Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:08Z",
+                        "lastTransitionTime": "2026-11-15T08:52:33Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:08Z",
+                        "lastTransitionTime": "2026-11-15T08:52:33Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:08Z",
+                        "lastTransitionTime": "2026-11-15T08:52:33Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:08Z",
+                        "lastTransitionTime": "2026-11-15T08:52:54Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                            "docker.io/library/venue-booking-api:lab2-20261113"
+                        ],
+                        "sizeBytes": 191687040
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                            "docker.io/library/postgres:16.15-bookworm"
+                        ],
+                        "sizeBytes": 153148144
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                            "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                            "registry.k8s.io/kube-apiserver:v1.34.11"
+                        ],
+                        "sizeBytes": 84226419
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                            "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                            "registry.k8s.io/kube-proxy:v1.34.11"
+                        ],
+                        "sizeBytes": 78172361
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                            "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                            "registry.k8s.io/kube-controller-manager:v1.34.11"
+                        ],
+                        "sizeBytes": 72233573
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                            "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                            "registry.k8s.io/kube-scheduler:v1.34.11"
+                        ],
+                        "sizeBytes": 51720412
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/kindnetd:v20260820-69b56db7"
+                        ],
+                        "sizeBytes": 35652389
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:0521d2c9b62c42e81942e9012d13f25cb6f79a35b8391b7eb28a29cfaa063fe8",
+                            "docker.io/library/venue-booking-frontend:lab2-eda8edd"
+                        ],
+                        "sizeBytes": 27829593
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:010230232b8a98689d32a0210bc27e2340642039d9eb65b8fd7f779a83ffcfbe",
+                            "docker.io/library/lab2-env-check:22e0c990"
+                        ],
+                        "sizeBytes": 25780629
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/etcd:3.6.5-0"
+                        ],
+                        "sizeBytes": 21136588
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/coredns/coredns:v1.12.1"
+                        ],
+                        "sizeBytes": 20392204
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+                        ],
+                        "sizeBytes": 14217939
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:2dac93009bda24147bf4c99455a92b3d0ffd13c00dc39b049ab9dfa3d4dad750"
+                        ],
+                        "sizeBytes": 5970602
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+                        ],
+                        "sizeBytes": 2740462
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387",
+                            "docker.io/library/venue-booking-node-check:lab2-20261115-01"
+                        ],
+                        "sizeBytes": 1903443
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause:3.10"
+                        ],
+                        "sizeBytes": 267933
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "arm64",
+                    "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+                    "containerRuntimeVersion": "containerd://2.3.4",
+                    "kernelVersion": "6.12.72-linuxkit",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.34.11",
+                    "machineID": "30037510e3184e02816e224e10a564c2",
+                    "operatingSystem": "linux",
+                    "osImage": "Debian GNU/Linux 13 (trixie)",
+                    "swap": {
+                        "capacity": 1073737728
+                    },
+                    "systemUUID": "30037510e3184e02816e224e10a564c2"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "test-handler"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-11-15T08:52:44Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "arm64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "arm64",
+                    "kubernetes.io/hostname": "venue-lab2-worker",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "venue-lab2-worker",
+                "resourceVersion": "19372",
+                "uid": "9e829dfd-cba5-470e-8666-bbc6a5655c76"
+            },
+            "spec": {
+                "podCIDR": "10.244.2.0/24",
+                "podCIDRs": [
+                    "10.244.2.0/24"
+                ],
+                "providerID": "kind://docker/venue-lab2/venue-lab2-worker"
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.20.0.3",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "venue-lab2-worker",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "11",
+                    "ephemeral-storage": "474095688Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "hugepages-32Mi": "0",
+                    "hugepages-64Ki": "0",
+                    "memory": "8024332Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "11",
+                    "ephemeral-storage": "474095688Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "hugepages-32Mi": "0",
+                    "hugepages-64Ki": "0",
+                    "memory": "8024332Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:21Z",
+                        "lastTransitionTime": "2026-11-15T08:52:44Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:21Z",
+                        "lastTransitionTime": "2026-11-15T08:52:44Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:21Z",
+                        "lastTransitionTime": "2026-11-15T08:52:44Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:36:21Z",
+                        "lastTransitionTime": "2026-11-15T08:52:56Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                            "docker.io/library/venue-booking-api:lab2-20261113"
+                        ],
+                        "sizeBytes": 191687040
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                            "docker.io/library/postgres:16.15-bookworm"
+                        ],
+                        "sizeBytes": 153148144
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                            "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                            "registry.k8s.io/kube-apiserver:v1.34.11"
+                        ],
+                        "sizeBytes": 84226803
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                            "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                            "registry.k8s.io/kube-proxy:v1.34.11"
+                        ],
+                        "sizeBytes": 78172361
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                            "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                            "registry.k8s.io/kube-controller-manager:v1.34.11"
+                        ],
+                        "sizeBytes": 72233180
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                            "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                            "registry.k8s.io/kube-scheduler:v1.34.11"
+                        ],
+                        "sizeBytes": 51720412
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/kindnetd:v20260820-69b56db7"
+                        ],
+                        "sizeBytes": 35652389
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:0521d2c9b62c42e81942e9012d13f25cb6f79a35b8391b7eb28a29cfaa063fe8",
+                            "docker.io/library/venue-booking-frontend:lab2-eda8edd"
+                        ],
+                        "sizeBytes": 27829593
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:010230232b8a98689d32a0210bc27e2340642039d9eb65b8fd7f779a83ffcfbe",
+                            "docker.io/library/lab2-env-check:22e0c990"
+                        ],
+                        "sizeBytes": 25780629
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/etcd:3.6.5-0"
+                        ],
+                        "sizeBytes": 21136588
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/coredns/coredns:v1.12.1"
+                        ],
+                        "sizeBytes": 20392204
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+                        ],
+                        "sizeBytes": 14217939
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:2dac93009bda24147bf4c99455a92b3d0ffd13c00dc39b049ab9dfa3d4dad750"
+                        ],
+                        "sizeBytes": 5970602
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+                        ],
+                        "sizeBytes": 2740462
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387",
+                            "docker.io/library/venue-booking-node-check:lab2-20261115-01"
+                        ],
+                        "sizeBytes": 1903443
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause:3.10"
+                        ],
+                        "sizeBytes": 267933
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "arm64",
+                    "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+                    "containerRuntimeVersion": "containerd://2.3.4",
+                    "kernelVersion": "6.12.72-linuxkit",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.34.11",
+                    "machineID": "42b4896bf4aa4c0b8decf95eef29cc1b",
+                    "operatingSystem": "linux",
+                    "osImage": "Debian GNU/Linux 13 (trixie)",
+                    "swap": {
+                        "capacity": 1073737728
+                    },
+                    "systemUUID": "42b4896bf4aa4c0b8decf95eef29cc1b"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "test-handler"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-11-15T08:52:43Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "arm64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "arm64",
+                    "kubernetes.io/hostname": "venue-lab2-worker2",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "venue-lab2-worker2",
+                "resourceVersion": "19475",
+                "uid": "4baf29d6-c2f7-4d9a-8ac5-8bcf3124efa0"
+            },
+            "spec": {
+                "podCIDR": "10.244.1.0/24",
+                "podCIDRs": [
+                    "10.244.1.0/24"
+                ],
+                "providerID": "kind://docker/venue-lab2/venue-lab2-worker2"
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.20.0.4",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "venue-lab2-worker2",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "11",
+                    "ephemeral-storage": "474095688Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "hugepages-32Mi": "0",
+                    "hugepages-64Ki": "0",
+                    "memory": "8024332Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "11",
+                    "ephemeral-storage": "474095688Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "hugepages-32Mi": "0",
+                    "hugepages-64Ki": "0",
+                    "memory": "8024332Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:37:29Z",
+                        "lastTransitionTime": "2026-11-15T08:52:43Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:37:29Z",
+                        "lastTransitionTime": "2026-11-15T08:52:43Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:37:29Z",
+                        "lastTransitionTime": "2026-11-15T08:52:43Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-11-16T07:37:29Z",
+                        "lastTransitionTime": "2026-11-15T08:52:56Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                            "docker.io/library/venue-booking-api:lab2-20261113"
+                        ],
+                        "sizeBytes": 191687040
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                            "docker.io/library/postgres:16.15-bookworm"
+                        ],
+                        "sizeBytes": 153148144
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:b70b1b27465d9d88f53c37d16dd4360495b531204f435580f43d3b77e0d94fd2",
+                            "registry.k8s.io/kube-apiserver-arm64:v1.34.11",
+                            "registry.k8s.io/kube-apiserver:v1.34.11"
+                        ],
+                        "sizeBytes": 84226419
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:f9095d949175252cb1714ced7f5347294ec0db306a8927c465efbf963ce32b89",
+                            "registry.k8s.io/kube-proxy-arm64:v1.34.11",
+                            "registry.k8s.io/kube-proxy:v1.34.11"
+                        ],
+                        "sizeBytes": 78172361
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:5640653153af638d4802368514ba06d40ec0f512d1767efa013222bc727bee92",
+                            "registry.k8s.io/kube-controller-manager-arm64:v1.34.11",
+                            "registry.k8s.io/kube-controller-manager:v1.34.11"
+                        ],
+                        "sizeBytes": 72233180
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-08-26@sha256:c31e639de86284e39caaea5b835d10412525283296ea45d96f8f636aa0c0cfc4",
+                            "registry.k8s.io/kube-scheduler-arm64:v1.34.11",
+                            "registry.k8s.io/kube-scheduler:v1.34.11"
+                        ],
+                        "sizeBytes": 51720412
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/kindnetd:v20260820-69b56db7"
+                        ],
+                        "sizeBytes": 35652389
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:0521d2c9b62c42e81942e9012d13f25cb6f79a35b8391b7eb28a29cfaa063fe8",
+                            "docker.io/library/venue-booking-frontend:lab2-eda8edd"
+                        ],
+                        "sizeBytes": 27829593
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:010230232b8a98689d32a0210bc27e2340642039d9eb65b8fd7f779a83ffcfbe",
+                            "docker.io/library/lab2-env-check:22e0c990"
+                        ],
+                        "sizeBytes": 25780629
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/etcd:3.6.5-0"
+                        ],
+                        "sizeBytes": 21136588
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/coredns/coredns:v1.12.1"
+                        ],
+                        "sizeBytes": 20392204
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/local-path-provisioner:v20260820-69b56db7"
+                        ],
+                        "sizeBytes": 14217939
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-15@sha256:2dac93009bda24147bf4c99455a92b3d0ffd13c00dc39b049ab9dfa3d4dad750"
+                        ],
+                        "sizeBytes": 5970602
+                    },
+                    {
+                        "names": [
+                            "docker.io/kindest/local-path-helper:v20260131-7181c60a"
+                        ],
+                        "sizeBytes": 2740462
+                    },
+                    {
+                        "names": [
+                            "docker.io/library/import-2026-11-16@sha256:f21260b56c8a4c6467e204d07bfb07a9013c0d95e1efdd57ccdf08935f450387",
+                            "docker.io/library/venue-booking-node-check:lab2-20261115-01"
+                        ],
+                        "sizeBytes": 1903443
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause:3.10"
+                        ],
+                        "sizeBytes": 267933
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "arm64",
+                    "bootID": "d086963f-be3e-44a9-9f2b-7ab747ec7e54",
+                    "containerRuntimeVersion": "containerd://2.3.4",
+                    "kernelVersion": "6.12.72-linuxkit",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.34.11",
+                    "machineID": "b685b50cc0414b8e9d9466cce495a157",
+                    "operatingSystem": "linux",
+                    "osImage": "Debian GNU/Linux 13 (trixie)",
+                    "swap": {
+                        "capacity": 1073737728
+                    },
+                    "systemUUID": "b685b50cc0414b8e9d9466cce495a157"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "test-handler"
+                    }
+                ]
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}
