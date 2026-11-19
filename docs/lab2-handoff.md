@@ -192,6 +192,171 @@ rollout 输出：[api-rollout.txt](assets/lab2/b-execution-20261116-113439/api-r
 - 待处理问题：本批无失败；非零业务数据和完整回归属于后续验收。
 - 下一步负责人：B 核对本次回传；A 以同一 API 标签和成功 Job ID 接入前端报告页，再按前置条件验证 CronJob/DaemonSet；C 协助执行。
 
+## B → C：补齐后端验收（待执行）
+
+交付时间：2026-11-19（Asia/Shanghai）。交付成员：B。执行成员：C 在共同集群宿主机执行集群命令；B 核对回传，并在有 Docker 的测试环境运行失败注入集成测试。
+
+源码基线：`develop@35e1809`；本交接文档位于 `feature/backend-acceptance-handoff`。C 执行前记录实际 `git rev-parse HEAD`，并确认 API 代码、Job 模板和触发脚本没有偏离已验证基线。API、手动 Job 和 CronJob 继续使用已装载的 `venue-booking-api:lab2-20261113`（`linux/arm64`）；只运行验收，不重建或覆盖此标签。若 API 代码后来变动，B 先交付新镜像标签及对应提交，再继续。
+
+依赖条件：C 的 `venue-lab2` / `kind-venue-lab2` / `venue-booking` 仍可用；两个 API Pod 均就绪，`database-0` 就绪，PVC 为 `Bound`。本批创建带唯一标识的场地、预约和新的手动 Job；这些业务记录保留用于后续持久化验收。不要删除数据库、PVC、Secret、集群或此前的报告 Job。C 在同一仓库根目录、同一 shell 中执行下面的命令，失败时停下并保留已生成的输出。
+
+先准备证据目录并记录环境；实际批次名、时间和源码提交由 C 回填：
+
+```sh
+export EVIDENCE="docs/assets/lab2/b-acceptance-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$EVIDENCE"
+(
+  set -e -o pipefail
+  date '+%Y-%m-%dT%H:%M:%S%z' | tee "$EVIDENCE/time.txt"
+  hostname | tee "$EVIDENCE/host.txt"
+  git rev-parse HEAD | tee "$EVIDENCE/source-commit.txt"
+  git diff --exit-code 35e1809 HEAD -- api/ k8s/base/api-deployment.yaml k8s/base/api-service.yaml k8s/jobs/ scripts/create-report-job.py > "$EVIDENCE/api-source-diff.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking rollout status deployment/api --timeout=180s | tee "$EVIDENCE/api-rollout.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pods -l app.kubernetes.io/component=api -o wide | tee "$EVIDENCE/api-pods.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pod database-0 -o wide | tee "$EVIDENCE/database.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pvc | tee "$EVIDENCE/pvc.txt"
+)
+```
+
+### 1. 两个 API Pod 的并发预约冲突
+
+分别端口转发到**两个不同的 API Pod**，用同一个新场地、同一未来日期和时段并发提交。这里直连两个 Pod 是为了明确请求落点；此前经 `api` Service 观察到两个实例的证据仍见本文件 B 的首批回传。每次运行会留下一个新场地和一条有效预约。
+
+```sh
+export POD_A="$(kubectl --context kind-venue-lab2 -n venue-booking get pods -l app.kubernetes.io/component=api -o jsonpath='{.items[0].metadata.name}')"
+export POD_B="$(kubectl --context kind-venue-lab2 -n venue-booking get pods -l app.kubernetes.io/component=api -o jsonpath='{.items[1].metadata.name}')"
+(
+  set -e -o pipefail
+  test -n "$POD_A" && test -n "$POD_B" && test "$POD_A" != "$POD_B"
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward "pod/$POD_A" 18081:8080 > "$EVIDENCE/pod-a-port-forward.txt" 2>&1 &
+  PF_A=$!
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward "pod/$POD_B" 18082:8080 > "$EVIDENCE/pod-b-port-forward.txt" 2>&1 &
+  PF_B=$!
+  trap 'kill "$PF_A" "$PF_B" 2>/dev/null || true' EXIT
+  python3 - <<'PY' 2>&1 | tee "$EVIDENCE/concurrent-booking.txt"
+import concurrent.futures
+import datetime as dt
+import http.client
+import json
+import os
+import threading
+import time
+import uuid
+from zoneinfo import ZoneInfo
+
+def call(port, path, body=None):
+    connection = http.client.HTTPConnection('127.0.0.1', port, timeout=30)
+    payload = None if body is None else json.dumps(body, ensure_ascii=False).encode()
+    headers = {} if body is None else {'Content-Type': 'application/json; charset=utf-8'}
+    try:
+        connection.request('GET' if body is None else 'POST', path, payload, headers)
+        response = connection.getresponse()
+        return response.status, json.loads(response.read())
+    finally:
+        connection.close()
+
+instances = []
+for port in (18081, 18082):
+    for _ in range(40):
+        try:
+            status, result = call(port, '/api/instance')
+            assert status == 200
+            instances.append(result['instance_id'])
+            break
+        except (OSError, AssertionError, ValueError, KeyError):
+            time.sleep(0.25)
+    else:
+        raise RuntimeError(f'API Pod on local port {port} did not become ready')
+assert len(set(instances)) == 2, instances
+
+batch = 'lab2-b-conflict-' + uuid.uuid4().hex[:10]
+day = (dt.datetime.now(ZoneInfo('Asia/Shanghai')).date() + dt.timedelta(days=30)).isoformat()
+status, venue = call(18081, '/api/venues', {
+    'name': batch, 'location': 'Lab 2 验收', 'capacity': 10,
+    'open_time': '08:00', 'close_time': '22:00'
+})
+assert status == 201, (status, venue)
+print(json.dumps({'batch': batch, 'venue_id': venue['id'], 'date': day}, ensure_ascii=False), flush=True)
+booking = {
+    'venue_id': venue['id'], 'booked_by': batch, 'purpose': batch,
+    'reservation_date': day, 'start_time': '10:00', 'end_time': '11:00',
+    'attendee_count': 1
+}
+gate = threading.Barrier(3)
+def create(port):
+    gate.wait()
+    return call(port, '/api/reservations', booking)
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+    futures = [pool.submit(create, port) for port in (18081, 18082)]
+    gate.wait()
+    results = [future.result() for future in futures]
+print(json.dumps({'responses': results}, ensure_ascii=False), flush=True)
+assert sorted(status for status, _ in results) == [201, 409], results
+assert next(body for status, body in results if status == 409)['error']['code'] == 'TIME_CONFLICT'
+status, rows = call(18081, '/api/reservations')
+assert status == 200
+active = [row for row in rows if row['venue_id'] == venue['id'] and
+          row['reservation_date'] == day and row['status'] == 'ACTIVE']
+assert len(active) == 1, active
+print(json.dumps({'batch': batch, 'pods': [os.environ['POD_A'], os.environ['POD_B']],
+                  'instances': instances, 'venue_id': venue['id'], 'date': day,
+                  'results': results, 'active_reservation_id': active[0]['id']},
+                 ensure_ascii=False, indent=2))
+PY
+)
+```
+
+通过条件：两个端口分别返回不同 `instance_id`；同一时段的两个 POST 恰好得到 `201` 和 `409 TIME_CONFLICT`；查询只剩该场地的一条 `ACTIVE` 预约。C 回传 Pod/节点、批次、场地及预约 ID、两份 HTTP 结果和输出文件；若未达到条件，保存 API Pod 日志及相关事件，不把本项记为通过。
+
+### 2. 手动报告同 ID 重试与 Job Pod 删除后的查询
+
+只删除**本节新建的测试 Job**，先保存原 Job/Pod/日志和报告响应，再以同名、同来源、同日期范围重建。原报告记录和 PVC 保留。以下日期覆盖已有的 2026-11-16 测试数据；比较的是同一 `job_id` 的完整快照是否不变，不假定数据库只有这些测试数据。
+
+```sh
+(
+  set -e -o pipefail
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward service/api 18080:8080 > "$EVIDENCE/report-port-forward.txt" 2>&1 &
+  PF_REPORT=$!
+  trap 'kill "$PF_REPORT" 2>/dev/null || true' EXIT
+  python3 scripts/create-report-job.py 2026-11-16 2026-11-16 --image venue-booking-api:lab2-20261113 | tee "$EVIDENCE/report-create.txt"
+  JOB_ID="$(sed -n 's/^job_id=//p' "$EVIDENCE/report-create.txt")"
+  test -n "$JOB_ID"
+  kubectl --context kind-venue-lab2 -n venue-booking wait --for=condition=complete "job/$JOB_ID" --timeout=180s | tee "$EVIDENCE/report-first-wait.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get job "$JOB_ID" -o json > "$EVIDENCE/report-first-job.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pods -l "batch.kubernetes.io/job-name=$JOB_ID" -o json > "$EVIDENCE/report-first-pods.json"
+  kubectl --context kind-venue-lab2 -n venue-booking logs "job/$JOB_ID" > "$EVIDENCE/report-first.log"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18080/api/reports/$JOB_ID" > "$EVIDENCE/report-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking delete job "$JOB_ID" --cascade=foreground --wait=true | tee "$EVIDENCE/report-delete.txt"
+  test -z "$(kubectl --context kind-venue-lab2 -n venue-booking get pods -l "batch.kubernetes.io/job-name=$JOB_ID" -o name)"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18080/api/reports/$JOB_ID" > "$EVIDENCE/report-after-pod-delete.json"
+  cmp "$EVIDENCE/report-before.json" "$EVIDENCE/report-after-pod-delete.json"
+  python3 scripts/create-report-job.py 2026-11-16 2026-11-16 --image venue-booking-api:lab2-20261113 --name "$JOB_ID" | tee "$EVIDENCE/report-recreate.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking wait --for=condition=complete "job/$JOB_ID" --timeout=180s | tee "$EVIDENCE/report-retry-wait.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get job "$JOB_ID" -o json > "$EVIDENCE/report-retry-job.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pods -l "batch.kubernetes.io/job-name=$JOB_ID" -o json > "$EVIDENCE/report-retry-pods.json"
+  kubectl --context kind-venue-lab2 -n venue-booking logs "job/$JOB_ID" > "$EVIDENCE/report-retry.log"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18080/api/reports/$JOB_ID" > "$EVIDENCE/report-after-retry.json"
+  cmp "$EVIDENCE/report-before.json" "$EVIDENCE/report-after-retry.json"
+  printf 'job_id=%s snapshot_unchanged=yes\n' "$JOB_ID" | tee "$EVIDENCE/report-result.txt"
+)
+```
+
+通过条件：首次与重建的 Job 均为 `Complete`、容器退出码为 0；删除原 Job Pod 后仍能查到 `SUCCEEDED`；同 ID 重试前后报告 JSON（包括 `generated_at` 和明细）完全一致。C 回传 Job ID、两次 Job/Pod 状态和日志、三份查询响应、`cmp` 结果；失败时保留 `describe`、events 和 Pod 日志。不要用同名重建覆盖原 B/A 的历史 Job。
+
+### 3. 可捕获失败与 `FAILED` 记录
+
+当前正式 API 镜像没有故障注入开关。无效参数或数据库不可达可能使 Job 非零退出，却不保证已创建 `report_runs` 记录，**不能**把这种结果写成数据库 `FAILED`。现有 `ReportIntegrationTest.runningFailureAndRetryExposeCorrectState` 在隔离的 Testcontainers PostgreSQL 中注入聚合异常，验证已落库 `RUNNING` 变为脱敏的 `FAILED`、明细为空，随后同 ID 重试成功；`sameJobIdConcurrentExecutionWritesOneSetOfItems` 验证并发同 ID。B 在具备 Java 17、Maven 和可用 Docker Engine 的机器运行并交付原始测试输出：
+
+```sh
+mvn -f api/pom.xml -B '-Dtest=ReportIntegrationTest' test
+```
+
+若环境缺少 Maven 或 Docker，记录 `NOT_RUN` 与具体原因，不以编译、镜像构建或手动 Job 成功代替这些测试；也不要在共同数据库上临时撤销权限或修改业务表来制造失败。若课程验收要求**共同集群中**实际展示 `FAILED`，B 须另行提供隔离的故障注入方案和新镜像标签，再由 C 执行并单独记录，当前交接不声称已完成该项。
+
+### C 执行回传区（待填写）
+
+按本文件模板新增唯一批次，分别填写三项的 `SUCCESS / FAILED / PARTIAL / NOT_RUN`，不得用其中一项成功代表整批通过。至少回传执行时间、宿主机、实际源码提交与镜像标签、完整命令及退出码、`$EVIDENCE` 路径、资源/数据 ID、预期与实际差异、待处理问题和下一步负责人。B 复核后再更新验收清单；数据库 Pod 重建后的**业务数据保留**仍由 C 单独执行并记录。
+
 ## A → C：前端、CronJob 和 DaemonSet 执行回传
 
 本节由 C 按 A 已合入的说明代执行并追加；前面的 B 交付与执行记录保留原文。
