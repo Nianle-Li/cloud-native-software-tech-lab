@@ -481,6 +481,16 @@ PY
 - 待处理问题：第 3 项由 B 提供隔离测试证据；不能据此宣称四项全部完成。
 - 下一步负责人：B 核对本回传并补齐隔离测试输出；C 将本批证据用于报告的并发/重试/持久化章节，再另行开展 A 的最终展示环境核验。
 
+### B 补充回传：隔离 `FAILED` 注入与后端回归（2026-11-19）
+
+B 已核对 C 本批原始响应、两次 Job Pod 的退出码、报告快照、数据库 Pod/PVC UID 与三份业务响应；第 1、2、4 项与 C 的 SUCCESS 记录一致。C 当时第 3 项的 `NOT_RUN` 保持为历史事实，本段记录随后独立补测的结果。
+
+- 环境：B 的 macOS ARM64；Java 17.0.20.1、Maven 3.10.0、Docker Engine 29.8.2；使用 Testcontainers 的临时 PostgreSQL 16。未连接或改动共同 kind 集群数据库。
+- 源码：聚焦测试在 `1c5bad3` 执行，完整回归在本地合并提交 `8fcd39b` 执行；两提交的 `api/` 内容无差异。
+- `mvn -f api/pom.xml -B '-Dtest=ReportIntegrationTest' test`：进程退出码 0，`ReportIntegrationTest` **6/6 通过**；[原始 Maven 输出（gzip 无损压缩）](assets/lab2/b-tests-20261119/report-integration-maven.txt.gz)。其中 `runningFailureAndRetryExposeCorrectState` 在聚合阶段注入异常，断言已落库运行记录转为 `FAILED`、错误摘要脱敏、明细为空，然后同 ID 重试转为 `SUCCEEDED`；另覆盖同 ID 并发执行和参数冲突。
+- `mvn -f api/pom.xml -B test`：进程退出码 0，后端 **21/21 通过**，含 Lab 1 预约回归与报告测试；[原始 Maven 输出（gzip 无损压缩）](assets/lab2/b-tests-20261119/backend-suite-maven.txt.gz)。两份输出可用 `gzip -dc <文件名>` 查看，解压后的 SHA-256 分别为 `d1483da415503af0a31b7aa82a869758307ceffbc51f1f7f5db4982fd90284e2` 和 `56f8e2c40e95463159d3e3d2ab621bd51c680b4591b2d5ef4901ddf8b062c0b3`。
+- 结论：第 3 项的**隔离集成测试**现已通过；共同集群未注入可捕获失败，不将本地 Testcontainers 结果写成集群 `FAILED` Job 证据。B 的四项交接可按“C 三项共同集群 SUCCESS + B 一项隔离测试 SUCCESS”分别引用。
+
 ## A → C：前端、CronJob 和 DaemonSet 执行回传
 
 本节由 C 按 A 已合入的说明代执行并追加；前面的 B 交付与执行记录保留原文。
