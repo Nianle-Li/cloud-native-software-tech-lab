@@ -2,6 +2,8 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ReportsPage } from './ReportsPage'
+import { reportApi } from '../api/reports'
+import { ApiError } from '../api/client'
 
 const jobId = 'venue-report-20261115-001'
 const running = {
@@ -22,6 +24,7 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 async function queryReport() {
@@ -41,11 +44,14 @@ describe('只读报告页', () => {
     expect(screen.getByRole('row', { name: /零预约场地/ })).toBeInTheDocument()
     expect(screen.getByText('已成功')).toBeInTheDocument()
     expect(screen.getByText('自动任务')).toBeInTheDocument()
-    expect(screen.getAllByText('2026-11-15T10:00:03+08:00')).toHaveLength(2)
+    expect(screen.getAllByText('2026-11-15 10:00:03')).toHaveLength(2)
+    expect(screen.getByText(/以下时间均为北京时间/)).toBeInTheDocument()
+    expect(screen.getByText(/已取消预约不计入/)).toBeInTheDocument()
+    expect(screen.getByText(/生成时快照/)).toBeInTheDocument()
     expect(screen.getByRole('row', { name: /零预约场地/ })).toHaveTextContent('0')
     await user.click(screen.getByRole('button', { name: '刷新报告' }))
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
-    expect(fetchMock).toHaveBeenNthCalledWith(2, `/api/reports/${jobId}`, undefined)
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `/api/reports/${jobId}`, { signal: expect.any(AbortSignal) })
   })
 
   it('运行超过 40 分钟只提示核对 Kubernetes Job，不自动判断终态', async () => {
@@ -84,6 +90,21 @@ describe('只读报告页', () => {
     answer = async () => Response.json({ status: 'SUCCEEDED' })
     await user.click(screen.getByRole('button', { name: '刷新报告' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('无效数据')
+  })
+
+  it('查询超时只提示查询结果未知，并允许手动重试', async () => {
+    const get = vi.spyOn(reportApi, 'get')
+      .mockRejectedValueOnce(new ApiError('报告查询超时', 0, 'TIMEOUT'))
+      .mockResolvedValueOnce(succeeded as Awaited<ReturnType<typeof reportApi.get>>)
+    render(<ReportsPage />)
+    const user = await queryReport()
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('查询超时')
+    expect(alert).toHaveTextContent('不表示任务失败')
+    expect(screen.queryByText('已失败')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '刷新报告' }))
+    expect(await screen.findByText('已成功')).toBeInTheDocument()
+    expect(get).toHaveBeenCalledTimes(2)
   })
 
   it('非法 ID 不发请求，编辑输入后不把旧报告当作新 ID 的结果', async () => {

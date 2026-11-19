@@ -13,14 +13,17 @@ const succeeded = {
   ],
 }
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
 
 describe('报告查询接口', () => {
   it('使用同源 API 查询，并接受成功、运行中和可重试的失败状态', async () => {
     const fetchMock = vi.fn(async () => Response.json(succeeded))
     vi.stubGlobal('fetch', fetchMock)
     await expect(reportApi.get(succeeded.job_id)).resolves.toEqual(succeeded)
-    expect(fetchMock).toHaveBeenCalledWith(`/api/reports/${succeeded.job_id}`, undefined)
+    expect(fetchMock).toHaveBeenCalledWith(`/api/reports/${succeeded.job_id}`, { signal: expect.any(AbortSignal) })
 
     const running = { ...succeeded, status: 'RUNNING', finished_at: null, generated_at: null, items: [] }
     vi.stubGlobal('fetch', vi.fn(async () => Response.json(running)))
@@ -37,6 +40,22 @@ describe('报告查询接口', () => {
     await expect(reportApi.get('Bad/ID')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' })
     expect(fetchMock).not.toHaveBeenCalled()
     await expect(reportApi.get('venue-report-20261115-001')).rejects.toMatchObject({ status: 404, code: 'REPORT_NOT_FOUND' })
+  })
+
+  it('查询超过 15 秒时中止请求，并将超时与报告任务状态区分', async () => {
+    vi.useFakeTimers()
+    const fetchMock = vi.fn((_path: RequestInfo | URL, init?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')), { once: true })
+    }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const pending = reportApi.get(succeeded.job_id)
+    const signal = fetchMock.mock.calls[0]?.[1]?.signal
+    expect(signal).toBeInstanceOf(AbortSignal)
+    const rejection = expect(pending).rejects.toMatchObject({ status: 0, code: 'TIMEOUT' })
+    await vi.advanceTimersByTimeAsync(15_000)
+    await rejection
+    expect(signal?.aborted).toBe(true)
   })
 
   it.each([

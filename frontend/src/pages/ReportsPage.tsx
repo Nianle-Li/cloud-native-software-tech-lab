@@ -15,11 +15,16 @@ function queryError(error: unknown): string {
     if (error.status === 404 && error.code === 'REPORT_NOT_FOUND') {
       return '数据库暂无运行记录；请核对 Job ID，并在 Kubernetes 中查看 Job 状态和日志。'
     }
+    if (error.code === 'TIMEOUT') return '查询超时，暂时无法确认报告状态；请检查连接后手动重试。此提示不表示任务失败。'
     if (error.code === 'NETWORK_ERROR') return '网络异常，暂时无法查询报告，请检查连接后手动刷新。'
     if (error.code === 'INVALID_RESPONSE') return '报告接口返回无效数据，暂时无法确认报告状态。'
     return error.message
   }
   return '查询报告失败，请稍后手动刷新。'
+}
+
+function formatBeijingTime(value: string): string {
+  return value.slice(0, 19).replace('T', ' ')
 }
 
 export function ReportsPage() {
@@ -103,13 +108,14 @@ export function ReportsPage() {
               <h2 id="report-result-heading">报告结果</h2>
             </div>
           </div>
+          <p className="report-note">以下时间均为北京时间（UTC+08:00）。</p>
           <dl className="report-summary">
             <div><dt>来源</dt><dd>{report.source === 'MANUAL' ? '手动任务' : '自动任务'}</dd></div>
             <div><dt>范围</dt><dd>{report.start_date} 至 {report.end_date}</dd></div>
             <div><dt>状态</dt><dd>{report.status === 'RUNNING' ? '运行中' : report.status === 'SUCCEEDED' ? '已成功' : '已失败'}</dd></div>
-            <div><dt>开始时间</dt><dd>{report.started_at}</dd></div>
-            <div><dt>结束时间</dt><dd>{report.finished_at ?? '尚未结束'}</dd></div>
-            <div><dt>生成时间</dt><dd>{report.generated_at ?? '尚未生成'}</dd></div>
+            <div><dt>开始时间</dt><dd><time dateTime={report.started_at}>{formatBeijingTime(report.started_at)}</time></dd></div>
+            <div><dt>结束时间</dt><dd>{report.finished_at ? <time dateTime={report.finished_at}>{formatBeijingTime(report.finished_at)}</time> : '尚未结束'}</dd></div>
+            <div><dt>生成时间</dt><dd>{report.generated_at ? <time dateTime={report.generated_at}>{formatBeijingTime(report.generated_at)}</time> : '尚未生成'}</dd></div>
           </dl>
           {report.status === 'RUNNING' && (
             <p className="empty-state">报告仍在运行，请稍后手动刷新。
@@ -120,20 +126,23 @@ export function ReportsPage() {
             <p role="alert" className="notice error">{report.error_summary}。Kubernetes Job 可能继续重试，请手动刷新或查看 Job 日志。</p>
           )}
           {report.status === 'SUCCEEDED' && (
-            report.items.length === 0 ? <p className="empty-state">本次报告没有场地明细。</p> : (
-              <div className="report-table-scroll">
-                <table className="report-table">
-                  <caption>各场地已预约次数与分钟数，包括零值场地</caption>
-                  <thead><tr><th scope="col">场地</th><th scope="col">预约次数</th><th scope="col">已预约分钟数</th></tr></thead>
-                  <tbody>{report.items.map((item) => (
-                    <tr key={item.venue_id}>
-                      <th scope="row">{item.venue_name}（#{item.venue_id}）</th>
-                      <td>{item.reservation_count}</td><td>{item.reserved_minutes}</td>
-                    </tr>
-                  ))}</tbody>
-                </table>
-              </div>
-            )
+            <>
+              <p className="report-note">仅统计报告生成时有效的预约，已取消预约不计入。结果是生成时快照，之后的预约变化不会改写本次报告；已预约分钟数不表示实际到场时长或利用率百分比。</p>
+              {report.items.length === 0 ? <p className="empty-state">本次报告没有场地明细。</p> : (
+                <div className="report-table-scroll">
+                  <table className="report-table">
+                    <caption>各场地已预约次数与分钟数，包括零值场地</caption>
+                    <thead><tr><th scope="col">场地</th><th scope="col">预约次数</th><th scope="col">已预约分钟数</th></tr></thead>
+                    <tbody>{report.items.map((item) => (
+                      <tr key={item.venue_id}>
+                        <th scope="row">{item.venue_name}（#{item.venue_id}）</th>
+                        <td>{item.reservation_count}</td><td>{item.reserved_minutes}</td>
+                      </tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </section>
       )}

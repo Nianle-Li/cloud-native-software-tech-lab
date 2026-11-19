@@ -24,6 +24,7 @@ export interface Report {
 }
 
 const jobIdPattern = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/
+const reportQueryTimeoutMs = 15_000
 
 export function isReportJobId(value: string): boolean {
   return jobIdPattern.test(value)
@@ -87,10 +88,23 @@ export const reportApi = {
     if (!isReportJobId(jobId)) {
       throw new ApiError('Job ID 格式无效，请输入 1 至 63 位小写字母、数字或连字符', 400, 'VALIDATION_ERROR')
     }
-    const body = await requestJson<unknown>(`/reports/${jobId}`, undefined, 200)
-    if (!isReport(body, jobId)) {
-      throw new ApiError('报告接口返回无效数据，请稍后重试', 200, 'INVALID_RESPONSE')
+    const controller = new AbortController()
+    let timedOut = false
+    const timeout = window.setTimeout(() => {
+      timedOut = true
+      controller.abort()
+    }, reportQueryTimeoutMs)
+    try {
+      const body = await requestJson<unknown>(`/reports/${jobId}`, { signal: controller.signal }, 200)
+      if (!isReport(body, jobId)) {
+        throw new ApiError('报告接口返回无效数据，请稍后重试', 200, 'INVALID_RESPONSE')
+      }
+      return body
+    } catch (error) {
+      if (timedOut) throw new ApiError('报告查询超时', 0, 'TIMEOUT')
+      throw error
+    } finally {
+      window.clearTimeout(timeout)
     }
-    return body
   },
 }

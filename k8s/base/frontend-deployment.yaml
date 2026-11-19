@@ -21,7 +21,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: frontend
-          image: venue-booking-frontend:lab2-eda8edd
+          image: venue-booking-frontend:lab2-report-query-02
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
