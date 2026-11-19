@@ -1,0 +1,12 @@
+2026-11-19T10:55:51.702409835Z 2026-11-19T10:55:51Z node=venue-lab2-worker host_ip=172.20.0.3 dns=ok target=kubernetes.default.svc.cluster.local
+2026-11-19T10:55:51.702425293Z Server:		10.96.0.10
+2026-11-19T10:55:51.702426585Z Address:	10.96.0.10:53
+2026-11-19T10:55:51.702427251Z 
+2026-11-19T10:55:51.702428376Z Name:	kubernetes.default.svc.cluster.local
+2026-11-19T10:55:51.702429085Z Address: 10.96.0.1
+2026-11-19T10:56:21.706707835Z 2026-11-19T10:56:21Z node=venue-lab2-worker host_ip=172.20.0.3 dns=ok target=kubernetes.default.svc.cluster.local
+2026-11-19T10:56:21.706781501Z Server:		10.96.0.10
+2026-11-19T10:56:21.706783835Z Address:	10.96.0.10:53
+2026-11-19T10:56:21.706784751Z 
+2026-11-19T10:56:21.706786251Z Name:	kubernetes.default.svc.cluster.local
+2026-11-19T10:56:21.706787168Z Address: 10.96.0.1

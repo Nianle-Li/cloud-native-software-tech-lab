@@ -1,0 +1,2 @@
+job.batch/venue-report-manual-20261119105626-364bf7 created
+job_id=venue-report-manual-20261119105626-364bf7
