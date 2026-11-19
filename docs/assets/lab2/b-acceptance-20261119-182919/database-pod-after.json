@@ -1,0 +1,278 @@
+{
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+        "creationTimestamp": "2026-11-19T10:30:27Z",
+        "generateName": "database-",
+        "generation": 1,
+        "labels": {
+            "app.kubernetes.io/component": "database",
+            "app.kubernetes.io/name": "venue-booking",
+            "apps.kubernetes.io/pod-index": "0",
+            "controller-revision-hash": "database-f74bb59bf",
+            "statefulset.kubernetes.io/pod-name": "database-0"
+        },
+        "name": "database-0",
+        "namespace": "venue-booking",
+        "ownerReferences": [
+            {
+                "apiVersion": "apps/v1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "StatefulSet",
+                "name": "database",
+                "uid": "95091eca-c10d-4165-9b07-3b0dc177b842"
+            }
+        ],
+        "resourceVersion": "131197",
+        "uid": "ea5cacb6-1d28-43af-87ea-0c915731be23"
+    },
+    "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+            {
+                "env": [
+                    {
+                        "name": "POSTGRES_DB",
+                        "valueFrom": {
+                            "configMapKeyRef": {
+                                "key": "POSTGRES_DB",
+                                "name": "venue-config"
+                            }
+                        }
+                    },
+                    {
+                        "name": "PGDATA",
+                        "valueFrom": {
+                            "configMapKeyRef": {
+                                "key": "PGDATA",
+                                "name": "venue-config"
+                            }
+                        }
+                    },
+                    {
+                        "name": "POSTGRES_USER",
+                        "valueFrom": {
+                            "secretKeyRef": {
+                                "key": "POSTGRES_USER",
+                                "name": "venue-db-credentials"
+                            }
+                        }
+                    },
+                    {
+                        "name": "POSTGRES_PASSWORD",
+                        "valueFrom": {
+                            "secretKeyRef": {
+                                "key": "POSTGRES_PASSWORD",
+                                "name": "venue-db-credentials"
+                            }
+                        }
+                    }
+                ],
+                "image": "postgres:16.15-bookworm",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                    "exec": {
+                        "command": [
+                            "sh",
+                            "-ec",
+                            "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                        ]
+                    },
+                    "failureThreshold": 6,
+                    "periodSeconds": 10,
+                    "successThreshold": 1,
+                    "timeoutSeconds": 3
+                },
+                "name": "database",
+                "ports": [
+                    {
+                        "containerPort": 5432,
+                        "name": "postgres",
+                        "protocol": "TCP"
+                    }
+                ],
+                "readinessProbe": {
+                    "exec": {
+                        "command": [
+                            "sh",
+                            "-ec",
+                            "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                        ]
+                    },
+                    "failureThreshold": 3,
+                    "periodSeconds": 5,
+                    "successThreshold": 1,
+                    "timeoutSeconds": 3
+                },
+                "resources": {
+                    "limits": {
+                        "cpu": "500m",
+                        "memory": "512Mi"
+                    },
+                    "requests": {
+                        "cpu": "100m",
+                        "memory": "128Mi"
+                    }
+                },
+                "startupProbe": {
+                    "exec": {
+                        "command": [
+                            "sh",
+                            "-ec",
+                            "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                        ]
+                    },
+                    "failureThreshold": 30,
+                    "periodSeconds": 5,
+                    "successThreshold": 1,
+                    "timeoutSeconds": 3
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                    {
+                        "mountPath": "/var/lib/postgresql/data",
+                        "name": "postgres-data"
+                    }
+                ]
+            }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": true,
+        "hostname": "database-0",
+        "nodeName": "venue-lab2-worker2",
+        "preemptionPolicy": "PreemptLowerPriority",
+        "priority": 0,
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {},
+        "serviceAccount": "default",
+        "serviceAccountName": "default",
+        "subdomain": "database-headless",
+        "terminationGracePeriodSeconds": 30,
+        "tolerations": [
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/not-ready",
+                "operator": "Exists",
+                "tolerationSeconds": 300
+            },
+            {
+                "effect": "NoExecute",
+                "key": "node.kubernetes.io/unreachable",
+                "operator": "Exists",
+                "tolerationSeconds": 300
+            }
+        ],
+        "volumes": [
+            {
+                "name": "postgres-data",
+                "persistentVolumeClaim": {
+                    "claimName": "postgres-data-database-0"
+                }
+            }
+        ]
+    },
+    "status": {
+        "conditions": [
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2026-11-19T10:30:28Z",
+                "observedGeneration": 1,
+                "status": "True",
+                "type": "PodReadyToStartContainers"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2026-11-19T10:30:27Z",
+                "observedGeneration": 1,
+                "status": "True",
+                "type": "Initialized"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2026-11-19T10:30:33Z",
+                "observedGeneration": 1,
+                "status": "True",
+                "type": "Ready"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2026-11-19T10:30:33Z",
+                "observedGeneration": 1,
+                "status": "True",
+                "type": "ContainersReady"
+            },
+            {
+                "lastProbeTime": null,
+                "lastTransitionTime": "2026-11-19T10:30:27Z",
+                "observedGeneration": 1,
+                "status": "True",
+                "type": "PodScheduled"
+            }
+        ],
+        "containerStatuses": [
+            {
+                "allocatedResources": {
+                    "cpu": "100m",
+                    "memory": "128Mi"
+                },
+                "containerID": "containerd://017924597edac51ee104f5df8c45a556445705b35631a8db16944cfcbae848c8",
+                "image": "docker.io/library/postgres:16.15-bookworm",
+                "imageID": "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                "lastState": {},
+                "name": "database",
+                "ready": true,
+                "resources": {
+                    "limits": {
+                        "cpu": "500m",
+                        "memory": "512Mi"
+                    },
+                    "requests": {
+                        "cpu": "100m",
+                        "memory": "128Mi"
+                    }
+                },
+                "restartCount": 0,
+                "started": true,
+                "state": {
+                    "running": {
+                        "startedAt": "2026-11-19T10:30:27Z"
+                    }
+                },
+                "user": {
+                    "linux": {
+                        "gid": 0,
+                        "supplementalGroups": [
+                            0
+                        ],
+                        "uid": 0
+                    }
+                },
+                "volumeMounts": [
+                    {
+                        "mountPath": "/var/lib/postgresql/data",
+                        "name": "postgres-data"
+                    }
+                ]
+            }
+        ],
+        "hostIP": "172.20.0.4",
+        "hostIPs": [
+            {
+                "ip": "172.20.0.4"
+            }
+        ],
+        "observedGeneration": 1,
+        "phase": "Running",
+        "podIP": "10.244.1.13",
+        "podIPs": [
+            {
+                "ip": "10.244.1.13"
+            }
+        ],
+        "qosClass": "Burstable",
+        "startTime": "2026-11-19T10:30:27Z"
+    }
+}

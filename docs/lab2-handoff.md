@@ -418,9 +418,68 @@ PY
 
 通过条件：数据库 Pod UID 改变，PVC UID 和 `Bound` 状态保持；同一场地、预约、报告 ID 的 API 响应在重建前后完全一致。C 回传六份业务响应、Pod/PVC 前后状态、rollout 输出、执行时间和失败日志；这只证明同一 kind 集群内 Pod 重建后的数据保留，不证明跨节点、跨宿主机或删集群后的恢复。
 
-### C 执行回传区（待填写）
+### C 执行回传区（b-acceptance-20261119-182919）
 
-按本文件模板新增唯一批次，分别填写上述四项的 `SUCCESS / FAILED / PARTIAL / NOT_RUN`，不得用其中一项成功代表整批通过。第 3 项由 B 提供隔离测试输出，C 不将其记为共同集群实测。至少回传执行时间、宿主机、实际源码提交与镜像标签、完整命令及退出码、`$EVIDENCE` 路径、资源/数据 ID、预期与实际差异、待处理问题和下一步负责人。B 复核后再更新验收清单。
+执行时间：`2026-11-19T18:29:19.415863+08:00` 至 `2026-11-19T18:30:34.079994+08:00`（Asia/Shanghai）；执行成员 C。
+
+环境：cluster=`venue-lab2`，context=`kind-venue-lab2`，namespace=`venue-booking`；宿主机见 [host.txt](assets/lab2/b-acceptance-20261119-182919/host.txt)。执行分支 `integration/lab2-backend-acceptance`，源码提交 `ad93428cf86451141c974460273f058d6ed59cb7`。API/清单/Job 脚本与 `35e1809` 差异检查为空，API 继续使用原镜像 `venue-booking-api:lab2-20261113`，未构建或覆盖镜像。
+
+**结果：C 执行的三项共同集群验收 SUCCESS；本节四项交接整体 PARTIAL，第 3 项隔离故障注入测试待 B 提供原始输出。**
+
+| 项目 | 结果 | 关键证据 |
+| --- | --- | --- |
+| 1. 两 API Pod 并发预约 | SUCCESS | [01-concurrent-booking.txt](assets/lab2/b-acceptance-20261119-182919/01-concurrent-booking.txt) |
+| 2. 同 ID 重试、Job/Pod 删除后仍可查询 | SUCCESS | [02-report-retry.txt](assets/lab2/b-acceptance-20261119-182919/02-report-retry.txt) |
+| 3. 隔离 Testcontainers 可捕获失败/FAILED | NOT_RUN（C 未执行，待 B 交付） | 不记为共同集群实测 |
+| 4. 数据库 Pod 重建后的业务保留 | SUCCESS | [04-business-persistence.txt](assets/lab2/b-acceptance-20261119-182919/04-business-persistence.txt) |
+
+**实际执行命令与证据**
+
+按 B 上述顺序执行 0 → 1 → 2 → 4。为避免日志被 `*.log` 忽略，仅将两个报告日志的保存扩展名改为 `.txt`；业务步骤未改变。完整实际脚本为本批 `00-preflight.sh`、`01-concurrent-booking.sh`、`02-report-retry.sh`、`04-business-persistence.sh`；命令、退出码和补充只读查询索引见 [execution.json](assets/lab2/b-acceptance-20261119-182919/execution.json)。
+
+**1. 两 Pod 并发预约**
+
+| API Pod | 节点 | 状态 |
+| --- | --- | --- |
+| `api-d866875dd-jtlfr` | `venue-lab2-worker` | 1/1 Ready |
+| `api-d866875dd-ndq66` | `venue-lab2-worker2` | 1/1 Ready |
+
+两个转发端口分别返回与 Pod 名称对应的不同 instance_id。创建本批唯一场地 ID `7`，对 `2026-12-19 10:00–11:00` 并发预约，恰好一个 `201`、一个 `409 TIME_CONFLICT`；API 查询仅有一条 ACTIVE 预约，ID `4`。完整两份响应及批次见 [01-concurrent-booking.txt](assets/lab2/b-acceptance-20261119-182919/01-concurrent-booking.txt)；ID 文件 [business-ids.json](assets/lab2/b-acceptance-20261119-182919/business-ids.json)。
+
+**2. 同 ID 报告重试与结果独立于 Job Pod**
+
+- 本轮新建 Job：`venue-report-manual-20261119102922-01fd83`；范围 `2026-11-16` 至 `2026-11-16`，来源 MANUAL。
+- 首次和同名重建的 Job 均 Complete，容器退出码均为 0；两次 Job UID 不同。只删除了本节新建的 Job/Pod，没有删除原 A/B 的历史 Job。
+- 原 Job 和 Pod 删除后，报告仍为 SUCCEEDED，可通过 API 查询。
+- 重试前后完整 JSON（包括 generated_at 和全部明细）一致；只读数据库计数为 1 条 report_runs、7 条 report_items，明细数与 API 一致。
+- 首次状态／日志：[report-first-job.json](assets/lab2/b-acceptance-20261119-182919/report-first-job.json)、[report-first-pods.json](assets/lab2/b-acceptance-20261119-182919/report-first-pods.json)、[report-first.txt](assets/lab2/b-acceptance-20261119-182919/report-first.txt)。
+- 删除后查询：[report-after-pod-delete.json](assets/lab2/b-acceptance-20261119-182919/report-after-pod-delete.json)。
+- 重建状态／日志：[report-retry-job.json](assets/lab2/b-acceptance-20261119-182919/report-retry-job.json)、[report-retry-pods.json](assets/lab2/b-acceptance-20261119-182919/report-retry-pods.json)、[report-retry.txt](assets/lab2/b-acceptance-20261119-182919/report-retry.txt)。
+- 比较快照：[report-before.json](assets/lab2/b-acceptance-20261119-182919/report-before.json)、[report-after-retry.json](assets/lab2/b-acceptance-20261119-182919/report-after-retry.json)；cmp 均退出 0，见 [02-report-retry.txt](assets/lab2/b-acceptance-20261119-182919/02-report-retry.txt)。
+- 数据库计数：[report-row-count.txt](assets/lab2/b-acceptance-20261119-182919/report-row-count.txt)，对应 SQL 为 [report-row-count.sql](assets/lab2/b-acceptance-20261119-182919/report-row-count.sql)。
+
+**3. 隔离可捕获失败与 FAILED**
+
+本批未运行 Maven/Testcontainers 测试，状态 NOT_RUN，责任人为 B；待提供 ReportIntegrationTest 原始运行结果。没有在共同数据库修改权限或表结构制造失败，也没有把参数错误、数据库不可达或普通 Job 成功冒充 FAILED 注入验收。
+
+**4. 数据库重建保留真实业务数据**
+
+- 使用同一场地 ID `7`、预约 ID `4`、报告 ID `venue-report-manual-20261119102922-01fd83`。重建前核查无活动 Job。
+- 仅删除 venue-booking/database-0 Pod，StatefulSet 使用原 PVC 恢复，且业务请求恢复成功。
+- 数据库 Pod UID 已改变，PVC UID 和 PV 名称不变，PVC 仍为 Bound。
+- 场地：[venue-before.json](assets/lab2/b-acceptance-20261119-182919/venue-before.json) 与 [venue-after.json](assets/lab2/b-acceptance-20261119-182919/venue-after.json) 完全一致。
+- 预约：[reservation-before.json](assets/lab2/b-acceptance-20261119-182919/reservation-before.json) 与 [reservation-after.json](assets/lab2/b-acceptance-20261119-182919/reservation-after.json) 完全一致。
+- 报告：[report-persistence-before.json](assets/lab2/b-acceptance-20261119-182919/report-persistence-before.json) 与 [report-persistence-after.json](assets/lab2/b-acceptance-20261119-182919/report-persistence-after.json) 完全一致。
+- Pod/PVC 状态：本批 `database-pod-before.json`、`database-pod-after.json`、`database-pvc-before.json`、`database-pvc-after.json`；rollout 见 [database-rollout.txt](assets/lab2/b-acceptance-20261119-182919/database-rollout.txt)。
+- 此结果只证明同一集群内 Pod 重建后的真实业务保留，不代表跨节点、跨主机或删除 kind 集群后的恢复。
+
+**资源保留、待处理项与下一步**
+
+- 场地、预约、报告和重建后的测试 Job 保留供复核；临时端口转发由脚本 trap 结束，未删除 PVC、Secret、StatefulSet 或集群。
+- Secret UID/resourceVersion 不变；API/前端 Deployment spec 与 UID 不变；正式 CronJob spec 不变。本批未操作 venue-booking-final。
+- 最终状态：[final-status.txt](assets/lab2/b-acceptance-20261119-182919/final-status.txt)；C 三项检查无失败。
+- 待处理问题：第 3 项由 B 提供隔离测试证据；不能据此宣称四项全部完成。
+- 下一步负责人：B 核对本回传并补齐隔离测试输出；C 将本批证据用于报告的并发/重试/持久化章节，再另行开展 A 的最终展示环境核验。
 
 ## A → C：前端、CronJob 和 DaemonSet 执行回传
 

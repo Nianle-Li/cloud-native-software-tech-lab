@@ -1,0 +1,1 @@
+pod "database-0" deleted from venue-booking namespace
