@@ -42,7 +42,7 @@ flowchart LR
     end
 ```
 
-图示为已验收的 `venue-booking` 工作负载和访问路径：两个 API Pod 与手动/定时 Job 通过数据库 Service 读写同一 PostgreSQL；Job/CronJob 共用 API 镜像，但报告 Pod 不提供 HTTP Service。节点检查独立运行在两个可调度 worker。`venue-booking-final` 是用于最终展示的独立命名空间，仍需 C 部署复测，不能把上图的历史实测直接移作其验收结果。图与最终提交版由 A、B、C 共同复核。
+图示为已验收的 `venue-booking` 工作负载和访问路径：两个 API Pod 与手动/定时 Job 通过数据库 Service 读写同一 PostgreSQL；Job/CronJob 共用 API 镜像，但报告 Pod 不提供 HTTP Service。节点检查独立运行在两个可调度 worker。`venue-booking-final` 是用于最终展示的独立命名空间，须以该命名空间自身的资源、Job 和页面证据复核，不能把上图的历史实测直接移作其验收结果。图与最终提交版由 A、B、C 共同复核。
 
 ### 1.3 系统运行与访问方式
 
