@@ -1,6 +1,6 @@
 # Lab 2 验收与报告记录清单
 
-本清单用于实施和报告时逐项核对；当前各项均为**待验证**，不代表已经完成。需求与方案见 [Lab 2 契约](lab2-contract.md)，跨成员接口与确定的设计选择见[公共契约](lab2-shared-contract.md)。唯一共同验收环境约定为 kind 集群 `venue-lab2`、context `kind-venue-lab2`、命名空间 `venue-booking`；对命名空间资源执行命令时显式加 `--context kind-venue-lab2 -n venue-booking`。
+本清单列出实施和报告的核对标准，不记录当前通过状态；实测结果与证据见 [Lab 2 实验报告](lab2-report.md)和[交接记录](lab2-handoff.md)。需求与方案见 [Lab 2 契约](lab2-contract.md)，跨成员接口与确定的设计选择见[公共契约](lab2-shared-contract.md)。共同集群为 kind 集群 `venue-lab2`、context `kind-venue-lab2`；原有资源位于 `venue-booking` 命名空间，最终展示资源位于独立的 `venue-booking-final` 命名空间。对命名空间资源执行命令时显式指定 context 和目标命名空间。
 
 | 验收项 | 操作与应保留的证据 | 通过条件 |
 | --- | --- | --- |
