@@ -1,0 +1,1 @@
+SELECT json_build_object('report_runs', (SELECT count(*) FROM report_runs WHERE job_id='venue-report-manual-20261119102922-01fd83'), 'report_items',(SELECT count(*) FROM report_items WHERE job_id='venue-report-manual-20261119102922-01fd83'));

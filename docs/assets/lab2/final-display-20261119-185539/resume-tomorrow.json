@@ -1,0 +1,41 @@
+{
+  "namespace": "venue-booking-final",
+  "context": "kind-venue-lab2",
+  "source_commit": "dfde6c8ed4bce013fe1e442f8e5ad6807903f0a5",
+  "scheduled_report_date": "2026-11-20",
+  "manual_report_date": "2026-11-21",
+  "manual_job_id": "venue-report-manual-20261119105626-364bf7",
+  "seed_already_run": true,
+  "do_not_rerun_seed": true,
+  "expected_scheduled_counts": {
+    "羽毛球馆 A": [
+      0,
+      0
+    ],
+    "多功能教室 B": [
+      0,
+      0
+    ],
+    "会议室 C": [
+      0,
+      0
+    ],
+    "排练室 D": [
+      0,
+      0
+    ],
+    "小型会议室 E": [
+      1,
+      60
+    ]
+  },
+  "next_steps": [
+    "Verify date and unchanged fixed dataset (5 venues / 7 reservations).",
+    "Start frontend port-forward in final namespace.",
+    "Apply k8s/final/demo; record switch time; wait for two new automatically created successful TODAY jobs.",
+    "Restore original rendered.yaml even on interruption.",
+    "Run verify-final-display.py with existing manual Job ID and two actual new automatic Job IDs.",
+    "Save automatic report page screenshot and update handoff."
+  ],
+  "note": "Formal 00:10 jobs may exist before the demo; do not mistake PREVIOUS_DAY reports for TODAY demo jobs."
+}
