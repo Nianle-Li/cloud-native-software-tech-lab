@@ -1,0 +1,8 @@
+job.batch/venue-report-manual-20261119102922-01fd83 created
+job_id=venue-report-manual-20261119102922-01fd83
+job.batch/venue-report-manual-20261119102922-01fd83 condition met
+job.batch "venue-report-manual-20261119102922-01fd83" deleted from venue-booking namespace
+job.batch/venue-report-manual-20261119102922-01fd83 created
+job_id=venue-report-manual-20261119102922-01fd83
+job.batch/venue-report-manual-20261119102922-01fd83 condition met
+job_id=venue-report-manual-20261119102922-01fd83 snapshot_unchanged=yes
