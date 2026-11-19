@@ -242,6 +242,7 @@ import os
 import threading
 import time
 import uuid
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 def call(port, path, body=None):
@@ -298,10 +299,13 @@ assert status == 200
 active = [row for row in rows if row['venue_id'] == venue['id'] and
           row['reservation_date'] == day and row['status'] == 'ACTIVE']
 assert len(active) == 1, active
-print(json.dumps({'batch': batch, 'pods': [os.environ['POD_A'], os.environ['POD_B']],
-                  'instances': instances, 'venue_id': venue['id'], 'date': day,
-                  'results': results, 'active_reservation_id': active[0]['id']},
-                 ensure_ascii=False, indent=2))
+summary = {'batch': batch, 'pods': [os.environ['POD_A'], os.environ['POD_B']],
+           'instances': instances, 'venue_id': venue['id'], 'date': day,
+           'results': results, 'active_reservation_id': active[0]['id']}
+Path(os.environ['EVIDENCE'], 'business-ids.json').write_text(
+    json.dumps({'venue_id': venue['id'], 'reservation_id': active[0]['id']},
+               ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+print(json.dumps(summary, ensure_ascii=False, indent=2))
 PY
 )
 ```
@@ -353,9 +357,70 @@ mvn -f api/pom.xml -B '-Dtest=ReportIntegrationTest' test
 
 若环境缺少 Maven 或 Docker，记录 `NOT_RUN` 与具体原因，不以编译、镜像构建或手动 Job 成功代替这些测试；也不要在共同数据库上临时撤销权限或修改业务表来制造失败。若课程验收要求**共同集群中**实际展示 `FAILED`，B 须另行提供隔离的故障注入方案和新镜像标签，再由 C 执行并单独记录，当前交接不声称已完成该项。
 
+### 4. C：数据库 Pod 重建后的业务数据保留
+
+本项由 C 在第 1、2 项成功后执行；使用本批留下的场地 ID、有效预约 ID 和报告 Job ID。先通过 API 保存三个对象，再只删除 `database-0` Pod，让 StatefulSet 使用原 PVC 重建，最后通过 API 查询同一 ID。此操作会短暂中断数据库，C 应避开其他成员正在运行的 Job 或业务验证；**不删除 StatefulSet、PVC、PV、Secret、节点或集群**。
+
+```sh
+export VENUE_ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["venue_id"])' "$EVIDENCE/business-ids.json")"
+export RESERVATION_ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["reservation_id"])' "$EVIDENCE/business-ids.json")"
+export JOB_ID="$(sed -n 's/^job_id=\([^ ]*\).*/\1/p' "$EVIDENCE/report-result.txt")"
+(
+  set -e -o pipefail
+  test -n "$VENUE_ID" && test -n "$RESERVATION_ID" && test -n "$JOB_ID"
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward service/api 18083:8080 > "$EVIDENCE/persistence-port-forward.txt" 2>&1 &
+  PF_PERSIST=$!
+  trap 'kill "$PF_PERSIST" 2>/dev/null || true' EXIT
+  READY=0
+  for attempt in {1..60}; do
+    if curl --noproxy '*' --fail --silent "http://127.0.0.1:18083/api/venues/$VENUE_ID" > /dev/null; then READY=1; break; fi
+    sleep 1
+  done
+  test "$READY" -eq 1
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/venues/$VENUE_ID" > "$EVIDENCE/venue-before.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reservations/$RESERVATION_ID" > "$EVIDENCE/reservation-before.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reports/$JOB_ID" > "$EVIDENCE/report-persistence-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pod database-0 -o json > "$EVIDENCE/database-pod-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pvc postgres-data-database-0 -o json > "$EVIDENCE/database-pvc-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking delete pod database-0 --wait=true | tee "$EVIDENCE/database-pod-delete.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking rollout status statefulset/database --timeout=180s | tee "$EVIDENCE/database-rollout.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pod database-0 -o json > "$EVIDENCE/database-pod-after.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pvc postgres-data-database-0 -o json > "$EVIDENCE/database-pvc-after.json"
+  READY=0
+  for attempt in {1..60}; do
+    if curl --noproxy '*' --fail --silent "http://127.0.0.1:18083/api/venues/$VENUE_ID" > /dev/null; then READY=1; break; fi
+    sleep 1
+  done
+  test "$READY" -eq 1
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/venues/$VENUE_ID" > "$EVIDENCE/venue-after.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reservations/$RESERVATION_ID" > "$EVIDENCE/reservation-after.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reports/$JOB_ID" > "$EVIDENCE/report-persistence-after.json"
+  cmp "$EVIDENCE/venue-before.json" "$EVIDENCE/venue-after.json"
+  cmp "$EVIDENCE/reservation-before.json" "$EVIDENCE/reservation-after.json"
+  cmp "$EVIDENCE/report-persistence-before.json" "$EVIDENCE/report-persistence-after.json"
+  python3 - "$EVIDENCE" <<'PY'
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+before_pod = json.loads((root / 'database-pod-before.json').read_text())
+after_pod = json.loads((root / 'database-pod-after.json').read_text())
+before_pvc = json.loads((root / 'database-pvc-before.json').read_text())
+after_pvc = json.loads((root / 'database-pvc-after.json').read_text())
+assert before_pod['metadata']['uid'] != after_pod['metadata']['uid']
+assert before_pvc['metadata']['uid'] == after_pvc['metadata']['uid']
+assert after_pvc['status']['phase'] == 'Bound'
+print('database_pod_uid_changed=yes pvc_uid_unchanged=yes business_responses_unchanged=yes')
+PY
+)
+```
+
+通过条件：数据库 Pod UID 改变，PVC UID 和 `Bound` 状态保持；同一场地、预约、报告 ID 的 API 响应在重建前后完全一致。C 回传六份业务响应、Pod/PVC 前后状态、rollout 输出、执行时间和失败日志；这只证明同一 kind 集群内 Pod 重建后的数据保留，不证明跨节点、跨宿主机或删集群后的恢复。
+
 ### C 执行回传区（待填写）
 
-按本文件模板新增唯一批次，分别填写三项的 `SUCCESS / FAILED / PARTIAL / NOT_RUN`，不得用其中一项成功代表整批通过。至少回传执行时间、宿主机、实际源码提交与镜像标签、完整命令及退出码、`$EVIDENCE` 路径、资源/数据 ID、预期与实际差异、待处理问题和下一步负责人。B 复核后再更新验收清单；数据库 Pod 重建后的**业务数据保留**仍由 C 单独执行并记录。
+按本文件模板新增唯一批次，分别填写上述四项的 `SUCCESS / FAILED / PARTIAL / NOT_RUN`，不得用其中一项成功代表整批通过。第 3 项由 B 提供隔离测试输出，C 不将其记为共同集群实测。至少回传执行时间、宿主机、实际源码提交与镜像标签、完整命令及退出码、`$EVIDENCE` 路径、资源/数据 ID、预期与实际差异、待处理问题和下一步负责人。B 复核后再更新验收清单。
 
 ## A → C：前端、CronJob 和 DaemonSet 执行回传
 
