@@ -12,6 +12,38 @@
 
 ### 1.2 系统架构图与组件通信路径（A、B、C）
 
+```mermaid
+flowchart LR
+    Browser[浏览器] -->|端口转发| FrontendSvc[frontend Service :80]
+    subgraph Cluster[venue-lab2 / venue-booking]
+        FrontendSvc --> FrontendPod[frontend Deployment / Nginx]
+        FrontendPod -->|同源 /api 代理| ApiSvc[api Service :8080]
+        ApiSvc --> ApiPod1[api Pod 1]
+        ApiSvc --> ApiPod2[api Pod 2]
+        ApiPod1 -->|JDBC| DbSvc[database Service :5432]
+        ApiPod2 -->|JDBC| DbSvc
+        ManualJob[手动报告 Job] -->|JDBC| DbSvc
+        Cron[CronJob 每日 / 演示] --> ScheduledJob[定时报告 Job]
+        ScheduledJob -->|JDBC| DbSvc
+        DbSvc --> DbPod[database-0 / StatefulSet]
+        DbPod --> PVC[PVC / PostgreSQL 数据]
+        Config[venue-config ConfigMap] -.-> ApiPod1
+        Config -.-> ApiPod2
+        Config -.-> ManualJob
+        Config -.-> ScheduledJob
+        Config -.-> DbPod
+        Secret[venue-db-credentials Secret] -.-> ApiPod1
+        Secret -.-> ApiPod2
+        Secret -.-> ManualJob
+        Secret -.-> ScheduledJob
+        Secret -.-> DbPod
+        Nodes[node-check DaemonSet] --> Worker1[worker 1 DNS 检查]
+        Nodes --> Worker2[worker 2 DNS 检查]
+    end
+```
+
+图示为已验收的 `venue-booking` 工作负载和访问路径：两个 API Pod 与手动/定时 Job 通过数据库 Service 读写同一 PostgreSQL；Job/CronJob 共用 API 镜像，但报告 Pod 不提供 HTTP Service。节点检查独立运行在两个可调度 worker。`venue-booking-final` 是用于最终展示的独立命名空间，仍需 C 部署复测，不能把上图的历史实测直接移作其验收结果。图与最终提交版由 A、B、C 共同复核。
+
 ### 1.3 系统运行与访问方式
 
 系统的常规资源部署在 kind 集群 `venue-lab2` 的 `venue-booking` 命名空间。资源就绪后，在承载集群的主机上执行：
@@ -36,6 +68,14 @@ kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend
 
 #### 2.1.2 API Deployment、Service 与一次性 Job（B）
 
+| 资源类型 | 资源名称 | 用途与选择理由 |
+| --- | --- | --- |
+| Deployment | `api` | 运行两个无状态 Spring Boot API Pod；数据库持久化预约和报告，多副本可共同处理请求。 |
+| Service | `api` | ClusterIP，`8080 → 8080`；为前端 Nginx 提供稳定的内部访问名称。 |
+| Job | `venue-report-manual-<唯一后缀>` | 按给定日期范围执行一次报告后退出；Job 名称同时作为持久化报告的 `job_id`，无需独立 Service。 |
+
+API 与报告 Job 使用同一后端镜像，报告模式通过启动参数选择。报告表由 Flyway V4 迁移创建，不在 Job Pod 内保存结果。
+
 #### 2.1.3 前端与周期、节点任务（A）
 
 | 资源类型 | 资源名称 | 用途与选择理由 |
@@ -54,6 +94,12 @@ kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend
 
 ### 2.3 后端 API、双副本与 Service（B）
 
+`api` Deployment 设为两个副本，容器监听 8080；同名 ClusterIP Service 只选择 API Pod，不暴露数据库端口。浏览器的 `/api` 请求先经前端 Nginx，再由 `api` Service 转发。API 和 Job 使用 `venue-config` 中的 JDBC 地址连接 `database:5432`，用户名与密码由 `venue-db-credentials` Secret 注入，清单没有写入实际凭据或 Pod IP。
+
+API Pod 的 `POD_NAME` 由 Downward API 提供；`GET /api/instance` 返回该标识，用于核对请求到达的副本。startup/liveness 与 readiness 分别访问 Actuator 的 `/actuator/health/liveness` 和 `/actuator/health/readiness`；数据库可用性另以真实业务 API 操作验证。每个 API Pod 请求 100m CPU、256Mi 内存，上限为 500m CPU、512Mi 内存，并关闭不需要的 ServiceAccount token 自动挂载。
+
+数据库就绪后由 API 启动执行 Flyway V1–V4；JPA 使用 `ddl-auto=validate` 检查映射，不另行改写表结构。两个副本共享 PostgreSQL，预约创建在事务中先锁定场地行，再检查有效预约的半开时段重叠并写入；取消也按场地优先的锁顺序执行。这样同一场地时段的并发请求由数据库串行化检查，而不是依赖请求落在哪个 Pod。
+
 ### 2.4 前端与报告查询页面（A）
 
 前端保留场地与预约页面，并新增 `#/reports` 查询入口。用户输入 Job ID 后，页面调用 `GET /api/reports/{job_id}`，显示任务状态、统计范围、执行时间及各场地的预约次数和分钟数。零预约场地仍显示为零值。页面只读取已保存的报告，不创建 Job，也不直接访问 Kubernetes API。
@@ -70,6 +116,12 @@ kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend
 Kubernetes 专用 Nginx 配置由 ConfigMap 提供，代理目标为 `api` Service。浏览器通过前端 Service 的端口转发访问系统；API 与数据库无需直接对外开放。
 
 ### 2.5 一次性报告 Job（B）
+
+`scripts/create-report-job.py` 根据起止日期和当前 API 镜像生成唯一名称的手动 Job。Job 容器沿用 `java -jar /app/app.jar` 入口，附加 `--spring.main.web-application-type=none`、`--report.run=true`，不启动 HTTP 服务。Pod 标签 `batch.kubernetes.io/job-name` 经 Downward API 注入为 `REPORT_JOB_ID`，另传 `REPORT_SOURCE=MANUAL`、`REPORT_START_DATE` 和 `REPORT_END_DATE`；成功退出码为 0，失败为非零。模板配置 `parallelism=1`、`completions=1`、`backoffLimit=1`、`activeDeadlineSeconds=1800`，关闭 ServiceAccount token 自动挂载。
+
+Flyway V4 新增 `report_runs` 和 `report_items`。每个 `job_id` 对应一条运行记录，每个 `(job_id, venue_id)` 对应一条明细；数据库约束限制状态、来源、日期范围和非负统计值。统计对每个场地都生成一行，只计报告生成时状态为 `ACTIVE` 的预约，以结束时间减开始时间得到 `reserved_minutes`。这一字段表示已预约分钟数，不表示实际到场时长或百分比。
+
+执行程序先持久化 `RUNNING`，再用单条 PostgreSQL 聚合查询取得一致快照，最后在一个事务中写入全部明细与 `SUCCEEDED`。同一 ID 已成功时直接沿用原快照；失败或残留 `RUNNING` 可按同来源和日期范围重试。数据库唯一约束、行锁和 Job 参数共同防止同 ID 的并发执行产生重复明细。可捕获的生成异常会保存脱敏的 `FAILED` 摘要；若进程在写入记录前终止，需结合 Kubernetes Job 状态和日志判断，不能由报告查询接口推断失败。
 
 ### 2.6 定时报告 CronJob（A）
 
@@ -128,9 +180,19 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 
 ### 3.3 API 双副本、Service 分流与并发预约（B）
 
+在 `venue-booking` 共同集群中，两个 API Pod 均为 `1/1 Ready`，分别位于 `venue-lab2-worker` 和 `venue-lab2-worker2`。先前通过 `api` Service 建立独立连接，`GET /api/instance` 返回过两个不同 Pod 标识，证明同一 Service 能将请求交给两个副本；单个 Service 端口转发连接未被用作分流证据。
+
+2026-11-19 的定向并发验收分别端口转发到两个 API Pod，两个 `/api/instance` 响应与 Pod 名称一一对应。C 创建唯一场地 ID `7`，对 `2026-12-19 10:00–11:00` 同时提交两份相同预约：一个返回 **201**、预约 ID `4`；另一个返回 **409 `TIME_CONFLICT`**。随后查询该场地仅有一条 `ACTIVE` 预约。此结果验证了两个副本同时访问同一数据库时的冲突保护；原始响应和 Pod 分布见附录 B。
+
 ### 3.4 数据库 Pod 重建与业务数据保留（C）
 
 ### 3.5 一次性报告 Job 的执行、持久化与失败重试（B）
+
+首次手动 Job `venue-report-manual-20261116033534-9f4175` 在历史日期窗口完成，容器退出码为 0；API 返回 HTTP 200、`SUCCEEDED`，三个当时存在的场地均为零值。后来 A 在同一集群创建了有效与已取消预约。C 于 2026-11-19 使用新 Job `venue-report-manual-20261119102922-01fd83` 统计 `2026-11-16`，B 随后核对原始证据：Job 为 `Complete`、退出码 0，API 返回七条场地明细。场地 ID `4` 为 **1 次、30 分钟**，其余六条为零值；其中已取消预约不计入。报告的日期和统计值对应本次数据库状态，不将旧报告解释为随业务变化自动更新。
+
+为验证幂等，C 保存该 Job 的状态、Pod 日志和完整报告响应，只删除**本轮新建**的 Job 及 Pod，再用相同 ID、来源、日期重建。删除后报告仍可通过 API 查询；重建 Job 再次 `Complete`、退出码 0，前后 JSON（含 `generated_at` 与全部明细）完全一致。只读 SQL 核对该 ID 在数据库中仍只有 1 条 `report_runs`、7 条 `report_items`。数据库 Pod 随后重建，报告响应保持一致；业务数据与 PVC 的前后原始记录见[交接回传](lab2-handoff.md)，由 C 在第 3.4 节归纳。
+
+可捕获异常的 `FAILED →` 同 ID 重试由**隔离的 Testcontainers PostgreSQL 集成测试**验证：在聚合阶段注入异常后，运行记录变为 `FAILED`、错误摘要脱敏、明细为空；随后同 ID 重试成功。`ReportIntegrationTest` 六项全部通过，完整后端回归 21 项全部通过。共同集群没有注入该异常，因此本实验不声称观察到了集群中的 `FAILED` Job；参数错误或数据库不可达导致的非零退出也不冒充已落库的 `FAILED`。
 
 ### 3.6 报告查询页面（A）
 
@@ -188,6 +250,10 @@ control-plane 带 `NoSchedule` 污点，不在本清单的覆盖范围内。因�
 
 ### 4.2 张玳瑗：后端 API、一次性 Job 与并发问题（B）
 
+张玳瑗负责沿用 Lab 1 的预约 API 与事务规则，新增 Flyway V4 报告表、统计程序、报告查询和实例标识接口，以及双副本 API 与手动 Job 清单。后端镜像同时供 API、手动 Job 和 CronJob 使用；与 A 对齐启动参数及报告 JSON，与 C 对齐迁移约束、Secret 引用和共同集群执行顺序。
+
+多副本的关键问题是两个 Pod 可能同时接受同一时段预约。B 保留场地行悲观锁、有效预约重叠查询与插入同事务的处理；C 在不同 Pod 上同时提交请求后，实测只产生一条有效预约。报告任务的关键问题是 Job Pod 删除或重试不能丢失、复制或改写成功结果。B 将报告写入数据库，并用唯一键、行锁和同 ID 成功短路保护快照；C 的同 ID 重建与数据库 Pod 重建验收均保留了相同结果。可捕获失败的 `FAILED` 状态通过 B 的隔离集成测试验证，集群验收与本地测试在报告中分别标注。
+
 ### 4.3 吴柯蝶：集群、数据库与存储问题（C）
 
 ### 4.4 小组联合复核（A、B、C）
@@ -212,6 +278,17 @@ control-plane 带 `NoSchedule` 污点，不在本清单的覆盖范围内。因�
 | DNS 问题定位 | 两个 worker 的短名称查询均失败，完整名称均可解析。 | [原日志：worker 1](assets/lab2/a-execution-20261116-123004/node-check-log-0.txt)、[原日志：worker 2](assets/lab2/a-execution-20261116-123004/node-check-log-1.txt)、[完整名称：worker 1](assets/lab2/a-execution-20261116-123004/node-check-fqdn-0.txt)、[完整名称：worker 2](assets/lab2/a-execution-20261116-123004/node-check-fqdn-1.txt) |
 
 ### B. 后端 API 与一次性 Job（B）
+
+| 验证环节 | 核实结果 | 原始记录 |
+| --- | --- | --- |
+| API 两副本与 Service | 两个 Pod 分布在两个 worker；经 `api` Service 的独立连接出现两个实例标识。 | [Pod 分布](assets/lab2/b-execution-20261116-113439/api-pods-wide.txt)、[三次实例响应](assets/lab2/b-execution-20261116-113439/instance-0.txt)、[C 本轮 Pod 状态](assets/lab2/b-acceptance-20261119-182919/api-pods.txt) |
+| Flyway 迁移 | 共同集群的 V1–V4 均成功。 | [迁移版本](assets/lab2/b-execution-20261116-113439/flyway-version.txt)、[API 启动日志](assets/lab2/b-execution-20261116-113439/api-startup-0.txt) |
+| 双 Pod 并发预约 | 同场地同一时段得到 201 与 409 `TIME_CONFLICT`，仅保留一条有效预约。 | [两份响应与实例 ID](assets/lab2/b-acceptance-20261119-182919/01-concurrent-booking.txt)、[测试数据 ID](assets/lab2/b-acceptance-20261119-182919/business-ids.json) |
+| 手动 Job 与报告查询 | 两次同名 Job 均完成，退出码均为 0；报告为 `SUCCEEDED`。 | [首次 Job/Pod](assets/lab2/b-acceptance-20261119-182919/report-first-job.json)、[重建 Job/Pod](assets/lab2/b-acceptance-20261119-182919/report-retry-pods.json)、[报告响应](assets/lab2/b-acceptance-20261119-182919/report-before.json) |
+| 报告持久化与幂等 | 原 Job Pod 删除后仍可查询；同 ID 重试快照不变，数据库为 1 条运行记录、7 条明细。 | [删除后响应](assets/lab2/b-acceptance-20261119-182919/report-after-pod-delete.json)、[重试后响应](assets/lab2/b-acceptance-20261119-182919/report-after-retry.json)、[行数核对](assets/lab2/b-acceptance-20261119-182919/report-row-count.txt) |
+| 可捕获失败与回归 | 隔离报告测试 6/6、完整后端回归 21/21；集群中未注入 `FAILED`。 | [报告测试原始输出（gzip）](assets/lab2/b-tests-20261119/report-integration-maven.txt.gz)、[完整回归原始输出（gzip）](assets/lab2/b-tests-20261119/backend-suite-maven.txt.gz) |
+
+上述两份 gzip 文件解压后为未改写的 Maven 输出；可用 `gzip -dc <文件名>` 阅读。B/C 共同集群验收的执行时间、实际命令、退出码和更多状态记录见[交接记录](lab2-handoff.md)。
 
 ### C. 集群、数据库与存储（C）
 
