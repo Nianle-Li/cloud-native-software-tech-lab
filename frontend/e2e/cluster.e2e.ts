@@ -11,14 +11,14 @@ function futureShanghaiDate(daysAhead: number): string {
 
 test('集群前端完成场地、预约、冲突、详情与取消', async ({ page }) => {
   const batch = `lab2-a-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-  const venueName = `回归场地 ${batch}`
+  const venueName = `研讨室 R-${Math.random().toString(36).slice(2, 7).toUpperCase()}`
   const date = futureShanghaiDate(2)
 
   await page.goto('/#/')
   await page.getByRole('link', { name: '创建场地' }).last().click()
   const create = page.getByRole('dialog', { name: '创建场地' })
   await create.getByLabel('场地名称').fill(venueName)
-  await create.getByLabel('所在位置').fill(`回归批次 ${batch}`)
+  await create.getByLabel('所在位置').fill('教学楼 3 层')
   await create.getByLabel('可容纳人数').fill('10')
   await create.getByLabel('开放时间').fill('08:00')
   await create.getByLabel('关闭时间').fill('22:00')
@@ -29,6 +29,7 @@ test('集群前端完成场地、预约、冲突、详情与取消', async ({ pa
   expect(venueResponse.status()).toBe(201)
   const venue = await venueResponse.json() as { id: number }
   expect(venue.id).toBeGreaterThan(0)
+  console.log(`batch=${batch} venue_id=${venue.id} venue_name=${venueName}`)
   await expect(create.getByRole('status')).toContainText(`编号 ${venue.id}`)
 
   await page.goto(`/#/venues/${venue.id}`)
@@ -38,12 +39,12 @@ test('集群前端完成场地、预约、冲突、详情与取消', async ({ pa
   await expect(booking).toBeVisible()
 
   async function fillBooking() {
-    await booking.getByLabel('预约人或组织').fill(batch)
+    await booking.getByLabel('预约人或组织').fill('课程实验组')
     await booking.getByLabel('预约日期').fill(date)
     await booking.getByLabel('开始时间').fill('10:00')
     await booking.getByLabel('结束时间').fill('11:00')
     await booking.getByLabel('参与人数').fill('3')
-    await booking.getByLabel('使用目的').fill(`浏览器回归 ${batch}`)
+    await booking.getByLabel('使用目的').fill('项目讨论')
   }
 
   await fillBooking()
@@ -54,7 +55,7 @@ test('集群前端完成场地、预约、冲突、详情与取消', async ({ pa
   expect(reservationResponse.status()).toBe(201)
   const reservation = await reservationResponse.json() as { id: number }
   expect(reservation.id).toBeGreaterThan(0)
-  console.log(`batch=${batch} venue_id=${venue.id} reservation_id=${reservation.id} reservation_date=${date}`)
+  console.log(`batch=${batch} reservation_id=${reservation.id} reservation_date=${date}`)
   await expect(page.getByRole('status')).toContainText(`预约成功，编号 ${reservation.id}`)
 
   await fillBooking()

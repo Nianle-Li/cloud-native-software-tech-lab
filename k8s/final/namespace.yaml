@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: venue-booking-final
+  labels:
+    app.kubernetes.io/name: venue-booking
+    app.kubernetes.io/part-of: venue-booking-final
