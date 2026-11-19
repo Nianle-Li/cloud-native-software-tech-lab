@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--restart-database', action='store_true',
                         help='Delete database-0 once, wait for recovery and verify retained data')
     parser.add_argument('--output', type=Path,
-                        default=ROOT / 'docs/assets/lab2/database-infrastructure.json')
+                        default=ROOT / '.lab2-evidence/database-infrastructure.json')
     args = parser.parse_args()
     base = ['kubectl', '--context', args.context]
     scoped = base + ['-n', args.namespace]

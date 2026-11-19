@@ -25,7 +25,7 @@ FLYWAY = 'redgate/flyway:11.20.0'
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--ref', default='origin/feature/backend')
-    parser.add_argument('--output', type=Path, default=ROOT / 'docs/assets/lab2/v4-verification.json')
+    parser.add_argument('--output', type=Path, default=ROOT / '.lab2-evidence/v4-verification.json')
     args = parser.parse_args()
     password = secrets.token_hex(24)
     env = dict(os.environ, POSTGRES_PASSWORD=password, FLYWAY_PASSWORD=password)
