@@ -1,10 +1,12 @@
-# Lab 2 部署顺序与 C 的数据库交付
+# Lab 2 Kubernetes 部署顺序与资源说明
+
+共同集群中用于最终展示的独立命名空间和可读业务数据，按[最终展示环境说明](final/README.md)部署与核对。以下各节说明原有 `venue-booking` 命名空间中资源的依赖关系和常规操作。
 
 共同环境为 kind 集群 `venue-lab2`、context `kind-venue-lab2`、命名空间
 `venue-booking`。命令从仓库根目录执行；不对整个 `k8s/` 目录执行 apply。
-集群创建见 [kind 配置说明](kind/README.md)，实测见
-[环境记录](../docs/lab2-environment.md)。当前文档完成 C 的数据库交付；
-API/任务由 B 部署，前端/CronJob/DaemonSet 由 A 部署并保留各自验证证据。
+集群创建见 [kind 配置说明](kind/README.md)。本文件按数据库、API/手动 Job、
+前端、CronJob 与 DaemonSet 的依赖关系组织操作；系统设计和结果见
+[Lab 2 报告](../docs/lab2-report.md)。
 前端镜像构建、清单应用与入口核查见[前端部署说明](frontend.md)。
 节点 DNS 检查的镜像、DaemonSet 与覆盖核查见[节点检查说明](node-check.md)。
 正式与演示定时报告的切换、核查和恢复见[定时报告说明](report-cronjob.md)。
@@ -31,9 +33,9 @@ docker image save --platform linux/arm64 -o /tmp/lab2-postgres-arm64.tar postgre
 kind load image-archive /tmp/lab2-postgres-arm64.tar --name venue-lab2
 ```
 
-本次已有该官方镜像，未重新拉取。AMD64 宿主机使用 `linux/amd64`；
+已有该官方镜像时无需重新拉取。AMD64 宿主机使用 `linux/amd64`；
 归档只是镜像分发文件，成功装载后可删除，不是数据库备份。
-Pod 使用 `IfNotPresent`，实际 imageID 保存在数据库验证证据中。
+Pod 使用 `IfNotPresent`；部署后核对实际 imageID 与镜像装载结果。
 
 ## 2. 命名空间、配置与 Secret
 
@@ -112,8 +114,8 @@ python3 scripts/verify-k8s-database.py --restart-database
 结束后删除探针 schema 和临时客户端。它不改业务表、不执行 Flyway、
 不删除 PVC/Secret。没有 `--restart-database` 时仅做连接和临时写读检查。
 
-输出保存到 [数据库基础设施证据](../docs/assets/lab2/database-infrastructure.json)，
-不含 Secret 数据。失败时保留错误并检查 Pod、事件、PVC 和日志，不把未通过
+输出默认保存到本地 `.lab2-evidence/database-infrastructure.json`，不纳入 Git，
+且不含 Secret 数据。失败时保留错误并检查 Pod、事件、PVC 和日志，不把未通过
 项写成成功；若清理失败，脚本会报错，应按输出中的独有资源名清理。
 
 ## 5. 交给 B，再交给 A
@@ -133,10 +135,10 @@ kubectl --context kind-venue-lab2 -n venue-booking apply -f k8s/base/api-deploym
 kubectl --context kind-venue-lab2 -n venue-booking rollout status deployment/api --timeout=180s
 ```
 
-以上 B 的命令是后续步骤，不是本次已执行记录。先确认 Flyway V1–V4 与
-JPA validate 通过、两 API Pod 就绪，再按 [手动 Job 说明](jobs/README.md)
-运行报告任务。API 两副本分流必须由集群内客户端证明，不能用单个
-port-forward 会话代替。随后 A 联调页面和 CronJob/DaemonSet。
+以上命令用于重建 API 资源。部署后须确认 Flyway V1–V4 与
+JPA validate 通过、两个 API Pod 就绪，再按 [手动 Job 说明](jobs/README.md)
+运行报告任务。API 两副本分流须由集群内客户端证明，不能用单个
+port-forward 会话代替。前端、CronJob 与 DaemonSet 的操作分别见下列说明。
 
 最终持久化验收仍须记录真实业务场地、预约及报告 ID，在数据库 Pod 重建后
 通过 API 查询原记录；C 的临时探针验证不能替代这项业务验收。

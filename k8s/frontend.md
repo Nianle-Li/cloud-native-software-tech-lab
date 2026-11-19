@@ -7,14 +7,15 @@ Service，再启动前端 Pod，否则 Nginx 启动时无法解析上游名称�
 
 ## 镜像与部署
 
-清单当前引用 `venue-booking-frontend:lab2-eda8edd`：其前端源码来自提交
-`eda8edd`。在承载共同 kind 集群的 Mac 上，从包含该提交的仓库版本构建
-ARM64 镜像；前端源码变化后必须使用新标签，并同步 Deployment 清单。
+清单当前引用 `venue-booking-frontend:lab2-report-query-02`，包含报告查询超时
+处理、北京时间显示与报告快照说明。在承载共同 kind 集群的 Mac 上，从包含
+这些改动的源码构建 ARM64 镜像；前端源码再次变化后须使用新标签，并同步
+Deployment 清单。构建和交接时记录实际源码提交与镜像摘要。
 
 ```sh
 docker build --platform linux/arm64 --provenance=false --load \
-  -t venue-booking-frontend:lab2-eda8edd ./frontend
-kind load docker-image venue-booking-frontend:lab2-eda8edd --name venue-lab2
+  -t venue-booking-frontend:lab2-report-query-02 ./frontend
+kind load docker-image venue-booking-frontend:lab2-report-query-02 --name venue-lab2
 
 kubectl --context kind-venue-lab2 -n venue-booking apply --dry-run=server \
   -f k8s/base/frontend-nginx-configmap.yaml \
@@ -27,7 +28,9 @@ kubectl --context kind-venue-lab2 -n venue-booking apply \
 kubectl --context kind-venue-lab2 -n venue-booking rollout status deployment/frontend --timeout=120s
 ```
 
-此处的构建、装载和部署命令是待执行步骤，不代表已经在共同集群验证。
+最终展示使用独立命名空间及可读场地数据，操作见
+[最终展示环境说明](final/README.md)。构建后核对节点实际装载的镜像摘要，
+再通过真实页面检查场地、预约和报告查询。
 集群的两个 worker 为 ARM64；在其他架构的个人环境构建时，应使用该环境
 的实际平台并另取标签。ConfigMap 只挂载到 `/etc/nginx/conf.d`，不改动
 Lab 1 Compose 使用的 `frontend/nginx.conf`。Nginx 不会因 ConfigMap 内容
@@ -50,9 +53,13 @@ kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend
 这个检查依赖 B 的 API 已就绪；仅有首页 HTTP 200 不足以证明代理可用。
 在 B 的手动 Job 已成功、报告可查询后，从同一台机器另开终端运行真实浏览器
 回归。`LAB2_REPORT_JOB_ID` 填目标集群中已成功、同时含零值与非零值场地的 Job 名称。
-该测试不启动模拟 API，也不拦截请求；它会在数据库中创建带唯一批次标识的
-场地和预约，并取消该预约，保留记录便于追踪。报告测试所用的成功 Job 须
-事先准备好有效预约和零值场地。命令在 `frontend/` 目录执行：
+该测试不启动模拟 API，也不拦截请求；它会在数据库中创建名称简短的
+场地和预约，并取消该预约。完整批次号及场地、预约 ID 写入测试输出，
+用于追踪真实记录。新场地会永久保留，重复运行将增加后续报告的零值行；
+日常回归宜在个人或隔离集群执行，共同集群只执行约定的验收批次。
+已有报告保存了场地名称快照，不应改写历史数据来美化截图。
+报告测试所用的成功 Job 须事先准备好有效预约和零值场地。
+命令在 `frontend/` 目录执行：
 
 ```sh
 LAB2_BASE_URL=http://127.0.0.1:8080 \

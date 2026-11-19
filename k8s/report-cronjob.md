@@ -12,6 +12,10 @@
 python3 scripts/test_lab2_cronjob.py
 ```
 
+短周期演示应核对至少两次自动创建的 Job、来源和统计结果，再恢复正式每日
+配置。最终展示命名空间的操作见[最终展示环境说明](final/README.md)，
+实际结果见[Lab 2 报告](../docs/lab2-report.md)。
+
 CronJob 与 API Deployment、手动 Job 使用相同 API 镜像，当前标签为
 `venue-booking-api:lab2-20261113`。B 更换 API 镜像后，先对齐三处标签并在
 共同 kind 集群装载，随后运行上述测试；不得让定时任务使用旧版报告程序。

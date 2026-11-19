@@ -34,9 +34,11 @@ kubectl --context kind-venue-lab2 -n venue-booking apply \
 kubectl --context kind-venue-lab2 -n venue-booking rollout status daemonset/node-check --timeout=120s
 ```
 
-这些是待执行的共同集群步骤；本地 Docker 测试不证明 DaemonSet 已覆盖节点。
-当前集群有两个无污点的 worker，control-plane 有 `NoSchedule` 污点；
-清单未添加该污点的容忍，因此预期在两个 worker 各有一个 Pod。
+部署后应有两个 worker 各一个就绪 Pod，且两份日志均显示 `dns=ok`。
+本地 Docker 脚本测试本身不证明节点覆盖。最终展示命名空间的部署与核对见
+[最终展示环境说明](final/README.md)。
+共同集群的两个 worker 无污点，control-plane 有 `NoSchedule` 污点；
+清单未添加该污点的容忍，因此覆盖范围为两个 worker。
 
 ## 共同集群验收
 
