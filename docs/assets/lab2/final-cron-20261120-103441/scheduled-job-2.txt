@@ -1,0 +1,159 @@
+{
+    "apiVersion": "batch/v1",
+    "kind": "Job",
+    "metadata": {
+        "annotations": {
+            "batch.kubernetes.io/cronjob-scheduled-timestamp": "2026-11-20T10:38:00+08:00"
+        },
+        "creationTimestamp": "2026-11-20T02:38:00Z",
+        "generation": 1,
+        "labels": {
+            "app.kubernetes.io/component": "report",
+            "app.kubernetes.io/name": "venue-booking"
+        },
+        "name": "venue-report-daily-29919038",
+        "namespace": "venue-booking-final",
+        "ownerReferences": [
+            {
+                "apiVersion": "batch/v1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "CronJob",
+                "name": "venue-report-daily",
+                "uid": "f524f5ed-b5bb-4f85-9c31-bbe3aaa4a9a4"
+            }
+        ],
+        "resourceVersion": "190752",
+        "uid": "124e5610-f87f-4f28-9ecb-07a3a4ccd3de"
+    },
+    "spec": {
+        "activeDeadlineSeconds": 1800,
+        "backoffLimit": 1,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+            "matchLabels": {
+                "batch.kubernetes.io/controller-uid": "124e5610-f87f-4f28-9ecb-07a3a4ccd3de"
+            }
+        },
+        "suspend": false,
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app.kubernetes.io/component": "report",
+                    "app.kubernetes.io/name": "venue-booking",
+                    "batch.kubernetes.io/controller-uid": "124e5610-f87f-4f28-9ecb-07a3a4ccd3de",
+                    "batch.kubernetes.io/job-name": "venue-report-daily-29919038",
+                    "controller-uid": "124e5610-f87f-4f28-9ecb-07a3a4ccd3de",
+                    "job-name": "venue-report-daily-29919038"
+                }
+            },
+            "spec": {
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "args": [
+                            "--spring.main.web-application-type=none",
+                            "--report.run=true"
+                        ],
+                        "env": [
+                            {
+                                "name": "REPORT_JOB_ID",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.labels['batch.kubernetes.io/job-name']"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "REPORT_SOURCE",
+                                "value": "SCHEDULED"
+                            },
+                            {
+                                "name": "REPORT_WINDOW_MODE",
+                                "value": "TODAY"
+                            },
+                            {
+                                "name": "SPRING_DATASOURCE_URL",
+                                "valueFrom": {
+                                    "configMapKeyRef": {
+                                        "key": "SPRING_DATASOURCE_URL",
+                                        "name": "venue-config"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "SPRING_DATASOURCE_USERNAME",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_USER",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "SPRING_DATASOURCE_PASSWORD",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_PASSWORD",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "venue-booking-api:lab2-20261113",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "report",
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File"
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "terminationGracePeriodSeconds": 30
+            }
+        }
+    },
+    "status": {
+        "completionTime": "2026-11-20T02:38:25Z",
+        "conditions": [
+            {
+                "lastProbeTime": "2026-11-20T02:38:25Z",
+                "lastTransitionTime": "2026-11-20T02:38:25Z",
+                "message": "Reached expected number of succeeded pods",
+                "reason": "CompletionsReached",
+                "status": "True",
+                "type": "SuccessCriteriaMet"
+            },
+            {
+                "lastProbeTime": "2026-11-20T02:38:25Z",
+                "lastTransitionTime": "2026-11-20T02:38:25Z",
+                "message": "Reached expected number of succeeded pods",
+                "reason": "CompletionsReached",
+                "status": "True",
+                "type": "Complete"
+            }
+        ],
+        "ready": 0,
+        "startTime": "2026-11-20T02:38:00Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+    }
+}

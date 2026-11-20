@@ -1,0 +1,131 @@
+{
+    "apiVersion": "batch/v1",
+    "kind": "CronJob",
+    "metadata": {
+        "annotations": {
+            "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"CronJob\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"venue-report-daily\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"concurrencyPolicy\":\"Forbid\",\"failedJobsHistoryLimit\":2,\"jobTemplate\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"activeDeadlineSeconds\":1800,\"backoffLimit\":1,\"completions\":1,\"parallelism\":1,\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"args\":[\"--spring.main.web-application-type=none\",\"--report.run=true\"],\"env\":[{\"name\":\"REPORT_JOB_ID\",\"valueFrom\":{\"fieldRef\":{\"fieldPath\":\"metadata.labels['batch.kubernetes.io/job-name']\"}}},{\"name\":\"REPORT_SOURCE\",\"value\":\"SCHEDULED\"},{\"name\":\"REPORT_WINDOW_MODE\",\"value\":\"PREVIOUS_DAY\"},{\"name\":\"SPRING_DATASOURCE_URL\",\"valueFrom\":{\"configMapKeyRef\":{\"key\":\"SPRING_DATASOURCE_URL\",\"name\":\"venue-config\"}}},{\"name\":\"SPRING_DATASOURCE_USERNAME\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_USER\",\"name\":\"venue-db-credentials\"}}},{\"name\":\"SPRING_DATASOURCE_PASSWORD\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_PASSWORD\",\"name\":\"venue-db-credentials\"}}}],\"image\":\"venue-booking-api:lab2-20261113\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"report\",\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"256Mi\"}}}],\"restartPolicy\":\"Never\"}}}},\"schedule\":\"10 0 * * *\",\"startingDeadlineSeconds\":600,\"successfulJobsHistoryLimit\":3,\"timeZone\":\"Asia/Shanghai\"}}\n"
+        },
+        "creationTimestamp": "2026-11-19T10:55:51Z",
+        "generation": 3,
+        "labels": {
+            "app.kubernetes.io/component": "report",
+            "app.kubernetes.io/name": "venue-booking"
+        },
+        "name": "venue-report-daily",
+        "namespace": "venue-booking-final",
+        "resourceVersion": "190771",
+        "uid": "f524f5ed-b5bb-4f85-9c31-bbe3aaa4a9a4"
+    },
+    "spec": {
+        "concurrencyPolicy": "Forbid",
+        "failedJobsHistoryLimit": 2,
+        "jobTemplate": {
+            "metadata": {
+                "labels": {
+                    "app.kubernetes.io/component": "report",
+                    "app.kubernetes.io/name": "venue-booking"
+                }
+            },
+            "spec": {
+                "activeDeadlineSeconds": 1800,
+                "backoffLimit": 1,
+                "completions": 1,
+                "parallelism": 1,
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/component": "report",
+                            "app.kubernetes.io/name": "venue-booking"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "args": [
+                                    "--spring.main.web-application-type=none",
+                                    "--report.run=true"
+                                ],
+                                "env": [
+                                    {
+                                        "name": "REPORT_JOB_ID",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "apiVersion": "v1",
+                                                "fieldPath": "metadata.labels['batch.kubernetes.io/job-name']"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "REPORT_SOURCE",
+                                        "value": "SCHEDULED"
+                                    },
+                                    {
+                                        "name": "REPORT_WINDOW_MODE",
+                                        "value": "PREVIOUS_DAY"
+                                    },
+                                    {
+                                        "name": "SPRING_DATASOURCE_URL",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "key": "SPRING_DATASOURCE_URL",
+                                                "name": "venue-config"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "SPRING_DATASOURCE_USERNAME",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "POSTGRES_USER",
+                                                "name": "venue-db-credentials"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "SPRING_DATASOURCE_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "POSTGRES_PASSWORD",
+                                                "name": "venue-db-credentials"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "image": "venue-booking-api:lab2-20261113",
+                                "imagePullPolicy": "IfNotPresent",
+                                "name": "report",
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "500m",
+                                        "memory": "512Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "100m",
+                                        "memory": "256Mi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Never",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            }
+        },
+        "schedule": "10 0 * * *",
+        "startingDeadlineSeconds": 600,
+        "successfulJobsHistoryLimit": 3,
+        "suspend": false,
+        "timeZone": "Asia/Shanghai"
+    },
+    "status": {
+        "lastScheduleTime": "2026-11-20T02:38:00Z",
+        "lastSuccessfulTime": "2026-11-20T02:38:25Z"
+    }
+}

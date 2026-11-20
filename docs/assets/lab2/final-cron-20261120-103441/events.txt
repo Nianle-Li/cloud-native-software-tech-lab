@@ -1,0 +1,23 @@
+LAST SEEN   TYPE      REASON             OBJECT                                  MESSAGE
+2m37s       Normal    Scheduled          pod/venue-report-daily-29919036-rmqj8   Successfully assigned venue-booking-final/venue-report-daily-29919036-rmqj8 to venue-lab2-worker
+37s         Normal    Scheduled          pod/venue-report-daily-29919038-n4zv8   Successfully assigned venue-booking-final/venue-report-daily-29919038-n4zv8 to venue-lab2-worker2
+157m        Warning   Unhealthy          pod/frontend-759cf94d9-cjcxl            Readiness probe failed: Get "http://10.244.1.16:80/": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+157m        Warning   Unhealthy          pod/api-d866875dd-cwd47                 Readiness probe failed: Get "http://10.244.1.14:8080/actuator/health/readiness": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+157m        Warning   Unhealthy          pod/api-d866875dd-cwd47                 Liveness probe failed: Get "http://10.244.1.14:8080/actuator/health/liveness": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+157m        Warning   Unhealthy          pod/api-d866875dd-rqm7l                 Liveness probe failed: Get "http://10.244.2.14:8080/actuator/health/liveness": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+50m         Warning   Unhealthy          pod/api-d866875dd-rqm7l                 Readiness probe failed: Get "http://10.244.2.14:8080/actuator/health/readiness": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+50m         Warning   Unhealthy          pod/database-0                          Readiness probe failed: command timed out: "sh -ec pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\"" timed out after 3s
+2m37s       Normal    SuccessfulCreate   job/venue-report-daily-29919036         Created pod: venue-report-daily-29919036-rmqj8
+2m37s       Normal    SuccessfulCreate   cronjob/venue-report-daily              Created job venue-report-daily-29919036
+2m37s       Normal    Created            pod/venue-report-daily-29919036-rmqj8   Created container: report
+2m37s       Normal    Started            pod/venue-report-daily-29919036-rmqj8   Started container report
+2m37s       Normal    Pulled             pod/venue-report-daily-29919036-rmqj8   Container image "venue-booking-api:lab2-20261113" already present on machine
+2m11s       Normal    Completed          job/venue-report-daily-29919036         Job completed
+2m11s       Normal    SawCompletedJob    cronjob/venue-report-daily              Saw completed job: venue-report-daily-29919036, condition: Complete
+37s         Normal    Pulled             pod/venue-report-daily-29919038-n4zv8   Container image "venue-booking-api:lab2-20261113" already present on machine
+37s         Normal    Created            pod/venue-report-daily-29919038-n4zv8   Created container: report
+37s         Normal    Started            pod/venue-report-daily-29919038-n4zv8   Started container report
+37s         Normal    SuccessfulCreate   job/venue-report-daily-29919038         Created pod: venue-report-daily-29919038-n4zv8
+37s         Normal    SuccessfulCreate   cronjob/venue-report-daily              Created job venue-report-daily-29919038
+12s         Normal    Completed          job/venue-report-daily-29919038         Job completed
+12s         Normal    SawCompletedJob    cronjob/venue-report-daily              Saw completed job: venue-report-daily-29919038, condition: Complete
