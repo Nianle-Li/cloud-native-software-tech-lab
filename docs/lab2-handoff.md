@@ -192,6 +192,305 @@ rollout 输出：[api-rollout.txt](assets/lab2/b-execution-20261116-113439/api-r
 - 待处理问题：本批无失败；非零业务数据和完整回归属于后续验收。
 - 下一步负责人：B 核对本次回传；A 以同一 API 标签和成功 Job ID 接入前端报告页，再按前置条件验证 CronJob/DaemonSet；C 协助执行。
 
+## B → C：补齐后端验收（待执行）
+
+交付时间：2026-11-19（Asia/Shanghai）。交付成员：B。执行成员：C 在共同集群宿主机执行集群命令；B 核对回传，并在有 Docker 的测试环境运行失败注入集成测试。
+
+源码基线：`develop@35e1809`；本交接文档位于 `feature/backend-acceptance-handoff`。C 执行前记录实际 `git rev-parse HEAD`，并确认 API 代码、Job 模板和触发脚本没有偏离已验证基线。API、手动 Job 和 CronJob 继续使用已装载的 `venue-booking-api:lab2-20261113`（`linux/arm64`）；只运行验收，不重建或覆盖此标签。若 API 代码后来变动，B 先交付新镜像标签及对应提交，再继续。
+
+依赖条件：C 的 `venue-lab2` / `kind-venue-lab2` / `venue-booking` 仍可用；两个 API Pod 均就绪，`database-0` 就绪，PVC 为 `Bound`。本批创建带唯一标识的场地、预约和新的手动 Job；这些业务记录保留用于后续持久化验收。不要删除数据库、PVC、Secret、集群或此前的报告 Job。C 在同一仓库根目录、同一 shell 中执行下面的命令，失败时停下并保留已生成的输出。
+
+先准备证据目录并记录环境；实际批次名、时间和源码提交由 C 回填：
+
+```sh
+export EVIDENCE="docs/assets/lab2/b-acceptance-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$EVIDENCE"
+(
+  set -e -o pipefail
+  date '+%Y-%m-%dT%H:%M:%S%z' | tee "$EVIDENCE/time.txt"
+  hostname | tee "$EVIDENCE/host.txt"
+  git rev-parse HEAD | tee "$EVIDENCE/source-commit.txt"
+  git diff --exit-code 35e1809 HEAD -- api/ k8s/base/api-deployment.yaml k8s/base/api-service.yaml k8s/jobs/ scripts/create-report-job.py > "$EVIDENCE/api-source-diff.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking rollout status deployment/api --timeout=180s | tee "$EVIDENCE/api-rollout.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pods -l app.kubernetes.io/component=api -o wide | tee "$EVIDENCE/api-pods.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pod database-0 -o wide | tee "$EVIDENCE/database.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pvc | tee "$EVIDENCE/pvc.txt"
+)
+```
+
+### 1. 两个 API Pod 的并发预约冲突
+
+分别端口转发到**两个不同的 API Pod**，用同一个新场地、同一未来日期和时段并发提交。这里直连两个 Pod 是为了明确请求落点；此前经 `api` Service 观察到两个实例的证据仍见本文件 B 的首批回传。每次运行会留下一个新场地和一条有效预约。
+
+```sh
+export POD_A="$(kubectl --context kind-venue-lab2 -n venue-booking get pods -l app.kubernetes.io/component=api -o jsonpath='{.items[0].metadata.name}')"
+export POD_B="$(kubectl --context kind-venue-lab2 -n venue-booking get pods -l app.kubernetes.io/component=api -o jsonpath='{.items[1].metadata.name}')"
+(
+  set -e -o pipefail
+  test -n "$POD_A" && test -n "$POD_B" && test "$POD_A" != "$POD_B"
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward "pod/$POD_A" 18081:8080 > "$EVIDENCE/pod-a-port-forward.txt" 2>&1 &
+  PF_A=$!
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward "pod/$POD_B" 18082:8080 > "$EVIDENCE/pod-b-port-forward.txt" 2>&1 &
+  PF_B=$!
+  trap 'kill "$PF_A" "$PF_B" 2>/dev/null || true' EXIT
+  python3 - <<'PY' 2>&1 | tee "$EVIDENCE/concurrent-booking.txt"
+import concurrent.futures
+import datetime as dt
+import http.client
+import json
+import os
+import threading
+import time
+import uuid
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+def call(port, path, body=None):
+    connection = http.client.HTTPConnection('127.0.0.1', port, timeout=30)
+    payload = None if body is None else json.dumps(body, ensure_ascii=False).encode()
+    headers = {} if body is None else {'Content-Type': 'application/json; charset=utf-8'}
+    try:
+        connection.request('GET' if body is None else 'POST', path, payload, headers)
+        response = connection.getresponse()
+        return response.status, json.loads(response.read())
+    finally:
+        connection.close()
+
+instances = []
+for port in (18081, 18082):
+    for _ in range(40):
+        try:
+            status, result = call(port, '/api/instance')
+            assert status == 200
+            instances.append(result['instance_id'])
+            break
+        except (OSError, AssertionError, ValueError, KeyError):
+            time.sleep(0.25)
+    else:
+        raise RuntimeError(f'API Pod on local port {port} did not become ready')
+assert len(set(instances)) == 2, instances
+
+batch = 'lab2-b-conflict-' + uuid.uuid4().hex[:10]
+day = (dt.datetime.now(ZoneInfo('Asia/Shanghai')).date() + dt.timedelta(days=30)).isoformat()
+status, venue = call(18081, '/api/venues', {
+    'name': batch, 'location': 'Lab 2 验收', 'capacity': 10,
+    'open_time': '08:00', 'close_time': '22:00'
+})
+assert status == 201, (status, venue)
+print(json.dumps({'batch': batch, 'venue_id': venue['id'], 'date': day}, ensure_ascii=False), flush=True)
+booking = {
+    'venue_id': venue['id'], 'booked_by': batch, 'purpose': batch,
+    'reservation_date': day, 'start_time': '10:00', 'end_time': '11:00',
+    'attendee_count': 1
+}
+gate = threading.Barrier(3)
+def create(port):
+    gate.wait()
+    return call(port, '/api/reservations', booking)
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+    futures = [pool.submit(create, port) for port in (18081, 18082)]
+    gate.wait()
+    results = [future.result() for future in futures]
+print(json.dumps({'responses': results}, ensure_ascii=False), flush=True)
+assert sorted(status for status, _ in results) == [201, 409], results
+assert next(body for status, body in results if status == 409)['error']['code'] == 'TIME_CONFLICT'
+status, rows = call(18081, '/api/reservations')
+assert status == 200
+active = [row for row in rows if row['venue_id'] == venue['id'] and
+          row['reservation_date'] == day and row['status'] == 'ACTIVE']
+assert len(active) == 1, active
+summary = {'batch': batch, 'pods': [os.environ['POD_A'], os.environ['POD_B']],
+           'instances': instances, 'venue_id': venue['id'], 'date': day,
+           'results': results, 'active_reservation_id': active[0]['id']}
+Path(os.environ['EVIDENCE'], 'business-ids.json').write_text(
+    json.dumps({'venue_id': venue['id'], 'reservation_id': active[0]['id']},
+               ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+print(json.dumps(summary, ensure_ascii=False, indent=2))
+PY
+)
+```
+
+通过条件：两个端口分别返回不同 `instance_id`；同一时段的两个 POST 恰好得到 `201` 和 `409 TIME_CONFLICT`；查询只剩该场地的一条 `ACTIVE` 预约。C 回传 Pod/节点、批次、场地及预约 ID、两份 HTTP 结果和输出文件；若未达到条件，保存 API Pod 日志及相关事件，不把本项记为通过。
+
+### 2. 手动报告同 ID 重试与 Job Pod 删除后的查询
+
+只删除**本节新建的测试 Job**，先保存原 Job/Pod/日志和报告响应，再以同名、同来源、同日期范围重建。原报告记录和 PVC 保留。以下日期覆盖已有的 2026-11-16 测试数据；比较的是同一 `job_id` 的完整快照是否不变，不假定数据库只有这些测试数据。
+
+```sh
+(
+  set -e -o pipefail
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward service/api 18080:8080 > "$EVIDENCE/report-port-forward.txt" 2>&1 &
+  PF_REPORT=$!
+  trap 'kill "$PF_REPORT" 2>/dev/null || true' EXIT
+  python3 scripts/create-report-job.py 2026-11-16 2026-11-16 --image venue-booking-api:lab2-20261113 | tee "$EVIDENCE/report-create.txt"
+  JOB_ID="$(sed -n 's/^job_id=//p' "$EVIDENCE/report-create.txt")"
+  test -n "$JOB_ID"
+  kubectl --context kind-venue-lab2 -n venue-booking wait --for=condition=complete "job/$JOB_ID" --timeout=180s | tee "$EVIDENCE/report-first-wait.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get job "$JOB_ID" -o json > "$EVIDENCE/report-first-job.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pods -l "batch.kubernetes.io/job-name=$JOB_ID" -o json > "$EVIDENCE/report-first-pods.json"
+  kubectl --context kind-venue-lab2 -n venue-booking logs "job/$JOB_ID" > "$EVIDENCE/report-first.log"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18080/api/reports/$JOB_ID" > "$EVIDENCE/report-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking delete job "$JOB_ID" --cascade=foreground --wait=true | tee "$EVIDENCE/report-delete.txt"
+  test -z "$(kubectl --context kind-venue-lab2 -n venue-booking get pods -l "batch.kubernetes.io/job-name=$JOB_ID" -o name)"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18080/api/reports/$JOB_ID" > "$EVIDENCE/report-after-pod-delete.json"
+  cmp "$EVIDENCE/report-before.json" "$EVIDENCE/report-after-pod-delete.json"
+  python3 scripts/create-report-job.py 2026-11-16 2026-11-16 --image venue-booking-api:lab2-20261113 --name "$JOB_ID" | tee "$EVIDENCE/report-recreate.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking wait --for=condition=complete "job/$JOB_ID" --timeout=180s | tee "$EVIDENCE/report-retry-wait.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get job "$JOB_ID" -o json > "$EVIDENCE/report-retry-job.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pods -l "batch.kubernetes.io/job-name=$JOB_ID" -o json > "$EVIDENCE/report-retry-pods.json"
+  kubectl --context kind-venue-lab2 -n venue-booking logs "job/$JOB_ID" > "$EVIDENCE/report-retry.log"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18080/api/reports/$JOB_ID" > "$EVIDENCE/report-after-retry.json"
+  cmp "$EVIDENCE/report-before.json" "$EVIDENCE/report-after-retry.json"
+  printf 'job_id=%s snapshot_unchanged=yes\n' "$JOB_ID" | tee "$EVIDENCE/report-result.txt"
+)
+```
+
+通过条件：首次与重建的 Job 均为 `Complete`、容器退出码为 0；删除原 Job Pod 后仍能查到 `SUCCEEDED`；同 ID 重试前后报告 JSON（包括 `generated_at` 和明细）完全一致。C 回传 Job ID、两次 Job/Pod 状态和日志、三份查询响应、`cmp` 结果；失败时保留 `describe`、events 和 Pod 日志。不要用同名重建覆盖原 B/A 的历史 Job。
+
+### 3. 可捕获失败与 `FAILED` 记录
+
+当前正式 API 镜像没有故障注入开关。无效参数或数据库不可达可能使 Job 非零退出，却不保证已创建 `report_runs` 记录，**不能**把这种结果写成数据库 `FAILED`。现有 `ReportIntegrationTest.runningFailureAndRetryExposeCorrectState` 在隔离的 Testcontainers PostgreSQL 中注入聚合异常，验证已落库 `RUNNING` 变为脱敏的 `FAILED`、明细为空，随后同 ID 重试成功；`sameJobIdConcurrentExecutionWritesOneSetOfItems` 验证并发同 ID。B 在具备 Java 17、Maven 和可用 Docker Engine 的机器运行并交付原始测试输出：
+
+```sh
+mvn -f api/pom.xml -B '-Dtest=ReportIntegrationTest' test
+```
+
+若环境缺少 Maven 或 Docker，记录 `NOT_RUN` 与具体原因，不以编译、镜像构建或手动 Job 成功代替这些测试；也不要在共同数据库上临时撤销权限或修改业务表来制造失败。若课程验收要求**共同集群中**实际展示 `FAILED`，B 须另行提供隔离的故障注入方案和新镜像标签，再由 C 执行并单独记录，当前交接不声称已完成该项。
+
+### 4. C：数据库 Pod 重建后的业务数据保留
+
+本项由 C 在第 1、2 项成功后执行；使用本批留下的场地 ID、有效预约 ID 和报告 Job ID。先通过 API 保存三个对象，再只删除 `database-0` Pod，让 StatefulSet 使用原 PVC 重建，最后通过 API 查询同一 ID。此操作会短暂中断数据库，C 应避开其他成员正在运行的 Job 或业务验证；**不删除 StatefulSet、PVC、PV、Secret、节点或集群**。
+
+```sh
+export VENUE_ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["venue_id"])' "$EVIDENCE/business-ids.json")"
+export RESERVATION_ID="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["reservation_id"])' "$EVIDENCE/business-ids.json")"
+export JOB_ID="$(sed -n 's/^job_id=\([^ ]*\).*/\1/p' "$EVIDENCE/report-result.txt")"
+(
+  set -e -o pipefail
+  test -n "$VENUE_ID" && test -n "$RESERVATION_ID" && test -n "$JOB_ID"
+  kubectl --context kind-venue-lab2 -n venue-booking port-forward service/api 18083:8080 > "$EVIDENCE/persistence-port-forward.txt" 2>&1 &
+  PF_PERSIST=$!
+  trap 'kill "$PF_PERSIST" 2>/dev/null || true' EXIT
+  READY=0
+  for attempt in {1..60}; do
+    if curl --noproxy '*' --fail --silent "http://127.0.0.1:18083/api/venues/$VENUE_ID" > /dev/null; then READY=1; break; fi
+    sleep 1
+  done
+  test "$READY" -eq 1
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/venues/$VENUE_ID" > "$EVIDENCE/venue-before.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reservations/$RESERVATION_ID" > "$EVIDENCE/reservation-before.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reports/$JOB_ID" > "$EVIDENCE/report-persistence-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pod database-0 -o json > "$EVIDENCE/database-pod-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pvc postgres-data-database-0 -o json > "$EVIDENCE/database-pvc-before.json"
+  kubectl --context kind-venue-lab2 -n venue-booking delete pod database-0 --wait=true | tee "$EVIDENCE/database-pod-delete.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking rollout status statefulset/database --timeout=180s | tee "$EVIDENCE/database-rollout.txt"
+  kubectl --context kind-venue-lab2 -n venue-booking get pod database-0 -o json > "$EVIDENCE/database-pod-after.json"
+  kubectl --context kind-venue-lab2 -n venue-booking get pvc postgres-data-database-0 -o json > "$EVIDENCE/database-pvc-after.json"
+  READY=0
+  for attempt in {1..60}; do
+    if curl --noproxy '*' --fail --silent "http://127.0.0.1:18083/api/venues/$VENUE_ID" > /dev/null; then READY=1; break; fi
+    sleep 1
+  done
+  test "$READY" -eq 1
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/venues/$VENUE_ID" > "$EVIDENCE/venue-after.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reservations/$RESERVATION_ID" > "$EVIDENCE/reservation-after.json"
+  curl --noproxy '*' --fail --silent --show-error "http://127.0.0.1:18083/api/reports/$JOB_ID" > "$EVIDENCE/report-persistence-after.json"
+  cmp "$EVIDENCE/venue-before.json" "$EVIDENCE/venue-after.json"
+  cmp "$EVIDENCE/reservation-before.json" "$EVIDENCE/reservation-after.json"
+  cmp "$EVIDENCE/report-persistence-before.json" "$EVIDENCE/report-persistence-after.json"
+  python3 - "$EVIDENCE" <<'PY'
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+before_pod = json.loads((root / 'database-pod-before.json').read_text())
+after_pod = json.loads((root / 'database-pod-after.json').read_text())
+before_pvc = json.loads((root / 'database-pvc-before.json').read_text())
+after_pvc = json.loads((root / 'database-pvc-after.json').read_text())
+assert before_pod['metadata']['uid'] != after_pod['metadata']['uid']
+assert before_pvc['metadata']['uid'] == after_pvc['metadata']['uid']
+assert after_pvc['status']['phase'] == 'Bound'
+print('database_pod_uid_changed=yes pvc_uid_unchanged=yes business_responses_unchanged=yes')
+PY
+)
+```
+
+通过条件：数据库 Pod UID 改变，PVC UID 和 `Bound` 状态保持；同一场地、预约、报告 ID 的 API 响应在重建前后完全一致。C 回传六份业务响应、Pod/PVC 前后状态、rollout 输出、执行时间和失败日志；这只证明同一 kind 集群内 Pod 重建后的数据保留，不证明跨节点、跨宿主机或删集群后的恢复。
+
+### C 执行回传区（b-acceptance-20261119-182919）
+
+执行时间：`2026-11-19T18:29:19.415863+08:00` 至 `2026-11-19T18:30:34.079994+08:00`（Asia/Shanghai）；执行成员 C。
+
+环境：cluster=`venue-lab2`，context=`kind-venue-lab2`，namespace=`venue-booking`；宿主机见 [host.txt](assets/lab2/b-acceptance-20261119-182919/host.txt)。执行分支 `integration/lab2-backend-acceptance`，源码提交 `ad93428cf86451141c974460273f058d6ed59cb7`。API/清单/Job 脚本与 `35e1809` 差异检查为空，API 继续使用原镜像 `venue-booking-api:lab2-20261113`，未构建或覆盖镜像。
+
+**结果：C 执行的三项共同集群验收 SUCCESS；本节四项交接整体 PARTIAL，第 3 项隔离故障注入测试待 B 提供原始输出。**
+
+| 项目 | 结果 | 关键证据 |
+| --- | --- | --- |
+| 1. 两 API Pod 并发预约 | SUCCESS | [01-concurrent-booking.txt](assets/lab2/b-acceptance-20261119-182919/01-concurrent-booking.txt) |
+| 2. 同 ID 重试、Job/Pod 删除后仍可查询 | SUCCESS | [02-report-retry.txt](assets/lab2/b-acceptance-20261119-182919/02-report-retry.txt) |
+| 3. 隔离 Testcontainers 可捕获失败/FAILED | NOT_RUN（C 未执行，待 B 交付） | 不记为共同集群实测 |
+| 4. 数据库 Pod 重建后的业务保留 | SUCCESS | [04-business-persistence.txt](assets/lab2/b-acceptance-20261119-182919/04-business-persistence.txt) |
+
+**实际执行命令与证据**
+
+按 B 上述顺序执行 0 → 1 → 2 → 4。为避免日志被 `*.log` 忽略，仅将两个报告日志的保存扩展名改为 `.txt`；业务步骤未改变。完整实际脚本为本批 `00-preflight.sh`、`01-concurrent-booking.sh`、`02-report-retry.sh`、`04-business-persistence.sh`；命令、退出码和补充只读查询索引见 [execution.json](assets/lab2/b-acceptance-20261119-182919/execution.json)。
+
+**1. 两 Pod 并发预约**
+
+| API Pod | 节点 | 状态 |
+| --- | --- | --- |
+| `api-d866875dd-jtlfr` | `venue-lab2-worker` | 1/1 Ready |
+| `api-d866875dd-ndq66` | `venue-lab2-worker2` | 1/1 Ready |
+
+两个转发端口分别返回与 Pod 名称对应的不同 instance_id。创建本批唯一场地 ID `7`，对 `2026-12-19 10:00–11:00` 并发预约，恰好一个 `201`、一个 `409 TIME_CONFLICT`；API 查询仅有一条 ACTIVE 预约，ID `4`。完整两份响应及批次见 [01-concurrent-booking.txt](assets/lab2/b-acceptance-20261119-182919/01-concurrent-booking.txt)；ID 文件 [business-ids.json](assets/lab2/b-acceptance-20261119-182919/business-ids.json)。
+
+**2. 同 ID 报告重试与结果独立于 Job Pod**
+
+- 本轮新建 Job：`venue-report-manual-20261119102922-01fd83`；范围 `2026-11-16` 至 `2026-11-16`，来源 MANUAL。
+- 首次和同名重建的 Job 均 Complete，容器退出码均为 0；两次 Job UID 不同。只删除了本节新建的 Job/Pod，没有删除原 A/B 的历史 Job。
+- 原 Job 和 Pod 删除后，报告仍为 SUCCEEDED，可通过 API 查询。
+- 重试前后完整 JSON（包括 generated_at 和全部明细）一致；只读数据库计数为 1 条 report_runs、7 条 report_items，明细数与 API 一致。
+- 首次状态／日志：[report-first-job.json](assets/lab2/b-acceptance-20261119-182919/report-first-job.json)、[report-first-pods.json](assets/lab2/b-acceptance-20261119-182919/report-first-pods.json)、[report-first.txt](assets/lab2/b-acceptance-20261119-182919/report-first.txt)。
+- 删除后查询：[report-after-pod-delete.json](assets/lab2/b-acceptance-20261119-182919/report-after-pod-delete.json)。
+- 重建状态／日志：[report-retry-job.json](assets/lab2/b-acceptance-20261119-182919/report-retry-job.json)、[report-retry-pods.json](assets/lab2/b-acceptance-20261119-182919/report-retry-pods.json)、[report-retry.txt](assets/lab2/b-acceptance-20261119-182919/report-retry.txt)。
+- 比较快照：[report-before.json](assets/lab2/b-acceptance-20261119-182919/report-before.json)、[report-after-retry.json](assets/lab2/b-acceptance-20261119-182919/report-after-retry.json)；cmp 均退出 0，见 [02-report-retry.txt](assets/lab2/b-acceptance-20261119-182919/02-report-retry.txt)。
+- 数据库计数：[report-row-count.txt](assets/lab2/b-acceptance-20261119-182919/report-row-count.txt)，对应 SQL 为 [report-row-count.sql](assets/lab2/b-acceptance-20261119-182919/report-row-count.sql)。
+
+**3. 隔离可捕获失败与 FAILED**
+
+本批未运行 Maven/Testcontainers 测试，状态 NOT_RUN，责任人为 B；待提供 ReportIntegrationTest 原始运行结果。没有在共同数据库修改权限或表结构制造失败，也没有把参数错误、数据库不可达或普通 Job 成功冒充 FAILED 注入验收。
+
+**4. 数据库重建保留真实业务数据**
+
+- 使用同一场地 ID `7`、预约 ID `4`、报告 ID `venue-report-manual-20261119102922-01fd83`。重建前核查无活动 Job。
+- 仅删除 venue-booking/database-0 Pod，StatefulSet 使用原 PVC 恢复，且业务请求恢复成功。
+- 数据库 Pod UID 已改变，PVC UID 和 PV 名称不变，PVC 仍为 Bound。
+- 场地：[venue-before.json](assets/lab2/b-acceptance-20261119-182919/venue-before.json) 与 [venue-after.json](assets/lab2/b-acceptance-20261119-182919/venue-after.json) 完全一致。
+- 预约：[reservation-before.json](assets/lab2/b-acceptance-20261119-182919/reservation-before.json) 与 [reservation-after.json](assets/lab2/b-acceptance-20261119-182919/reservation-after.json) 完全一致。
+- 报告：[report-persistence-before.json](assets/lab2/b-acceptance-20261119-182919/report-persistence-before.json) 与 [report-persistence-after.json](assets/lab2/b-acceptance-20261119-182919/report-persistence-after.json) 完全一致。
+- Pod/PVC 状态：本批 `database-pod-before.json`、`database-pod-after.json`、`database-pvc-before.json`、`database-pvc-after.json`；rollout 见 [database-rollout.txt](assets/lab2/b-acceptance-20261119-182919/database-rollout.txt)。
+- 此结果只证明同一集群内 Pod 重建后的真实业务保留，不代表跨节点、跨主机或删除 kind 集群后的恢复。
+
+**资源保留、待处理项与下一步**
+
+- 场地、预约、报告和重建后的测试 Job 保留供复核；临时端口转发由脚本 trap 结束，未删除 PVC、Secret、StatefulSet 或集群。
+- Secret UID/resourceVersion 不变；API/前端 Deployment spec 与 UID 不变；正式 CronJob spec 不变。本批未操作 venue-booking-final。
+- 最终状态：[final-status.txt](assets/lab2/b-acceptance-20261119-182919/final-status.txt)；C 三项检查无失败。
+- 待处理问题：第 3 项由 B 提供隔离测试证据；不能据此宣称四项全部完成。
+- 下一步负责人：B 核对本回传并补齐隔离测试输出；C 将本批证据用于报告的并发/重试/持久化章节，再另行开展 A 的最终展示环境核验。
+
+### B 补充回传：隔离 `FAILED` 注入与后端回归（2026-11-19）
+
+B 已核对 C 本批原始响应、两次 Job Pod 的退出码、报告快照、数据库 Pod/PVC UID 与三份业务响应；第 1、2、4 项与 C 的 SUCCESS 记录一致。C 当时第 3 项的 `NOT_RUN` 保持为历史事实，本段记录随后独立补测的结果。
+
+- 环境：B 的 macOS ARM64；Java 17.0.20.1、Maven 3.10.0、Docker Engine 29.8.2；使用 Testcontainers 的临时 PostgreSQL 16。未连接或改动共同 kind 集群数据库。
+- 源码：聚焦测试在 `1c5bad3` 执行，完整回归在本地合并提交 `8fcd39b` 执行；两提交的 `api/` 内容无差异。
+- `mvn -f api/pom.xml -B '-Dtest=ReportIntegrationTest' test`：进程退出码 0，`ReportIntegrationTest` **6/6 通过**；[原始 Maven 输出（gzip 无损压缩）](assets/lab2/b-tests-20261119/report-integration-maven.txt.gz)。其中 `runningFailureAndRetryExposeCorrectState` 在聚合阶段注入异常，断言已落库运行记录转为 `FAILED`、错误摘要脱敏、明细为空，然后同 ID 重试转为 `SUCCEEDED`；另覆盖同 ID 并发执行和参数冲突。
+- `mvn -f api/pom.xml -B test`：进程退出码 0，后端 **21/21 通过**，含 Lab 1 预约回归与报告测试；[原始 Maven 输出（gzip 无损压缩）](assets/lab2/b-tests-20261119/backend-suite-maven.txt.gz)。两份输出可用 `gzip -dc <文件名>` 查看，解压后的 SHA-256 分别为 `d1483da415503af0a31b7aa82a869758307ceffbc51f1f7f5db4982fd90284e2` 和 `56f8e2c40e95463159d3e3d2ab621bd51c680b4591b2d5ef4901ddf8b062c0b3`。
+- 结论：第 3 项的**隔离集成测试**现已通过；共同集群未注入可捕获失败，不将本地 Testcontainers 结果写成集群 `FAILED` Job 证据。B 的四项交接可按“C 三项共同集群 SUCCESS + B 一项隔离测试 SUCCESS”分别引用。
+
 ## A → C：前端、CronJob 和 DaemonSet 执行回传
 
 本节由 C 按 A 已合入的说明代执行并追加；前面的 B 交付与执行记录保留原文。
@@ -332,3 +631,74 @@ rollout 输出：[api-rollout.txt](assets/lab2/b-execution-20261116-113439/api-r
 - 报告返回：[report-f7-api-response.json](assets/lab2/a-daemonset-retest-20261116-154006/report-f7-api-response.json)。
 - 本次未新增业务数据，临时 port-forward 已关闭；新镜像、DaemonSet READY=2 和正式 CronJob 配置均保持。
 - 待处理问题：此次补测无失败。A 可统一核对 DaemonSet 修复复测和本节新版报告页测试结果；整组其他验收项仍按原验收清单推进。
+
+## A → C：最终展示环境首日部署与手动报告（final-display-20261119-185539）
+
+执行人 C，依据 [最终展示部署说明](../k8s/final/README.md)。本节只记录共同集群的最终展示部署，不覆盖前面旧命名空间的历史回传。
+
+- 源码基线：`dfde6c8ed4bce013fe1e442f8e5ad6807903f0a5`；执行分支 `integration/lab2-final-display`。
+- 时间：`2026-11-19T18:55:39.082068+08:00` 至 `2026-11-19T18:56:55.962640+08:00`（Asia/Shanghai）；后续只读浏览器和截图核对输出见本节证据。
+- 环境：host=`wukediedeMacBook-Pro.local`，context=`kind-venue-lab2`，namespace=`venue-booking-final`。
+- 状态：**今日范围 SUCCESS；最终展示整体 PARTIAL，定时自动报告及三 Job 联合核对待 2026-11-20 完成。**
+
+**部署前检查与镜像**
+
+最初 venue-booking-final 不存在，按新环境流程创建。使用独立 Secret、StatefulSet 和 PVC；已比较新旧 PVC UID/PV 名称，确认不与 venue-booking 共享卷。原命名空间 Deployment/StatefulSet/DaemonSet/PVC 的 UID/spec 前后未变。Secret 只记录元数据，不保存或输出真实值。
+
+| 组件 | 镜像 |
+| --- | --- |
+| api | `venue-booking-api:lab2-20261113` |
+| frontend | `venue-booking-frontend:lab2-report-query-02` |
+| node-check | `venue-booking-node-check:lab2-20261116-01` |
+| postgres | `postgres:16.15-bookworm` |
+
+最终前端从上述源码构建 ARM64 镜像；其他镜像检查已有缓存并复用，各镜像均核对三个节点的实际镜像存储。镜像摘要、节点记录及完整实际命令见 [execution.json](assets/lab2/final-display-20261119-185539/execution.json)。
+系统 Python 为 3.9，最终脚本使用 Python 3.10+ 注解，因此在 /tmp 准备 Python 3.12；未改系统 Python 或源脚本。访问本地端口时只在执行进程设置 NO_PROXY，避免已知系统代理影响。
+
+**资源与只读核验**
+
+- 渲染清单中所有有命名空间的资源均为 venue-booking-final，Namespace 对象也是该名称；[rendered.yaml](assets/lab2/final-display-20261119-185539/rendered.yaml)。
+- 数据库、双 API、前端和两个 worker 的 DaemonSet 均 rollout 成功；PVC Bound；两份节点检查日志均为 dns=ok。[final-status.txt](assets/lab2/final-display-20261119-185539/final-status.txt)，DNS 日志见本批 dns-log-0.txt/dns-log-1.txt。
+- 前端 /api/instance 已核对属于本命名空间的 API Pod，不使用旧环境的端口转发写数据。
+- 正式 CronJob 为 10 0 * * *、Asia/Shanghai、PREVIOUS_DAY；未应用 k8s/final/demo，未主动触发定时演示。[cron-final.txt](assets/lab2/final-display-20261119-185539/cron-final.txt)。
+
+**展示数据脚本只执行一次**
+
+- 写入前 API 显示仅有三个 Flyway 初始场地、预约为空；[venues-before.json](assets/lab2/final-display-20261119-185539/venues-before.json)、[reservations-before.json](assets/lab2/final-display-20261119-185539/reservations-before.json)。
+- 一次性执行后为五个指定场地、七条预约（六条 ACTIVE、一条 CANCELLED）；[seed-result.json](assets/lab2/final-display-20261119-185539/seed-result.json)、[venues-after.json](assets/lab2/final-display-20261119-185539/venues-after.json)、[reservations-after.json](assets/lab2/final-display-20261119-185539/reservations-after.json)。
+- 手动统计日期：**2026-11-21**。
+- 定时演示日期：**2026-11-20**；scheduled_demo_can_run_today=false。
+- 取消预约 ID 为 6，有效预约 ID 为 1, 2, 3, 4, 5, 7。
+- 明天不得再次运行 seed-final-display.py；保留现有数据和 PVC。
+
+**手动报告**
+
+- Job ID：`venue-report-manual-20261119105626-364bf7`；范围使用脚本输出的 2026-11-21。
+- Job Complete，报告容器退出码 0；API 报告为 MANUAL / SUCCEEDED，起止日期正确。
+- 羽毛球馆 A：2 次/150 分钟；多功能教室 B：1 次/120 分钟；会议室 C：0/0；排练室 D：2 次/150 分钟；小型会议室 E：0/0。
+- 状态及完整日志：[manual-job.txt](assets/lab2/final-display-20261119-185539/manual-job.txt)、[manual-job-pods.txt](assets/lab2/final-display-20261119-185539/manual-job-pods.txt)、[manual-job-log.txt](assets/lab2/final-display-20261119-185539/manual-job-log.txt)。报告响应：[manual-report.json](assets/lab2/final-display-20261119-185539/manual-report.json)。
+
+**页面、截图与固定数据保留**
+
+只进行了只读导航和报告查询，没有提交创建/预约/取消表单，没有运行会新增随机场地的浏览器回归。浏览器前后的五场地、七预约 API 响应完全一致。检查记录：[readonly-browser-checks.json](assets/lab2/final-display-20261119-185539/readonly-browser-checks.json)、[readonly-browser.txt](assets/lab2/final-display-20261119-185539/readonly-browser.txt)。
+
+- 场地概览：[final-venues.png](assets/lab2/final-display-20261119-185539/final-venues.png)。
+- 场地详情：[final-venue-detail.png](assets/lab2/final-display-20261119-185539/final-venue-detail.png)。
+- 预约列表：[final-reservations.png](assets/lab2/final-display-20261119-185539/final-reservations.png)。
+- 已取消预约详情：[final-cancelled-reservation.png](assets/lab2/final-display-20261119-185539/final-cancelled-reservation.png)。
+- 本次共同环境手动报告截图：[final-manual-report.png](assets/lab2/final-display-20261119-185539/final-manual-report.png)，日期、来源和五条数值均与真实 API 核对。
+- 对照报告原图 docs/附件/手动报告查询页面.png：样例统计和日期相同，但 Job ID、生成时间不同，不能把原图当成本次共同集群同一 Job 的截图。未覆盖 A 原图；统一报告时应使用本次截图或准确标注旧图来源。
+- 自动报告图尚不能作为本最终命名空间的实测，明天取得实际自动 Job 后补拍。
+
+**明日继续入口**
+
+日期和已有 Job 信息已保存：[resume-tomorrow.json](assets/lab2/final-display-20261119-185539/resume-tomorrow.json)。2026-11-20 任一合适时间可验证，不必等到预约的 17:00；统计的是已预约记录。
+
+1. 确认实际日期、命名空间、镜像和固定数据仍一致，重启前端端口转发；不重新灌数据。
+2. 应用 k8s/final/demo，记录切换时间，等待至少两个新自动 Job 成功，报告范围为 2026-11-20、来源 SCHEDULED；小型会议室 E 1 次/60 分钟，其余为零。
+3. 不要将可能已存在的正式 00:10 PREVIOUS_DAY Job 当作两次 TODAY 演示。
+4. 即使失败或中断也恢复本批 rendered.yaml 的正式配置，并核对 schedule 与窗口。
+5. 用已有手动 Job `venue-report-manual-20261119105626-364bf7` 和两个实际自动 Job ID 运行 verify-final-display.py，保存完整输出与自动报告截图。
+6. 回填本文件，联合核对实验报告截图、环境说明与最终 Job ID。
+
+待处理问题：今天无失败；两次自动报告、最终三 Job 核对脚本和自动报告截图明确 NOT_RUN。所有业务数据保留，临时端口转发已关闭。
