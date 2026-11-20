@@ -1,0 +1,21 @@
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                        SELECTOR
+deployment.apps/api        2/2     2            2           15h   api          venue-booking-api:lab2-20261113               app.kubernetes.io/component=api,app.kubernetes.io/name=venue-booking
+deployment.apps/frontend   1/1     1            1           15h   frontend     venue-booking-frontend:lab2-report-query-02   app.kubernetes.io/component=frontend,app.kubernetes.io/name=venue-booking
+
+NAME                        READY   AGE   CONTAINERS   IMAGES
+statefulset.apps/database   1/1     15h   database     postgres:16.15-bookworm
+
+NAME                        DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE   CONTAINERS   IMAGES                                      SELECTOR
+daemonset.apps/node-check   2         2         2       2            2           <none>          15h   node-check   venue-booking-node-check:lab2-20261116-01   app.kubernetes.io/component=node-check,app.kubernetes.io/name=venue-booking
+
+NAME                                                  READY   STATUS      RESTARTS   AGE   IP            NODE                 NOMINATED NODE   READINESS GATES
+pod/api-d866875dd-cwd47                               1/1     Running     0          15h   10.244.1.14   venue-lab2-worker2   <none>           <none>
+pod/api-d866875dd-rqm7l                               1/1     Running     0          15h   10.244.2.14   venue-lab2-worker    <none>           <none>
+pod/database-0                                        1/1     Running     0          15h   10.244.2.17   venue-lab2-worker    <none>           <none>
+pod/frontend-759cf94d9-cjcxl                          1/1     Running     0          15h   10.244.1.16   venue-lab2-worker2   <none>           <none>
+pod/node-check-pzqf8                                  1/1     Running     0          15h   10.244.2.15   venue-lab2-worker    <none>           <none>
+pod/node-check-r8hnz                                  1/1     Running     0          15h   10.244.1.15   venue-lab2-worker2   <none>           <none>
+pod/venue-report-manual-20261119105626-364bf7-7lm4d   0/1     Completed   0          15h   10.244.2.18   venue-lab2-worker    <none>           <none>
+
+NAME                                             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE   VOLUMEMODE
+persistentvolumeclaim/postgres-data-database-0   Bound    pvc-053fb160-ea00-42c7-8c9e-23a6d864a7e4   1Gi        RWO            standard       <unset>                 15h   Filesystem

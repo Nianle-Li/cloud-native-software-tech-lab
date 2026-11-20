@@ -1,0 +1,4 @@
+NAME                       STATUS   ROLES           AGE     VERSION    INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION     CONTAINER-RUNTIME
+venue-lab2-control-plane   Ready    control-plane   4d17h   v1.34.11   172.20.0.2    <none>        Debian GNU/Linux 13 (trixie)   6.12.72-linuxkit   containerd://2.3.4
+venue-lab2-worker          Ready    <none>          4d17h   v1.34.11   172.20.0.3    <none>        Debian GNU/Linux 13 (trixie)   6.12.72-linuxkit   containerd://2.3.4
+venue-lab2-worker2         Ready    <none>          4d17h   v1.34.11   172.20.0.4    <none>        Debian GNU/Linux 13 (trixie)   6.12.72-linuxkit   containerd://2.3.4

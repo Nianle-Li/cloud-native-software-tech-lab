@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "羽毛球馆 A",
+    "location": "体育中心 1 层",
+    "capacity": 8,
+    "open_time": "08:00",
+    "close_time": "22:00",
+    "status": "OPEN"
+  },
+  {
+    "id": 2,
+    "name": "多功能教室 B",
+    "location": "教学楼 2 层",
+    "capacity": 30,
+    "open_time": "09:00",
+    "close_time": "21:00",
+    "status": "OPEN"
+  },
+  {
+    "id": 3,
+    "name": "会议室 C",
+    "location": "行政楼 3 层",
+    "capacity": 12,
+    "open_time": "09:00",
+    "close_time": "18:00",
+    "status": "CLOSED"
+  },
+  {
+    "id": 4,
+    "name": "排练室 D",
+    "location": "艺术中心 2 层",
+    "capacity": 15,
+    "open_time": "09:00",
+    "close_time": "18:00",
+    "status": "OPEN"
+  },
+  {
+    "id": 5,
+    "name": "小型会议室 E",
+    "location": "图书馆 3 层",
+    "capacity": 12,
+    "open_time": "09:00",
+    "close_time": "18:00",
+    "status": "OPEN"
+  }
+]

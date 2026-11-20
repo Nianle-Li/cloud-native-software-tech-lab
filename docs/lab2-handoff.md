@@ -702,3 +702,74 @@ B 已核对 C 本批原始响应、两次 Job Pod 的退出码、报告快照、
 6. 回填本文件，联合核对实验报告截图、环境说明与最终 Job ID。
 
 待处理问题：今天无失败；两次自动报告、最终三 Job 核对脚本和自动报告截图明确 NOT_RUN。所有业务数据保留，临时端口转发已关闭。
+
+
+## A → C：最终展示环境两次自动报告与三 Job 补测（final-cron-20261120-103441）
+
+A 已选择补齐 `venue-booking-final` 自身的自动报告与三 Job 核对，使自动报告截图与本批固定数据对应；原 `venue-booking` 的历史记录仍保留并标注来源。本节追加实测结果，不改写此前批次的执行范围或状态。
+
+- 执行成员：C；时间：`2026-11-20T10:34:41.590241+08:00` 至 `2026-11-20T10:38:37.923226+08:00`（Asia/Shanghai）。
+- 环境：cluster=`venue-lab2`，context=`kind-venue-lab2`，namespace=`venue-booking-final`；[宿主机](assets/lab2/final-cron-20261120-103441/host.txt)。
+- 源码：从最新远程 `develop` 的 `4c9f2f59585da53385f0a83b835502e6fa26a4e1` 创建执行分支 `integration/lab2-final-cron`；本轮未修改应用源码、镜像或仓库资源清单。
+- 延续前一日部署：`integration/lab2-final-display` 的 `8aa39ef`，证据批次 `final-display-20261119-185539`。本批复制四份只读基线 JSON 供独立复核，不重复执行种子数据脚本或部署全套资源。
+- **结果：SUCCESS。两个新的 TODAY 自动 Job 均成功；现有手动 Job 与两次自动 Job 的完整核对脚本 PASS；两张真实页面截图已保存。**
+
+### 执行顺序与实际命令
+
+1. 检查主机日期为 `2026-11-20`、最终环境工作负载与原手动 Job，核对场地、预约和手动报告与前一日 JSON 完全一致。共 5 个场地、7 条预约（6 ACTIVE / 1 CANCELLED）；固定数据要求的自动报告日期正是当天。
+2. 通过最终命名空间前端 Service 临时端口转发进行只读查询；将 `k8s/final/demo` 渲染并 server dry-run，仅应用演示 CronJob。开始时间 `2026-11-20T10:34:43.531959+08:00`；配置为 `*/2 * * * *`、`Asia/Shanghai`、`TODAY`。
+3. 记录切换前的 Job UID 集合；等待 CronJob 控制器创建两个新的 Job，并核对父资源 UID、Kubernetes 完成状态、Pod 日志、报告来源、日期与统计。没有使用 `kubectl create job --from=cronjob` 代替自动触发。
+4. 两个 Job 成功后，将 `k8s/final` 渲染结果中正式 CronJob 的完整资源单独应用，避免重部署其他资源。于 `2026-11-20T10:38:35.690355+08:00` 恢复 `10 0 * * *`、`Asia/Shanghai`、`PREVIOUS_DAY`，并再次读取确认；`concurrencyPolicy=Forbid` 保持。
+5. 恢复后用实际三个 ID 执行原核对脚本；只读打开两份报告并截图。末尾比较业务 JSON、原手动报告、PVC UID/PV 和 Secret UID/resourceVersion，全部未变；临时端口转发已结束。
+
+完整命令、退出码和逐项输出索引：[execution.json](assets/lab2/final-cron-20261120-103441/execution.json)。本次仅对 CronJob 进行临时配置切换，实际应用的 [演示清单](assets/lab2/final-cron-20261120-103441/demo-cron.yaml) 和 [正式恢复清单](assets/lab2/final-cron-20261120-103441/formal-cron.yaml) 均留存。
+
+```sh
+kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/final/demo
+kubectl --context kind-venue-lab2 -n venue-booking-final apply --dry-run=server -f docs/assets/lab2/final-cron-20261120-103441/demo-cron.yaml
+kubectl --context kind-venue-lab2 -n venue-booking-final apply -f docs/assets/lab2/final-cron-20261120-103441/demo-cron.yaml
+# 等待下面两次由 CronJob 控制器实际创建的 Job 成功，再恢复正式资源。
+kubectl --context kind-venue-lab2 -n venue-booking-final apply -f docs/assets/lab2/final-cron-20261120-103441/formal-cron.yaml
+kubectl --context kind-venue-lab2 -n venue-booking-final get cronjob venue-report-daily -o json
+```
+
+### 实际三个 Job 与报告
+
+| 类型 | Job ID | 范围 | 结果 |
+| --- | --- | --- | --- |
+| 原手动报告，复用未重建 | `venue-report-manual-20261119105626-364bf7` | 2026-11-21 | MANUAL / SUCCEEDED，原完整响应未改变 |
+| 新自动报告 1 | `venue-report-daily-29919036` | 2026-11-20 | SCHEDULED / SUCCEEDED；Kubernetes succeeded=1 |
+| 新自动报告 2 | `venue-report-daily-29919038` | 2026-11-20 | SCHEDULED / SUCCEEDED；Kubernetes succeeded=1 |
+
+两个新 Job 的父资源均为本命名空间同一 `CronJob/venue-report-daily`，容器 `REPORT_WINDOW_MODE=TODAY`。控制器在北京时间 10:36 和 10:38 两轮创建，数据库报告生成时间分别为 `10:36:24.335628+08:00`、`10:38:22.409721+08:00`。
+
+- 第一次：[Job 资源](assets/lab2/final-cron-20261120-103441/scheduled-job-1.txt)、[Pod 状态](assets/lab2/final-cron-20261120-103441/scheduled-pods-1.txt)、[日志](assets/lab2/final-cron-20261120-103441/scheduled-log-1.txt)、[GET 报告响应](assets/lab2/final-cron-20261120-103441/scheduled-report-1.json)。
+- 第二次：[Job 资源](assets/lab2/final-cron-20261120-103441/scheduled-job-2.txt)、[Pod 状态](assets/lab2/final-cron-20261120-103441/scheduled-pods-2.txt)、[日志](assets/lab2/final-cron-20261120-103441/scheduled-log-2.txt)、[GET 报告响应](assets/lab2/final-cron-20261120-103441/scheduled-report-2.json)。
+- 两次自动报告均为：羽毛球馆 A、多功能教室 B、会议室 C、排练室 D 各 0 次 / 0 分钟；小型会议室 E **1 次 / 60 分钟**。
+- 原手动报告仍为：羽毛球馆 A 2 次 / 150 分钟，多功能教室 B 1 次 / 120 分钟，排练室 D 2 次 / 150 分钟，会议室 C 和小型会议室 E 各 0 次 / 0 分钟；[原手动报告复核](assets/lab2/final-cron-20261120-103441/manual-report-after.json)。
+
+三 Job 核对的实际命令（Python 3.12；本机 Python 3.9 不支持脚本类型注解，使用已安装的 3.12 解释器；临时转发地址已在结束后关闭）：
+
+```sh
+NO_PROXY=127.0.0.1,localhost no_proxy=127.0.0.1,localhost \
+/opt/homebrew/opt/python@3.12/bin/python3.12 scripts/verify-final-display.py \
+  --base-url http://127.0.0.1:54540 \
+  --context kind-venue-lab2 --namespace venue-booking-final \
+  --manual-job venue-report-manual-20261119105626-364bf7 \
+  --scheduled-jobs venue-report-daily-29919036 venue-report-daily-29919038
+```
+
+原始输出：[three-job-check.txt](assets/lab2/final-cron-20261120-103441/three-job-check.txt)；[结构化结果](assets/lab2/final-cron-20261120-103441/three-job-check.json)：`result=PASS`、venues=5、reservations=7、daemonset_ready=2。脚本同时核对了三个报告的名称/日期/来源/零值与非零值统计、自动 Job 父资源、正式调度、四种工作负载镜像、两个 API 副本就绪、数据库 PVC Bound，以及两个 worker 的 DNS 日志。
+
+### 自动报告截图与资源保留
+
+- [最终环境自动报告 1](assets/lab2/final-cron-20261120-103441/final-scheduled-report-1.png)：Job `venue-report-daily-29919036`，日期、来源、成功状态及五行统计均与 API 一致。
+- [最终环境自动报告 2](assets/lab2/final-cron-20261120-103441/final-scheduled-report-2.png)：Job `venue-report-daily-29919038`，同样逐行核对通过。
+- 浏览器只执行报告查询，不运行会新增随机场地的回归用例：[断言结果](assets/lab2/final-cron-20261120-103441/readonly-browser-checks.json)、[原始输出](assets/lab2/final-cron-20261120-103441/browser-check.txt)、[实际只读浏览器脚本](assets/lab2/final-cron-20261120-103441/readonly-browser.cjs)。两张完整截图均已人工查看，页面未截断统计行。
+- API 镜像 `venue-booking-api:lab2-20261113`，前端 `venue-booking-frontend:lab2-report-query-02`，节点检查 `venue-booking-node-check:lab2-20261116-01`，数据库 `postgres:16.15-bookworm`；本轮未重建或更换标签。
+- [最终工作负载状态](assets/lab2/final-cron-20261120-103441/final-status.txt)：API 2/2、前端 1/1、数据库 1/1、DaemonSet 2/2，PVC Bound；[Pod 镜像及节点分布](assets/lab2/final-cron-20261120-103441/pods-audit.json)，两份 worker DNS 日志在同批目录。
+- [恢复后的 CronJob](assets/lab2/final-cron-20261120-103441/cron-restored.txt)；本轮证明短周期调度自动触发与正式配置恢复，未将其描述为等待跨日 00:10 触发的实测。
+- 场地与预约分别在本批 `venues-before/after.json`、`reservations-before/after.json` 完全一致，且与前日基线一致。原手动报告完整 JSON 也未改变。
+- PVC UID/PV 不变，Secret UID/resourceVersion 不变；只保存 Secret 元数据，不保存真实凭据。未删除 PVC、清空数据库或操作其他命名空间。
+
+**待处理问题：本轮两次自动报告与三 Job 核对无失败。此前最终命名空间“自动报告与三 Job 待补测”由本批 SUCCESS 关闭。下一步由 A 核对本批输出、选择上述自动报告截图，更新 `docs/lab2-report.md` 及交接中的当前结论，明确区分最终环境与历史命名空间来源；其他业务交互截图按已约定范围保留，无需全部重拍。本分支仅追加回传与证据，未替 A 改写报告结论。**
