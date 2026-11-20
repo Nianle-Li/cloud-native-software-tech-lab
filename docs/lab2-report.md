@@ -10,6 +10,31 @@
 
 ### 1.1 Kubernetes 环境、版本、节点与镜像方式（C）
 
+共同验收环境由 C 在 Apple Silicon Mac 上建立，使用 Docker Desktop 提供容器引擎，由独立 kind CLI 创建 `venue-lab2` 集群。所有验收命令显式指定 `--context kind-venue-lab2`，避免误操作其他本地集群。三个节点是同一宿主机中的容器，不代表三台物理机器。
+
+| 项目 | 实际配置 |
+| --- | --- |
+| 宿主机 | macOS、ARM64，物理内存 18 GiB |
+| Docker | Desktop 4.64.0 / Engine 29.2.1，分配 11 CPU、约 7.65 GiB 内存 |
+| kind / kubectl | v0.33.0 / v1.34.1 |
+| Kubernetes | 三节点均为 v1.34.11，容器运行时为 containerd |
+| 节点镜像 | `kindest/node:v1.34.11@sha256:44e222ee2132dab25ff87301682f89eb82c7880ea3a1bf543bfe9708fd08d67d` |
+| 常规验收命名空间 | `venue-booking` |
+| 最终展示命名空间 | `venue-booking-final`，拥有独立 Secret、数据库和 PVC |
+
+集群配置保存在 [cluster.yaml](../k8s/kind/cluster.yaml)。`venue-lab2-control-plane` 带 `node-role.kubernetes.io/control-plane:NoSchedule` 污点；`venue-lab2-worker` 与 `venue-lab2-worker2` 无污点。初始验证中三个节点均 Ready，业务及节点检查主要在两个 worker 上调度，原始版本、架构和污点见[环境证据](assets/lab2/kind-environment.json)。
+
+自建镜像按 `linux/arm64` 构建，使用可追踪标签，并通过 `kind load docker-image <镜像:标签> --name venue-lab2` 装载到指定集群。使用 `--provenance=false --load` 的单平台构建避免本机多架构缓存导入时缺少内容摘要的问题；装载后核查各节点镜像及实际 Pod imageID，而非仅检查宿主机镜像列表。官方 PostgreSQL 镜像使用选定 ARM64 平台的归档装载。清单使用 `IfNotPresent`，内容改变时必须更换标签。
+
+| 最终展示组件 | 固定镜像标签 |
+| --- | --- |
+| 前端 | `venue-booking-frontend:lab2-report-query-02` |
+| API、手动报告与 CronJob | `venue-booking-api:lab2-20261113` |
+| 节点检查 | `venue-booking-node-check:lab2-20261116-01` |
+| 数据库 | `postgres:16.15-bookworm` |
+
+最终前端与旧验收前端使用不同标签；各阶段的构建提交、摘要和节点装载记录分别保存，不将同名命名空间或相同标签作为同一次验收的充分证据。
+
 ### 1.2 系统架构图与组件通信路径（A、B、C）
 
 ```mermaid
@@ -66,6 +91,18 @@ kubectl --context kind-venue-lab2 -n venue-booking port-forward service/frontend
 
 #### 2.1.1 数据库 StatefulSet、Service、ConfigMap、Secret 与 PVC（C）
 
+| 资源类型 | 名称 | 用途与选择理由 |
+| --- | --- | --- |
+| Namespace | `venue-booking` / `venue-booking-final` | 分隔常规验收与最终展示的资源和数据；最终配置由 Kustomize 指定命名空间。 |
+| StatefulSet | `database`，1 副本 | 管理有状态 PostgreSQL，提供稳定 Pod 身份并关联独立存储；不通过简单增加副本模拟数据库复制。 |
+| Service | `database` | ClusterIP，提供内部 `5432` 端口，供 API 与报告任务访问。 |
+| Service | `database-headless` | 无头 Service，为 `database-0` 提供稳定的 Pod DNS 身份。 |
+| ConfigMap | `venue-config` | 保存数据库名、数据目录和 JDBC Service 地址等非敏感配置。 |
+| Secret | `venue-db-credentials` | 保存数据库账号和密码，通过键引用注入容器。 |
+| PVC | `postgres-data-database-0` | 由 volumeClaimTemplates 创建，数据库 Pod 重建后复用。 |
+
+Service 的 selector 同时匹配 `app.kubernetes.io/name=venue-booking` 和 `app.kubernetes.io/component=database`，不会误选 API 或报告 Pod。数据库服务不发布 NodePort 或宿主机端口；组件连接使用 `database` Service，配置中不依赖临时 Pod IP。对应实现见[数据库 Services](../k8s/base/database-services.yaml)和[StatefulSet](../k8s/base/database-statefulset.yaml)。
+
 #### 2.1.2 API Deployment、Service 与一次性 Job（B）
 
 | 资源类型 | 资源名称 | 用途与选择理由 |
@@ -91,6 +128,24 @@ API 与报告 Job 使用同一后端镜像，报告模式通过启动参数选�
 浏览器通过 `frontend` Service 访问页面，Nginx 再将 `/api/` 请求转发至 `api` Service。组件之间使用稳定的 Service 名称；非敏感配置存于 ConfigMap，数据库凭据由 Secret 提供。
 
 ### 2.2 数据库、配置与 PVC 持久化（C）
+
+PostgreSQL 使用 `postgres:16.15-bookworm`。ConfigMap 中的 `POSTGRES_DB=venue_booking` 与 JDBC 地址 `jdbc:postgresql://database:5432/venue_booking` 一致；PVC 挂载于 `/var/lib/postgresql/data`，`PGDATA=/var/lib/postgresql/data/pgdata` 将数据库文件放入卷内子目录。API 和报告任务使用同一数据库 Service 和凭据，业务数据与报告结果均保存在该数据库中。
+
+Secret 由 [create-k8s-db-secret.py](../scripts/create-k8s-db-secret.py) 在内存中生成随机密码，经标准输入创建到指定命名空间；密码不写入仓库、镜像或执行回传。重复执行保留已有 Secret；若 PVC 已存在而 Secret 丢失，脚本拒绝重新随机生成，以免与已初始化数据库的密码不一致。修改初始化环境变量不会自动轮换数据库密码。Secret 的编码不等于加密，本实验共用数据库初始化账号，未实现应用、迁移和报告账号的权限分离。
+
+| 存储项 | 实测配置 |
+| --- | --- |
+| StorageClass | `standard`，默认类 |
+| provisioner | `rancher.io/local-path` |
+| 绑定模式 | `WaitForFirstConsumer`，等待 Pod 调度后供卷 |
+| PVC | 请求 1Gi、ReadWriteOnce，实际 Bound |
+| 回收策略 | StorageClass 为 Delete；StatefulSet 的 whenDeleted/whenScaled 均为 Retain |
+
+StatefulSet 的保留策略避免删除或缩容控制器时自动删除声明，但不保证手动删除 PVC 后仍保留数据。PV 具有本地节点关联，Pod 重建复用原卷；本实验只验证同一集群内 Pod 重建，不宣称跨节点、跨主机或删除 kind 集群后的恢复能力。
+
+数据库 requests 为 100m CPU/128Mi，limits 为 500m CPU/512Mi。startup、readiness、liveness 均用本地 TCP `pg_isready`；另通过其他 worker 的客户端验证 Service/DNS 和真实认证连接。Pod 关闭 ServiceAccount token 自动挂载。资源值是实验配置，不作为吞吐或高可用性能结论。
+
+Flyway 仍是表结构唯一来源，由 API 启动执行，C 不在数据库初始化目录另建业务表。C 在独立临时 PostgreSQL 中核对 B 的 V4：V1–V3 原文件未变、空库迁移和 V3 升级保留数据、报告主键、状态约束、非负统计及外键删除保护等共 52 项通过。其[原始记录](assets/lab2/v4-verification.json)属于独立验证，不替代共同集群中的 Flyway 启动记录。
 
 ### 2.3 后端 API、双副本与 Service（B）
 
@@ -150,6 +205,18 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 
 ### 3.1 命名空间资源总览与配置核对（C）
 
+共同集群的常规验收使用 `venue-booking`。资源类型及责任边界为：API 双副本和前端单副本 Deployment、数据库单副本 StatefulSet、报告 Job/CronJob、两个 worker 的 node-check DaemonSet，以及内部 Services、ConfigMaps、Secret 和 PVC。C 先交付数据库与配置，再按 B/A 指令执行部署，保存阶段输出；不同日期的资源快照不合并冒称一次瞬时状态。
+
+11 月 19 日 B/C 补充验收结束时，原命名空间数据库与业务资源的状态保存在[资源快照](assets/lab2/b-acceptance-20261119-182919/final-status.txt)。后端专项结果由 B 章节说明；数据库重建保留数据的结果见 3.4。
+
+同日，C 从 `develop@dfde6c8` 在 `venue-booking-final` 新建独立展示环境，使用 [Kustomize 最终配置](../k8s/final/kustomization.yaml)。渲染后检查所有命名空间资源的目标，server dry-run 通过后部署；数据库、双 API、前端均就绪，DaemonSet 在两个 worker 就绪，PVC Bound。新旧命名空间的 PVC UID/PV 名称不同，旧环境的资源 spec/UID 前后未变；[最终资源快照](assets/lab2/final-display-20261119-185539/final-status.txt)及[执行记录](assets/lab2/final-display-20261119-185539/execution.json)保存了镜像、节点和配置核对结果。
+
+写数据前先确认前端的 `/api/instance` 属于最终命名空间、数据库只有三个初始场地且无预约，再运行一次展示数据脚本。最终为五个场地、七条预约，其中六条 ACTIVE、一条 CANCELLED。手动报告 Job `venue-report-manual-20261119105626-364bf7` 统计 2026-11-21：羽毛球馆 A 2 次/150 分钟、多功能教室 B 1 次/120 分钟、排练室 D 2 次/150 分钟，其余为零，API 与页面一致。
+
+该次脚本在 16:00 后执行，返回定时样例日期 2026-11-20。记录截止时，最终命名空间的两次短周期自动报告与三 Job 联合核对未执行；保留正式每日 00:10、PREVIOUS_DAY 配置。第 3.7 节已有的自动触发证据来自旧验收命名空间，不能直接改记为最终命名空间的结果。最终页面仅作只读核对，前后五场地、七预约内容一致，未在展示库运行随机数据回归。
+
+当前共同环境的[手动报告截图](assets/lab2/final-display-20261119-185539/final-manual-report.png)与报告原有样例图统计相同，但 Job ID 和生成时间不同；图片来源需连同命名空间、宿主机和 Job ID 一起核对，不能仅凭相同场地名称或统计值认定为同一次执行。
+
 ### 3.2 场地与预约业务流程（A）
 
 用户可按“浏览或创建场地 → 创建预约 → 查询记录 → 取消预约”的顺序完成业务操作。集群中的浏览器回归覆盖了这一流程，也验证了重复预约同一时段时的冲突反馈。页面请求经前端 Service 到达真实 API。
@@ -185,6 +252,20 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 2026-11-19 的定向并发验收分别端口转发到两个 API Pod，两个 `/api/instance` 响应与 Pod 名称一一对应。C 创建唯一场地 ID `7`，对 `2026-12-19 10:00–11:00` 同时提交两份相同预约：一个返回 **201**、预约 ID `4`；另一个返回 **409 `TIME_CONFLICT`**。随后查询该场地仅有一条 `ACTIVE` 预约。此结果验证了两个副本同时访问同一数据库时的冲突保护；原始响应和 Pod 分布见附录 B。
 
 ### 3.4 数据库 Pod 重建与业务数据保留（C）
+
+11 月 19 日，C 在 `kind-venue-lab2 / venue-booking` 完成真实业务持久化验收。使用 B/C 本批新建场地 ID 7、有效预约 ID 4，以及报告 `venue-report-manual-20261119102922-01fd83`，先通过 API 保存三个对象和数据库 Pod/PVC 状态。确认无活动 Job 后，只删除 `database-0` Pod，由 StatefulSet 复用原 PVC 恢复；数据库就绪后继续以业务请求确认连接恢复，再查询相同 ID。
+
+| 比较项 | 重建前后结果 |
+| --- | --- |
+| 数据库 Pod UID | 改变，确认实际创建了新 Pod |
+| PVC UID、绑定 PV | 保持不变，PVC 为 Bound |
+| 场地 ID 7 | 完整 API JSON 一致 |
+| 预约 ID 4 | 完整 API JSON 一致，仍为 ACTIVE |
+| 指定报告 Job ID | 完整 API JSON 一致，仍为 SUCCEEDED，时间与明细保留 |
+
+比较使用 `cmp`，三个响应均退出 0，Pod/PVC 标识断言通过。原始 [rollout](assets/lab2/b-acceptance-20261119-182919/database-rollout.txt) 与[验证输出](assets/lab2/b-acceptance-20261119-182919/04-business-persistence.txt)记录了恢复过程；响应和前后对象链接见附录 C。Secret 元数据未变化，API/前端未重新部署，未删除 StatefulSet、PVC、PV、Secret、节点或集群。
+
+该结果补充了早期临时探针数据的保留测试，直接证明场地、预约和数据库内报告能在 PostgreSQL Pod 重建后保留；范围是旧验收命名空间，不是最终展示库重建，也不代表数据库复制、跨节点灾备或宿主机故障恢复。
 
 ### 3.5 一次性报告 Job 的执行、持久化与失败重试（B）
 
@@ -256,6 +337,16 @@ control-plane 带 `NoSchedule` 污点，不在本清单的覆盖范围内。因�
 
 ### 4.3 吴柯蝶：集群、数据库与存储问题（C）
 
+吴柯蝶负责共同 kind 环境、数据库与持久化资源、配置和 Secret 创建方式，独立复核 V4 约束及迁移，并维护部署步骤和证据。共同集群承载于 C 的 Mac，A/B 提供代码、清单与命令，C 按交接文件代执行并回传，功能负责人核对结果；不将代执行写成其他成员在该主机亲自操作。
+
+环境准备阶段曾启用 Docker Desktop 内置 kubeadm 单节点。小组明确采用 kind 后，C 改用独立 CLI 和固定节点镜像建立三节点环境；此前 kubeadm 的存储和镜像结果未混作 kind 验收。通过显式 context、命名空间和批次记录避免多个本地环境混淆。
+
+镜像分发阶段，直接装载已有多架构缓存曾报告缺少内容摘要。自建镜像改用单平台 ARM64 构建并关闭 provenance；官方 PostgreSQL 按 ARM64 导出归档再装载，随后检查节点缓存和实际运行 Pod。该处理修复镜像分发，不通过更改业务代码掩盖环境问题。
+
+存储采用先核实 StorageClass、再部署 PVC、最后验证数据的顺序。先用独立探针检查供卷与跨 worker 连接，再用真实场地、预约和报告验证数据库重建保留。临时探针 schema 和客户端已清理，验收业务数据及历史报告保留供复核。最终展示另建命名空间和 PVC，以免随机测试记录混入可读样例。
+
+C 完成了 kind 及数据库配置、迁移约束复核、镜像装载与 A/B 指令代执行、业务持久化和最终展示首轮核验。执行失败时保存命令、状态与日志，再由对应负责人修复；如节点检查问题的修复及复测见 4.1 和附录 A。未执行的最终定时展示步骤保持未验证状态。
+
 ### 4.4 小组联合复核（A、B、C）
 
 ## 5. 项目总结
@@ -291,6 +382,21 @@ control-plane 带 `NoSchedule` 污点，不在本清单的覆盖范围内。因�
 上述两份 gzip 文件解压后为未改写的 Maven 输出；可用 `gzip -dc <文件名>` 阅读。B/C 共同集群验收的执行时间、实际命令、退出码和更多状态记录见[交接记录](lab2-handoff.md)。
 
 ### C. 集群、数据库与存储（C）
+
+| 验证内容 | 结果与范围 | 原始记录 |
+| --- | --- | --- |
+| kind 环境与存储发现 | 三节点版本、架构、污点、StorageClass 及临时供卷检查通过 | [环境 JSON](assets/lab2/kind-environment.json)、[环境说明](lab2-environment.md) |
+| 数据库基础设施 | 跨 worker 认证连接、稳定服务发现和探针数据保留检查通过；临时 schema/客户端已清理 | [数据库记录](assets/lab2/database-infrastructure.json) |
+| V4 独立复核 | 临时 PostgreSQL 中 52 项通过，不作为共同集群实测替代 | [验证结果](assets/lab2/v4-verification.json)、[验证脚本](../scripts/verify-report-schema.py) |
+| 真实业务持久化 | venue-booking 中场地、预约、报告在数据库 Pod 重建后响应不变 | [实际命令](assets/lab2/b-acceptance-20261119-182919/04-business-persistence.sh)、[比较输出](assets/lab2/b-acceptance-20261119-182919/04-business-persistence.txt) |
+| Pod/PVC 身份 | Pod UID 改变，PVC/PV 保持 | [Pod 前](assets/lab2/b-acceptance-20261119-182919/database-pod-before.json)、[Pod 后](assets/lab2/b-acceptance-20261119-182919/database-pod-after.json)、[PVC 前](assets/lab2/b-acceptance-20261119-182919/database-pvc-before.json)、[PVC 后](assets/lab2/b-acceptance-20261119-182919/database-pvc-after.json) |
+| 场地与预约响应 | 相同 ID 的完整 JSON 一致 | [场地前](assets/lab2/b-acceptance-20261119-182919/venue-before.json)、[场地后](assets/lab2/b-acceptance-20261119-182919/venue-after.json)、[预约前](assets/lab2/b-acceptance-20261119-182919/reservation-before.json)、[预约后](assets/lab2/b-acceptance-20261119-182919/reservation-after.json) |
+| 报告响应 | 相同 Job ID、生成时间和明细不变 | [报告前](assets/lab2/b-acceptance-20261119-182919/report-persistence-before.json)、[报告后](assets/lab2/b-acceptance-20261119-182919/report-persistence-after.json) |
+| 最终展示部署 | 独立 PVC，资源就绪；五场地、七预约、手动报告及只读页面通过 | [执行记录](assets/lab2/final-display-20261119-185539/execution.json)、[资源状态](assets/lab2/final-display-20261119-185539/final-status.txt)、[种子输出](assets/lab2/final-display-20261119-185539/seed-result.json)、[只读页面核对](assets/lab2/final-display-20261119-185539/readonly-browser-checks.json) |
+| 最终展示手动报告 | 2026-11-21 窗口的五条统计与预期一致 | [API 响应](assets/lab2/final-display-20261119-185539/manual-report.json)、[共同环境截图](assets/lab2/final-display-20261119-185539/final-manual-report.png) |
+| 最终定时展示 | 本次未执行，不纳入通过结论 | [保留的日期与后续步骤](assets/lab2/final-display-20261119-185539/resume-tomorrow.json) |
+
+C 的结果来自不同阶段，各条按其命名空间、时间和源码提交归档。隔离测试、旧验收环境、最终展示环境的证据分别使用，未将缺失测试或计划输出记作实际成功。
 
 ### D. 业务页面补充图
 
