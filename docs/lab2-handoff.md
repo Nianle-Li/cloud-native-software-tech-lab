@@ -631,3 +631,74 @@ B 已核对 C 本批原始响应、两次 Job Pod 的退出码、报告快照、
 - 报告返回：[report-f7-api-response.json](assets/lab2/a-daemonset-retest-20261116-154006/report-f7-api-response.json)。
 - 本次未新增业务数据，临时 port-forward 已关闭；新镜像、DaemonSet READY=2 和正式 CronJob 配置均保持。
 - 待处理问题：此次补测无失败。A 可统一核对 DaemonSet 修复复测和本节新版报告页测试结果；整组其他验收项仍按原验收清单推进。
+
+## A → C：最终展示环境首日部署与手动报告（final-display-20261119-185539）
+
+执行人 C，依据 [最终展示部署说明](../k8s/final/README.md)。本节只记录共同集群的最终展示部署，不覆盖前面旧命名空间的历史回传。
+
+- 源码基线：`dfde6c8ed4bce013fe1e442f8e5ad6807903f0a5`；执行分支 `integration/lab2-final-display`。
+- 时间：`2026-11-19T18:55:39.082068+08:00` 至 `2026-11-19T18:56:55.962640+08:00`（Asia/Shanghai）；后续只读浏览器和截图核对输出见本节证据。
+- 环境：host=`wukediedeMacBook-Pro.local`，context=`kind-venue-lab2`，namespace=`venue-booking-final`。
+- 状态：**今日范围 SUCCESS；最终展示整体 PARTIAL，定时自动报告及三 Job 联合核对待 2026-11-20 完成。**
+
+**部署前检查与镜像**
+
+最初 venue-booking-final 不存在，按新环境流程创建。使用独立 Secret、StatefulSet 和 PVC；已比较新旧 PVC UID/PV 名称，确认不与 venue-booking 共享卷。原命名空间 Deployment/StatefulSet/DaemonSet/PVC 的 UID/spec 前后未变。Secret 只记录元数据，不保存或输出真实值。
+
+| 组件 | 镜像 |
+| --- | --- |
+| api | `venue-booking-api:lab2-20261113` |
+| frontend | `venue-booking-frontend:lab2-report-query-02` |
+| node-check | `venue-booking-node-check:lab2-20261116-01` |
+| postgres | `postgres:16.15-bookworm` |
+
+最终前端从上述源码构建 ARM64 镜像；其他镜像检查已有缓存并复用，各镜像均核对三个节点的实际镜像存储。镜像摘要、节点记录及完整实际命令见 [execution.json](assets/lab2/final-display-20261119-185539/execution.json)。
+系统 Python 为 3.9，最终脚本使用 Python 3.10+ 注解，因此在 /tmp 准备 Python 3.12；未改系统 Python 或源脚本。访问本地端口时只在执行进程设置 NO_PROXY，避免已知系统代理影响。
+
+**资源与只读核验**
+
+- 渲染清单中所有有命名空间的资源均为 venue-booking-final，Namespace 对象也是该名称；[rendered.yaml](assets/lab2/final-display-20261119-185539/rendered.yaml)。
+- 数据库、双 API、前端和两个 worker 的 DaemonSet 均 rollout 成功；PVC Bound；两份节点检查日志均为 dns=ok。[final-status.txt](assets/lab2/final-display-20261119-185539/final-status.txt)，DNS 日志见本批 dns-log-0.txt/dns-log-1.txt。
+- 前端 /api/instance 已核对属于本命名空间的 API Pod，不使用旧环境的端口转发写数据。
+- 正式 CronJob 为 10 0 * * *、Asia/Shanghai、PREVIOUS_DAY；未应用 k8s/final/demo，未主动触发定时演示。[cron-final.txt](assets/lab2/final-display-20261119-185539/cron-final.txt)。
+
+**展示数据脚本只执行一次**
+
+- 写入前 API 显示仅有三个 Flyway 初始场地、预约为空；[venues-before.json](assets/lab2/final-display-20261119-185539/venues-before.json)、[reservations-before.json](assets/lab2/final-display-20261119-185539/reservations-before.json)。
+- 一次性执行后为五个指定场地、七条预约（六条 ACTIVE、一条 CANCELLED）；[seed-result.json](assets/lab2/final-display-20261119-185539/seed-result.json)、[venues-after.json](assets/lab2/final-display-20261119-185539/venues-after.json)、[reservations-after.json](assets/lab2/final-display-20261119-185539/reservations-after.json)。
+- 手动统计日期：**2026-11-21**。
+- 定时演示日期：**2026-11-20**；scheduled_demo_can_run_today=false。
+- 取消预约 ID 为 6，有效预约 ID 为 1, 2, 3, 4, 5, 7。
+- 明天不得再次运行 seed-final-display.py；保留现有数据和 PVC。
+
+**手动报告**
+
+- Job ID：`venue-report-manual-20261119105626-364bf7`；范围使用脚本输出的 2026-11-21。
+- Job Complete，报告容器退出码 0；API 报告为 MANUAL / SUCCEEDED，起止日期正确。
+- 羽毛球馆 A：2 次/150 分钟；多功能教室 B：1 次/120 分钟；会议室 C：0/0；排练室 D：2 次/150 分钟；小型会议室 E：0/0。
+- 状态及完整日志：[manual-job.txt](assets/lab2/final-display-20261119-185539/manual-job.txt)、[manual-job-pods.txt](assets/lab2/final-display-20261119-185539/manual-job-pods.txt)、[manual-job-log.txt](assets/lab2/final-display-20261119-185539/manual-job-log.txt)。报告响应：[manual-report.json](assets/lab2/final-display-20261119-185539/manual-report.json)。
+
+**页面、截图与固定数据保留**
+
+只进行了只读导航和报告查询，没有提交创建/预约/取消表单，没有运行会新增随机场地的浏览器回归。浏览器前后的五场地、七预约 API 响应完全一致。检查记录：[readonly-browser-checks.json](assets/lab2/final-display-20261119-185539/readonly-browser-checks.json)、[readonly-browser.txt](assets/lab2/final-display-20261119-185539/readonly-browser.txt)。
+
+- 场地概览：[final-venues.png](assets/lab2/final-display-20261119-185539/final-venues.png)。
+- 场地详情：[final-venue-detail.png](assets/lab2/final-display-20261119-185539/final-venue-detail.png)。
+- 预约列表：[final-reservations.png](assets/lab2/final-display-20261119-185539/final-reservations.png)。
+- 已取消预约详情：[final-cancelled-reservation.png](assets/lab2/final-display-20261119-185539/final-cancelled-reservation.png)。
+- 本次共同环境手动报告截图：[final-manual-report.png](assets/lab2/final-display-20261119-185539/final-manual-report.png)，日期、来源和五条数值均与真实 API 核对。
+- 对照报告原图 docs/附件/手动报告查询页面.png：样例统计和日期相同，但 Job ID、生成时间不同，不能把原图当成本次共同集群同一 Job 的截图。未覆盖 A 原图；统一报告时应使用本次截图或准确标注旧图来源。
+- 自动报告图尚不能作为本最终命名空间的实测，明天取得实际自动 Job 后补拍。
+
+**明日继续入口**
+
+日期和已有 Job 信息已保存：[resume-tomorrow.json](assets/lab2/final-display-20261119-185539/resume-tomorrow.json)。2026-11-20 任一合适时间可验证，不必等到预约的 17:00；统计的是已预约记录。
+
+1. 确认实际日期、命名空间、镜像和固定数据仍一致，重启前端端口转发；不重新灌数据。
+2. 应用 k8s/final/demo，记录切换时间，等待至少两个新自动 Job 成功，报告范围为 2026-11-20、来源 SCHEDULED；小型会议室 E 1 次/60 分钟，其余为零。
+3. 不要将可能已存在的正式 00:10 PREVIOUS_DAY Job 当作两次 TODAY 演示。
+4. 即使失败或中断也恢复本批 rendered.yaml 的正式配置，并核对 schedule 与窗口。
+5. 用已有手动 Job `venue-report-manual-20261119105626-364bf7` 和两个实际自动 Job ID 运行 verify-final-display.py，保存完整输出与自动报告截图。
+6. 回填本文件，联合核对实验报告截图、环境说明与最终 Job ID。
+
+待处理问题：今天无失败；两次自动报告、最终三 Job 核对脚本和自动报告截图明确 NOT_RUN。所有业务数据保留，临时端口转发已关闭。

@@ -1,0 +1,2528 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "annotations": {
+                    "deployment.kubernetes.io/revision": "1",
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"apps/v1\",\"kind\":\"Deployment\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"api\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"api\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"replicas\":2,\"selector\":{\"matchLabels\":{\"app.kubernetes.io/component\":\"api\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"api\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"env\":[{\"name\":\"SPRING_DATASOURCE_URL\",\"valueFrom\":{\"configMapKeyRef\":{\"key\":\"SPRING_DATASOURCE_URL\",\"name\":\"venue-config\"}}},{\"name\":\"SPRING_DATASOURCE_USERNAME\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_USER\",\"name\":\"venue-db-credentials\"}}},{\"name\":\"SPRING_DATASOURCE_PASSWORD\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_PASSWORD\",\"name\":\"venue-db-credentials\"}}},{\"name\":\"POD_NAME\",\"valueFrom\":{\"fieldRef\":{\"fieldPath\":\"metadata.name\"}}}],\"image\":\"venue-booking-api:lab2-20261113\",\"imagePullPolicy\":\"IfNotPresent\",\"livenessProbe\":{\"failureThreshold\":3,\"httpGet\":{\"path\":\"/actuator/health/liveness\",\"port\":\"http\"},\"periodSeconds\":10},\"name\":\"api\",\"ports\":[{\"containerPort\":8080,\"name\":\"http\"}],\"readinessProbe\":{\"failureThreshold\":3,\"httpGet\":{\"path\":\"/actuator/health/readiness\",\"port\":\"http\"},\"periodSeconds\":5},\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"256Mi\"}},\"startupProbe\":{\"failureThreshold\":30,\"httpGet\":{\"path\":\"/actuator/health/liveness\",\"port\":\"http\"},\"periodSeconds\":5}}]}}}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "api",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "api",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133697",
+                "uid": "2c68635d-2cd5-4735-9771-7a85a404dc0c"
+            },
+            "spec": {
+                "progressDeadlineSeconds": 600,
+                "replicas": 2,
+                "revisionHistoryLimit": 10,
+                "selector": {
+                    "matchLabels": {
+                        "app.kubernetes.io/component": "api",
+                        "app.kubernetes.io/name": "venue-booking"
+                    }
+                },
+                "strategy": {
+                    "rollingUpdate": {
+                        "maxSurge": "25%",
+                        "maxUnavailable": "25%"
+                    },
+                    "type": "RollingUpdate"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/component": "api",
+                            "app.kubernetes.io/name": "venue-booking"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "SPRING_DATASOURCE_URL",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "key": "SPRING_DATASOURCE_URL",
+                                                "name": "venue-config"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "SPRING_DATASOURCE_USERNAME",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "POSTGRES_USER",
+                                                "name": "venue-db-credentials"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "SPRING_DATASOURCE_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "POSTGRES_PASSWORD",
+                                                "name": "venue-db-credentials"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "POD_NAME",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "apiVersion": "v1",
+                                                "fieldPath": "metadata.name"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "image": "venue-booking-api:lab2-20261113",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/actuator/health/liveness",
+                                        "port": "http",
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 1
+                                },
+                                "name": "api",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "name": "http",
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/actuator/health/readiness",
+                                        "port": "http",
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 1
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "500m",
+                                        "memory": "512Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "100m",
+                                        "memory": "256Mi"
+                                    }
+                                },
+                                "startupProbe": {
+                                    "failureThreshold": 30,
+                                    "httpGet": {
+                                        "path": "/actuator/health/liveness",
+                                        "port": "http",
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 1
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            },
+            "status": {
+                "availableReplicas": 2,
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-11-19T10:56:21Z",
+                        "lastUpdateTime": "2026-11-19T10:56:21Z",
+                        "message": "Deployment has minimum availability.",
+                        "reason": "MinimumReplicasAvailable",
+                        "status": "True",
+                        "type": "Available"
+                    },
+                    {
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "lastUpdateTime": "2026-11-19T10:56:21Z",
+                        "message": "ReplicaSet \"api-d866875dd\" has successfully progressed.",
+                        "reason": "NewReplicaSetAvailable",
+                        "status": "True",
+                        "type": "Progressing"
+                    }
+                ],
+                "observedGeneration": 1,
+                "readyReplicas": 2,
+                "replicas": 2,
+                "updatedReplicas": 2
+            }
+        },
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "annotations": {
+                    "deployment.kubernetes.io/revision": "1",
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"apps/v1\",\"kind\":\"Deployment\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"frontend\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"frontend\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"replicas\":1,\"selector\":{\"matchLabels\":{\"app.kubernetes.io/component\":\"frontend\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"frontend\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"image\":\"venue-booking-frontend:lab2-report-query-02\",\"imagePullPolicy\":\"IfNotPresent\",\"livenessProbe\":{\"failureThreshold\":3,\"httpGet\":{\"path\":\"/\",\"port\":\"http\"},\"periodSeconds\":10,\"timeoutSeconds\":2},\"name\":\"frontend\",\"ports\":[{\"containerPort\":80,\"name\":\"http\"}],\"readinessProbe\":{\"failureThreshold\":3,\"httpGet\":{\"path\":\"/\",\"port\":\"http\"},\"periodSeconds\":5,\"timeoutSeconds\":2},\"resources\":{\"limits\":{\"cpu\":\"250m\",\"memory\":\"256Mi\"},\"requests\":{\"cpu\":\"25m\",\"memory\":\"64Mi\"}},\"startupProbe\":{\"failureThreshold\":12,\"httpGet\":{\"path\":\"/\",\"port\":\"http\"},\"periodSeconds\":5,\"timeoutSeconds\":2},\"volumeMounts\":[{\"mountPath\":\"/etc/nginx/conf.d\",\"name\":\"nginx-config\",\"readOnly\":true}]}],\"volumes\":[{\"configMap\":{\"items\":[{\"key\":\"default.conf\",\"path\":\"default.conf\"}],\"name\":\"frontend-nginx\"},\"name\":\"nginx-config\"}]}}}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "frontend",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "frontend",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133630",
+                "uid": "99f6c55f-55a1-4f79-80a5-8f95065cd477"
+            },
+            "spec": {
+                "progressDeadlineSeconds": 600,
+                "replicas": 1,
+                "revisionHistoryLimit": 10,
+                "selector": {
+                    "matchLabels": {
+                        "app.kubernetes.io/component": "frontend",
+                        "app.kubernetes.io/name": "venue-booking"
+                    }
+                },
+                "strategy": {
+                    "rollingUpdate": {
+                        "maxSurge": "25%",
+                        "maxUnavailable": "25%"
+                    },
+                    "type": "RollingUpdate"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/component": "frontend",
+                            "app.kubernetes.io/name": "venue-booking"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "image": "venue-booking-frontend:lab2-report-query-02",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": "http",
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 2
+                                },
+                                "name": "frontend",
+                                "ports": [
+                                    {
+                                        "containerPort": 80,
+                                        "name": "http",
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 3,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": "http",
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 2
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "250m",
+                                        "memory": "256Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "25m",
+                                        "memory": "64Mi"
+                                    }
+                                },
+                                "startupProbe": {
+                                    "failureThreshold": 12,
+                                    "httpGet": {
+                                        "path": "/",
+                                        "port": "http",
+                                        "scheme": "HTTP"
+                                    },
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 2
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/etc/nginx/conf.d",
+                                        "name": "nginx-config",
+                                        "readOnly": true
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30,
+                        "volumes": [
+                            {
+                                "configMap": {
+                                    "defaultMode": 420,
+                                    "items": [
+                                        {
+                                            "key": "default.conf",
+                                            "path": "default.conf"
+                                        }
+                                    ],
+                                    "name": "frontend-nginx"
+                                },
+                                "name": "nginx-config"
+                            }
+                        ]
+                    }
+                }
+            },
+            "status": {
+                "availableReplicas": 1,
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2026-11-19T10:55:57Z",
+                        "lastUpdateTime": "2026-11-19T10:55:57Z",
+                        "message": "Deployment has minimum availability.",
+                        "reason": "MinimumReplicasAvailable",
+                        "status": "True",
+                        "type": "Available"
+                    },
+                    {
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "lastUpdateTime": "2026-11-19T10:55:57Z",
+                        "message": "ReplicaSet \"frontend-759cf94d9\" has successfully progressed.",
+                        "reason": "NewReplicaSetAvailable",
+                        "status": "True",
+                        "type": "Progressing"
+                    }
+                ],
+                "observedGeneration": 1,
+                "readyReplicas": 1,
+                "replicas": 1,
+                "updatedReplicas": 1
+            }
+        },
+        {
+            "apiVersion": "apps/v1",
+            "kind": "StatefulSet",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"apps/v1\",\"kind\":\"StatefulSet\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"database\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"persistentVolumeClaimRetentionPolicy\":{\"whenDeleted\":\"Retain\",\"whenScaled\":\"Retain\"},\"replicas\":1,\"selector\":{\"matchLabels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"serviceName\":\"database-headless\",\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"env\":[{\"name\":\"POSTGRES_DB\",\"valueFrom\":{\"configMapKeyRef\":{\"key\":\"POSTGRES_DB\",\"name\":\"venue-config\"}}},{\"name\":\"PGDATA\",\"valueFrom\":{\"configMapKeyRef\":{\"key\":\"PGDATA\",\"name\":\"venue-config\"}}},{\"name\":\"POSTGRES_USER\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_USER\",\"name\":\"venue-db-credentials\"}}},{\"name\":\"POSTGRES_PASSWORD\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_PASSWORD\",\"name\":\"venue-db-credentials\"}}}],\"image\":\"postgres:16.15-bookworm\",\"imagePullPolicy\":\"IfNotPresent\",\"livenessProbe\":{\"exec\":{\"command\":[\"sh\",\"-ec\",\"pg_isready -h 127.0.0.1 -U \\\"$POSTGRES_USER\\\" -d \\\"$POSTGRES_DB\\\"\"]},\"failureThreshold\":6,\"periodSeconds\":10,\"timeoutSeconds\":3},\"name\":\"database\",\"ports\":[{\"containerPort\":5432,\"name\":\"postgres\"}],\"readinessProbe\":{\"exec\":{\"command\":[\"sh\",\"-ec\",\"pg_isready -h 127.0.0.1 -U \\\"$POSTGRES_USER\\\" -d \\\"$POSTGRES_DB\\\"\"]},\"failureThreshold\":3,\"periodSeconds\":5,\"timeoutSeconds\":3},\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"128Mi\"}},\"startupProbe\":{\"exec\":{\"command\":[\"sh\",\"-ec\",\"pg_isready -h 127.0.0.1 -U \\\"$POSTGRES_USER\\\" -d \\\"$POSTGRES_DB\\\"\"]},\"failureThreshold\":30,\"periodSeconds\":5,\"timeoutSeconds\":3},\"volumeMounts\":[{\"mountPath\":\"/var/lib/postgresql/data\",\"name\":\"postgres-data\"}]}],\"terminationGracePeriodSeconds\":30}},\"volumeClaimTemplates\":[{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"postgres-data\"},\"spec\":{\"accessModes\":[\"ReadWriteOnce\"],\"resources\":{\"requests\":{\"storage\":\"1Gi\"}},\"storageClassName\":\"standard\"}}]}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "database",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "database",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133641",
+                "uid": "76d9e2a1-bc73-4427-a68c-0b164d228305"
+            },
+            "spec": {
+                "persistentVolumeClaimRetentionPolicy": {
+                    "whenDeleted": "Retain",
+                    "whenScaled": "Retain"
+                },
+                "podManagementPolicy": "OrderedReady",
+                "replicas": 1,
+                "revisionHistoryLimit": 10,
+                "selector": {
+                    "matchLabels": {
+                        "app.kubernetes.io/component": "database",
+                        "app.kubernetes.io/name": "venue-booking"
+                    }
+                },
+                "serviceName": "database-headless",
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/component": "database",
+                            "app.kubernetes.io/name": "venue-booking"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "POSTGRES_DB",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "key": "POSTGRES_DB",
+                                                "name": "venue-config"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "PGDATA",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "key": "PGDATA",
+                                                "name": "venue-config"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "POSTGRES_USER",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "POSTGRES_USER",
+                                                "name": "venue-db-credentials"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "POSTGRES_PASSWORD",
+                                        "valueFrom": {
+                                            "secretKeyRef": {
+                                                "key": "POSTGRES_PASSWORD",
+                                                "name": "venue-db-credentials"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "image": "postgres:16.15-bookworm",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "sh",
+                                            "-ec",
+                                            "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                                        ]
+                                    },
+                                    "failureThreshold": 6,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 3
+                                },
+                                "name": "database",
+                                "ports": [
+                                    {
+                                        "containerPort": 5432,
+                                        "name": "postgres",
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "sh",
+                                            "-ec",
+                                            "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                                        ]
+                                    },
+                                    "failureThreshold": 3,
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 3
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "500m",
+                                        "memory": "512Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "100m",
+                                        "memory": "128Mi"
+                                    }
+                                },
+                                "startupProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "sh",
+                                            "-ec",
+                                            "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                                        ]
+                                    },
+                                    "failureThreshold": 30,
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 3
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/postgresql/data",
+                                        "name": "postgres-data"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 30
+                    }
+                },
+                "updateStrategy": {
+                    "rollingUpdate": {
+                        "partition": 0
+                    },
+                    "type": "RollingUpdate"
+                },
+                "volumeClaimTemplates": [
+                    {
+                        "apiVersion": "v1",
+                        "kind": "PersistentVolumeClaim",
+                        "metadata": {
+                            "labels": {
+                                "app.kubernetes.io/component": "database",
+                                "app.kubernetes.io/name": "venue-booking"
+                            },
+                            "name": "postgres-data"
+                        },
+                        "spec": {
+                            "accessModes": [
+                                "ReadWriteOnce"
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "storage": "1Gi"
+                                }
+                            },
+                            "storageClassName": "standard",
+                            "volumeMode": "Filesystem"
+                        },
+                        "status": {
+                            "phase": "Pending"
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "availableReplicas": 1,
+                "collisionCount": 0,
+                "currentReplicas": 1,
+                "currentRevision": "database-f74bb59bf",
+                "observedGeneration": 1,
+                "readyReplicas": 1,
+                "replicas": 1,
+                "updateRevision": "database-f74bb59bf",
+                "updatedReplicas": 1
+            }
+        },
+        {
+            "apiVersion": "apps/v1",
+            "kind": "DaemonSet",
+            "metadata": {
+                "annotations": {
+                    "deprecated.daemonset.template.generation": "1",
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"apps/v1\",\"kind\":\"DaemonSet\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"node-check\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"node-check\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"selector\":{\"matchLabels\":{\"app.kubernetes.io/component\":\"node-check\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"node-check\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"env\":[{\"name\":\"NODE_NAME\",\"valueFrom\":{\"fieldRef\":{\"fieldPath\":\"spec.nodeName\"}}},{\"name\":\"HOST_IP\",\"valueFrom\":{\"fieldRef\":{\"fieldPath\":\"status.hostIP\"}}}],\"image\":\"venue-booking-node-check:lab2-20261116-01\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"node-check\",\"readinessProbe\":{\"exec\":{\"command\":[\"sh\",\"-c\",\"nslookup kubernetes.default.svc.cluster.local \\u003e/dev/null 2\\u003e\\u00261\"]},\"failureThreshold\":2,\"periodSeconds\":10,\"timeoutSeconds\":3},\"resources\":{\"limits\":{\"cpu\":\"100m\",\"memory\":\"64Mi\"},\"requests\":{\"cpu\":\"10m\",\"memory\":\"16Mi\"}}}],\"terminationGracePeriodSeconds\":5}}}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "node-check",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "node-check",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133595",
+                "uid": "bd1983e7-990c-4384-a64a-cd6c8ab2fabf"
+            },
+            "spec": {
+                "revisionHistoryLimit": 10,
+                "selector": {
+                    "matchLabels": {
+                        "app.kubernetes.io/component": "node-check",
+                        "app.kubernetes.io/name": "venue-booking"
+                    }
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/component": "node-check",
+                            "app.kubernetes.io/name": "venue-booking"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "NODE_NAME",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "apiVersion": "v1",
+                                                "fieldPath": "spec.nodeName"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "HOST_IP",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "apiVersion": "v1",
+                                                "fieldPath": "status.hostIP"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "image": "venue-booking-node-check:lab2-20261116-01",
+                                "imagePullPolicy": "IfNotPresent",
+                                "name": "node-check",
+                                "readinessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "sh",
+                                            "-c",
+                                            "nslookup kubernetes.default.svc.cluster.local \u003e/dev/null 2\u003e\u00261"
+                                        ]
+                                    },
+                                    "failureThreshold": 2,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "timeoutSeconds": 3
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "100m",
+                                        "memory": "64Mi"
+                                    },
+                                    "requests": {
+                                        "cpu": "10m",
+                                        "memory": "16Mi"
+                                    }
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {},
+                        "terminationGracePeriodSeconds": 5
+                    }
+                },
+                "updateStrategy": {
+                    "rollingUpdate": {
+                        "maxSurge": 0,
+                        "maxUnavailable": 1
+                    },
+                    "type": "RollingUpdate"
+                }
+            },
+            "status": {
+                "currentNumberScheduled": 2,
+                "desiredNumberScheduled": 2,
+                "numberAvailable": 2,
+                "numberMisscheduled": 0,
+                "numberReady": 2,
+                "observedGeneration": 1,
+                "updatedNumberScheduled": 2
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "annotations": {
+                    "pv.kubernetes.io/bind-completed": "yes",
+                    "pv.kubernetes.io/bound-by-controller": "yes",
+                    "volume.beta.kubernetes.io/storage-provisioner": "rancher.io/local-path",
+                    "volume.kubernetes.io/selected-node": "venue-lab2-worker",
+                    "volume.kubernetes.io/storage-provisioner": "rancher.io/local-path"
+                },
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "finalizers": [
+                    "kubernetes.io/pvc-protection"
+                ],
+                "labels": {
+                    "app.kubernetes.io/component": "database",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "postgres-data-database-0",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133606",
+                "uid": "053fb160-ea00-42c7-8c9e-23a6d864a7e4"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "1Gi"
+                    }
+                },
+                "storageClassName": "standard",
+                "volumeMode": "Filesystem",
+                "volumeName": "pvc-053fb160-ea00-42c7-8c9e-23a6d864a7e4"
+            },
+            "status": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "capacity": {
+                    "storage": "1Gi"
+                },
+                "phase": "Bound"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generateName": "api-d866875dd-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "api",
+                    "app.kubernetes.io/name": "venue-booking",
+                    "pod-template-hash": "d866875dd"
+                },
+                "name": "api-d866875dd-cwd47",
+                "namespace": "venue-booking-final",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "api-d866875dd",
+                        "uid": "1aa72bd7-afbc-40c7-8b96-03f0fe366c9a"
+                    }
+                ],
+                "resourceVersion": "133687",
+                "uid": "b71abf86-da25-4233-a61f-ee46b4e64c18"
+            },
+            "spec": {
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "SPRING_DATASOURCE_URL",
+                                "valueFrom": {
+                                    "configMapKeyRef": {
+                                        "key": "SPRING_DATASOURCE_URL",
+                                        "name": "venue-config"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "SPRING_DATASOURCE_USERNAME",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_USER",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "SPRING_DATASOURCE_PASSWORD",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_PASSWORD",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "venue-booking-api:lab2-20261113",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/actuator/health/liveness",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "name": "api",
+                        "ports": [
+                            {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/actuator/health/readiness",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "startupProbe": {
+                            "failureThreshold": 30,
+                            "httpGet": {
+                                "path": "/actuator/health/liveness",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File"
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "venue-lab2-worker2",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:56:21Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:56:21Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "256Mi"
+                        },
+                        "containerID": "containerd://a1983474d030aab1eb11bce9b428de628f9ea56c361cc1aa1a9608333b1c65bc",
+                        "image": "docker.io/library/venue-booking-api:lab2-20261113",
+                        "imageID": "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                        "lastState": {},
+                        "name": "api",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-19T10:55:51Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 999,
+                                "supplementalGroups": [
+                                    999
+                                ],
+                                "uid": 999
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "172.20.0.4",
+                "hostIPs": [
+                    {
+                        "ip": "172.20.0.4"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.1.14",
+                "podIPs": [
+                    {
+                        "ip": "10.244.1.14"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-19T10:55:51Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generateName": "api-d866875dd-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "api",
+                    "app.kubernetes.io/name": "venue-booking",
+                    "pod-template-hash": "d866875dd"
+                },
+                "name": "api-d866875dd-rqm7l",
+                "namespace": "venue-booking-final",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "api-d866875dd",
+                        "uid": "1aa72bd7-afbc-40c7-8b96-03f0fe366c9a"
+                    }
+                ],
+                "resourceVersion": "133693",
+                "uid": "f12b4377-49ca-46c4-87bc-e7594aef0d0c"
+            },
+            "spec": {
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "SPRING_DATASOURCE_URL",
+                                "valueFrom": {
+                                    "configMapKeyRef": {
+                                        "key": "SPRING_DATASOURCE_URL",
+                                        "name": "venue-config"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "SPRING_DATASOURCE_USERNAME",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_USER",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "SPRING_DATASOURCE_PASSWORD",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_PASSWORD",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "venue-booking-api:lab2-20261113",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/actuator/health/liveness",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "name": "api",
+                        "ports": [
+                            {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/actuator/health/readiness",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "startupProbe": {
+                            "failureThreshold": 30,
+                            "httpGet": {
+                                "path": "/actuator/health/liveness",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File"
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "venue-lab2-worker",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:56:21Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:56:21Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "256Mi"
+                        },
+                        "containerID": "containerd://2b1ff0115b3b6b739a3b1c44e863eed37a3285489d3d8465c394e3c2ef69636c",
+                        "image": "docker.io/library/venue-booking-api:lab2-20261113",
+                        "imageID": "docker.io/library/import-2026-11-16@sha256:49f3eabfc4eb9d320e3d22ba3b5044def48ac4858eef87c3727d09bdf1ae1a0e",
+                        "lastState": {},
+                        "name": "api",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "256Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-19T10:55:51Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 999,
+                                "supplementalGroups": [
+                                    999
+                                ],
+                                "uid": 999
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "172.20.0.3",
+                "hostIPs": [
+                    {
+                        "ip": "172.20.0.3"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.2.14",
+                "podIPs": [
+                    {
+                        "ip": "10.244.2.14"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-19T10:55:51Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generateName": "database-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "database",
+                    "app.kubernetes.io/name": "venue-booking",
+                    "apps.kubernetes.io/pod-index": "0",
+                    "controller-revision-hash": "database-f74bb59bf",
+                    "statefulset.kubernetes.io/pod-name": "database-0"
+                },
+                "name": "database-0",
+                "namespace": "venue-booking-final",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "StatefulSet",
+                        "name": "database",
+                        "uid": "76d9e2a1-bc73-4427-a68c-0b164d228305"
+                    }
+                ],
+                "resourceVersion": "133636",
+                "uid": "4b5bc557-b28f-414b-bfdb-35cfcfd10df8"
+            },
+            "spec": {
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "POSTGRES_DB",
+                                "valueFrom": {
+                                    "configMapKeyRef": {
+                                        "key": "POSTGRES_DB",
+                                        "name": "venue-config"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "PGDATA",
+                                "valueFrom": {
+                                    "configMapKeyRef": {
+                                        "key": "PGDATA",
+                                        "name": "venue-config"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POSTGRES_USER",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_USER",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POSTGRES_PASSWORD",
+                                "valueFrom": {
+                                    "secretKeyRef": {
+                                        "key": "POSTGRES_PASSWORD",
+                                        "name": "venue-db-credentials"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "postgres:16.15-bookworm",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "exec": {
+                                "command": [
+                                    "sh",
+                                    "-ec",
+                                    "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                                ]
+                            },
+                            "failureThreshold": 6,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "name": "database",
+                        "ports": [
+                            {
+                                "containerPort": 5432,
+                                "name": "postgres",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "exec": {
+                                "command": [
+                                    "sh",
+                                    "-ec",
+                                    "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                                ]
+                            },
+                            "failureThreshold": 3,
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "128Mi"
+                            }
+                        },
+                        "startupProbe": {
+                            "exec": {
+                                "command": [
+                                    "sh",
+                                    "-ec",
+                                    "pg_isready -h 127.0.0.1 -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""
+                                ]
+                            },
+                            "failureThreshold": 30,
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/lib/postgresql/data",
+                                "name": "postgres-data"
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "hostname": "database-0",
+                "nodeName": "venue-lab2-worker",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "subdomain": "database-headless",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "postgres-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "postgres-data-database-0"
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:54Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:54Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:56:00Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:56:00Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:54Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "100m",
+                            "memory": "128Mi"
+                        },
+                        "containerID": "containerd://196ac76fa9b78b1d7b5383e8ab1ca01885efa9632c32e8ccf529d0778a7304cc",
+                        "image": "docker.io/library/postgres:16.15-bookworm",
+                        "imageID": "docker.io/library/import-2026-11-15@sha256:fa3c29f5e14d5a44df02bfd46fc881294c058d16198c238b574f4960aabae01c",
+                        "lastState": {},
+                        "name": "database",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "500m",
+                                "memory": "512Mi"
+                            },
+                            "requests": {
+                                "cpu": "100m",
+                                "memory": "128Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-19T10:55:54Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/lib/postgresql/data",
+                                "name": "postgres-data"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "172.20.0.3",
+                "hostIPs": [
+                    {
+                        "ip": "172.20.0.3"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.2.17",
+                "podIPs": [
+                    {
+                        "ip": "10.244.2.17"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-19T10:55:54Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generateName": "frontend-759cf94d9-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "frontend",
+                    "app.kubernetes.io/name": "venue-booking",
+                    "pod-template-hash": "759cf94d9"
+                },
+                "name": "frontend-759cf94d9-cjcxl",
+                "namespace": "venue-booking-final",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "ReplicaSet",
+                        "name": "frontend-759cf94d9",
+                        "uid": "e18ee2db-9af1-4c27-8ed7-28e5c3ccf7f5"
+                    }
+                ],
+                "resourceVersion": "133626",
+                "uid": "d2a2e365-c79a-4a64-85a5-89f3ec65b9e7"
+            },
+            "spec": {
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "image": "venue-booking-frontend:lab2-report-query-02",
+                        "imagePullPolicy": "IfNotPresent",
+                        "livenessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 2
+                        },
+                        "name": "frontend",
+                        "ports": [
+                            {
+                                "containerPort": 80,
+                                "name": "http",
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
+                                "path": "/",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 2
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "250m",
+                                "memory": "256Mi"
+                            },
+                            "requests": {
+                                "cpu": "25m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "startupProbe": {
+                            "failureThreshold": 12,
+                            "httpGet": {
+                                "path": "/",
+                                "port": "http",
+                                "scheme": "HTTP"
+                            },
+                            "periodSeconds": 5,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 2
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/etc/nginx/conf.d",
+                                "name": "nginx-config",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "venue-lab2-worker2",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    }
+                ],
+                "volumes": [
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "items": [
+                                {
+                                    "key": "default.conf",
+                                    "path": "default.conf"
+                                }
+                            ],
+                            "name": "frontend-nginx"
+                        },
+                        "name": "nginx-config"
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:56Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:56Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "25m",
+                            "memory": "64Mi"
+                        },
+                        "containerID": "containerd://99d7a36f154c333f988666629fdf8980c6832d067a5b8275a3a6828b6dd11e28",
+                        "image": "docker.io/library/venue-booking-frontend:lab2-report-query-02",
+                        "imageID": "docker.io/library/import-2026-11-19@sha256:592ca490ba32f30cf81f1c56fe610162ae66789f8f2dda3cb01a541ccb6dfcc9",
+                        "lastState": {},
+                        "name": "frontend",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "250m",
+                                "memory": "256Mi"
+                            },
+                            "requests": {
+                                "cpu": "25m",
+                                "memory": "64Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-19T10:55:51Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0,
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    6,
+                                    10,
+                                    11,
+                                    20,
+                                    26,
+                                    27
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/etc/nginx/conf.d",
+                                "name": "nginx-config",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "172.20.0.4",
+                "hostIPs": [
+                    {
+                        "ip": "172.20.0.4"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.1.16",
+                "podIPs": [
+                    {
+                        "ip": "10.244.1.16"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-19T10:55:51Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generateName": "node-check-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "node-check",
+                    "app.kubernetes.io/name": "venue-booking",
+                    "controller-revision-hash": "7fccb76d89",
+                    "pod-template-generation": "1"
+                },
+                "name": "node-check-pzqf8",
+                "namespace": "venue-booking-final",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "DaemonSet",
+                        "name": "node-check",
+                        "uid": "bd1983e7-990c-4384-a64a-cd6c8ab2fabf"
+                    }
+                ],
+                "resourceVersion": "133585",
+                "uid": "03ee630e-af5d-4038-8eee-9897162f7849"
+            },
+            "spec": {
+                "affinity": {
+                    "nodeAffinity": {
+                        "requiredDuringSchedulingIgnoredDuringExecution": {
+                            "nodeSelectorTerms": [
+                                {
+                                    "matchFields": [
+                                        {
+                                            "key": "metadata.name",
+                                            "operator": "In",
+                                            "values": [
+                                                "venue-lab2-worker"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "HOST_IP",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "status.hostIP"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "venue-booking-node-check:lab2-20261116-01",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "node-check",
+                        "readinessProbe": {
+                            "exec": {
+                                "command": [
+                                    "sh",
+                                    "-c",
+                                    "nslookup kubernetes.default.svc.cluster.local \u003e/dev/null 2\u003e\u00261"
+                                ]
+                            },
+                            "failureThreshold": 2,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            },
+                            "requests": {
+                                "cpu": "10m",
+                                "memory": "16Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File"
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "venue-lab2-worker",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 5,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/disk-pressure",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/pid-pressure",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/unschedulable",
+                        "operator": "Exists"
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "10m",
+                            "memory": "16Mi"
+                        },
+                        "containerID": "containerd://67948450811792628722704f10a96c0aa0a463f981c1fd154fcaae1d5846fc65",
+                        "image": "docker.io/library/venue-booking-node-check:lab2-20261116-01",
+                        "imageID": "docker.io/library/import-2026-11-16@sha256:3da7d99a2383470f26d0ed587f43dbc59c25d2c8e3edba082dac1b7eea59662a",
+                        "lastState": {},
+                        "name": "node-check",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            },
+                            "requests": {
+                                "cpu": "10m",
+                                "memory": "16Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-19T10:55:51Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 65534,
+                                "supplementalGroups": [
+                                    65534
+                                ],
+                                "uid": 65534
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "172.20.0.3",
+                "hostIPs": [
+                    {
+                        "ip": "172.20.0.3"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.2.15",
+                "podIPs": [
+                    {
+                        "ip": "10.244.2.15"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-19T10:55:51Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generateName": "node-check-",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "node-check",
+                    "app.kubernetes.io/name": "venue-booking",
+                    "controller-revision-hash": "7fccb76d89",
+                    "pod-template-generation": "1"
+                },
+                "name": "node-check-r8hnz",
+                "namespace": "venue-booking-final",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": true,
+                        "controller": true,
+                        "kind": "DaemonSet",
+                        "name": "node-check",
+                        "uid": "bd1983e7-990c-4384-a64a-cd6c8ab2fabf"
+                    }
+                ],
+                "resourceVersion": "133594",
+                "uid": "db77d33f-771c-414f-b0bd-274adc99c5d3"
+            },
+            "spec": {
+                "affinity": {
+                    "nodeAffinity": {
+                        "requiredDuringSchedulingIgnoredDuringExecution": {
+                            "nodeSelectorTerms": [
+                                {
+                                    "matchFields": [
+                                        {
+                                            "key": "metadata.name",
+                                            "operator": "In",
+                                            "values": [
+                                                "venue-lab2-worker2"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "automountServiceAccountToken": false,
+                "containers": [
+                    {
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "HOST_IP",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "status.hostIP"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "venue-booking-node-check:lab2-20261116-01",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "node-check",
+                        "readinessProbe": {
+                            "exec": {
+                                "command": [
+                                    "sh",
+                                    "-c",
+                                    "nslookup kubernetes.default.svc.cluster.local \u003e/dev/null 2\u003e\u00261"
+                                ]
+                            },
+                            "failureThreshold": 2,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 3
+                        },
+                        "resources": {
+                            "limits": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            },
+                            "requests": {
+                                "cpu": "10m",
+                                "memory": "16Mi"
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File"
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "venue-lab2-worker2",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {},
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 5,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/disk-pressure",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/pid-pressure",
+                        "operator": "Exists"
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/unschedulable",
+                        "operator": "Exists"
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:52Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:52Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-11-19T10:55:51Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "10m",
+                            "memory": "16Mi"
+                        },
+                        "containerID": "containerd://59136c841f42f2fbaf28dee44812cf136ad3eadd0aaef486a74d4f797972c864",
+                        "image": "docker.io/library/venue-booking-node-check:lab2-20261116-01",
+                        "imageID": "docker.io/library/import-2026-11-16@sha256:3da7d99a2383470f26d0ed587f43dbc59c25d2c8e3edba082dac1b7eea59662a",
+                        "lastState": {},
+                        "name": "node-check",
+                        "ready": true,
+                        "resources": {
+                            "limits": {
+                                "cpu": "100m",
+                                "memory": "64Mi"
+                            },
+                            "requests": {
+                                "cpu": "10m",
+                                "memory": "16Mi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": true,
+                        "state": {
+                            "running": {
+                                "startedAt": "2026-11-19T10:55:51Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 65534,
+                                "supplementalGroups": [
+                                    65534
+                                ],
+                                "uid": 65534
+                            }
+                        }
+                    }
+                ],
+                "hostIP": "172.20.0.4",
+                "hostIPs": [
+                    {
+                        "ip": "172.20.0.4"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Running",
+                "podIP": "10.244.1.15",
+                "podIPs": [
+                    {
+                        "ip": "10.244.1.15"
+                    }
+                ],
+                "qosClass": "Burstable",
+                "startTime": "2026-11-19T10:55:51Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"api\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"api\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"ports\":[{\"name\":\"http\",\"port\":8080,\"targetPort\":\"http\"}],\"selector\":{\"app.kubernetes.io/component\":\"api\",\"app.kubernetes.io/name\":\"venue-booking\"},\"type\":\"ClusterIP\"}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:50Z",
+                "labels": {
+                    "app.kubernetes.io/component": "api",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "api",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133487",
+                "uid": "2bb75f1d-84e7-4f28-80a4-96fe93083974"
+            },
+            "spec": {
+                "clusterIP": "10.96.114.131",
+                "clusterIPs": [
+                    "10.96.114.131"
+                ],
+                "internalTrafficPolicy": "Cluster",
+                "ipFamilies": [
+                    "IPv4"
+                ],
+                "ipFamilyPolicy": "SingleStack",
+                "ports": [
+                    {
+                        "name": "http",
+                        "port": 8080,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                    }
+                ],
+                "selector": {
+                    "app.kubernetes.io/component": "api",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"database\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"ports\":[{\"name\":\"postgres\",\"port\":5432,\"targetPort\":\"postgres\"}],\"selector\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"type\":\"ClusterIP\"}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:50Z",
+                "labels": {
+                    "app.kubernetes.io/component": "database",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "database",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133491",
+                "uid": "a4defd0a-77b7-4823-a6a2-b537676344c7"
+            },
+            "spec": {
+                "clusterIP": "10.96.13.28",
+                "clusterIPs": [
+                    "10.96.13.28"
+                ],
+                "internalTrafficPolicy": "Cluster",
+                "ipFamilies": [
+                    "IPv4"
+                ],
+                "ipFamilyPolicy": "SingleStack",
+                "ports": [
+                    {
+                        "name": "postgres",
+                        "port": 5432,
+                        "protocol": "TCP",
+                        "targetPort": "postgres"
+                    }
+                ],
+                "selector": {
+                    "app.kubernetes.io/component": "database",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"database-headless\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"clusterIP\":\"None\",\"ports\":[{\"name\":\"postgres\",\"port\":5432,\"targetPort\":\"postgres\"}],\"selector\":{\"app.kubernetes.io/component\":\"database\",\"app.kubernetes.io/name\":\"venue-booking\"}}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:50Z",
+                "labels": {
+                    "app.kubernetes.io/component": "database",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "database-headless",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133495",
+                "uid": "85d54f9d-63cb-4f29-b074-4f8c5f1b2c1d"
+            },
+            "spec": {
+                "clusterIP": "None",
+                "clusterIPs": [
+                    "None"
+                ],
+                "internalTrafficPolicy": "Cluster",
+                "ipFamilies": [
+                    "IPv4"
+                ],
+                "ipFamilyPolicy": "SingleStack",
+                "ports": [
+                    {
+                        "name": "postgres",
+                        "port": 5432,
+                        "protocol": "TCP",
+                        "targetPort": "postgres"
+                    }
+                ],
+                "selector": {
+                    "app.kubernetes.io/component": "database",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"frontend\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"frontend\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"ports\":[{\"name\":\"http\",\"port\":80,\"targetPort\":\"http\"}],\"selector\":{\"app.kubernetes.io/component\":\"frontend\",\"app.kubernetes.io/name\":\"venue-booking\"},\"type\":\"ClusterIP\"}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:50Z",
+                "labels": {
+                    "app.kubernetes.io/component": "frontend",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "frontend",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133499",
+                "uid": "3b80f7af-fc0d-41ad-961a-d12819a89b2d"
+            },
+            "spec": {
+                "clusterIP": "10.96.26.214",
+                "clusterIPs": [
+                    "10.96.26.214"
+                ],
+                "internalTrafficPolicy": "Cluster",
+                "ipFamilies": [
+                    "IPv4"
+                ],
+                "ipFamilyPolicy": "SingleStack",
+                "ports": [
+                    {
+                        "name": "http",
+                        "port": 80,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                    }
+                ],
+                "selector": {
+                    "app.kubernetes.io/component": "frontend",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "sessionAffinity": "None",
+                "type": "ClusterIP"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "apiVersion": "batch/v1",
+            "kind": "CronJob",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"batch/v1\",\"kind\":\"CronJob\",\"metadata\":{\"annotations\":{},\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"},\"name\":\"venue-report-daily\",\"namespace\":\"venue-booking-final\"},\"spec\":{\"concurrencyPolicy\":\"Forbid\",\"failedJobsHistoryLimit\":2,\"jobTemplate\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"activeDeadlineSeconds\":1800,\"backoffLimit\":1,\"completions\":1,\"parallelism\":1,\"template\":{\"metadata\":{\"labels\":{\"app.kubernetes.io/component\":\"report\",\"app.kubernetes.io/name\":\"venue-booking\"}},\"spec\":{\"automountServiceAccountToken\":false,\"containers\":[{\"args\":[\"--spring.main.web-application-type=none\",\"--report.run=true\"],\"env\":[{\"name\":\"REPORT_JOB_ID\",\"valueFrom\":{\"fieldRef\":{\"fieldPath\":\"metadata.labels['batch.kubernetes.io/job-name']\"}}},{\"name\":\"REPORT_SOURCE\",\"value\":\"SCHEDULED\"},{\"name\":\"REPORT_WINDOW_MODE\",\"value\":\"PREVIOUS_DAY\"},{\"name\":\"SPRING_DATASOURCE_URL\",\"valueFrom\":{\"configMapKeyRef\":{\"key\":\"SPRING_DATASOURCE_URL\",\"name\":\"venue-config\"}}},{\"name\":\"SPRING_DATASOURCE_USERNAME\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_USER\",\"name\":\"venue-db-credentials\"}}},{\"name\":\"SPRING_DATASOURCE_PASSWORD\",\"valueFrom\":{\"secretKeyRef\":{\"key\":\"POSTGRES_PASSWORD\",\"name\":\"venue-db-credentials\"}}}],\"image\":\"venue-booking-api:lab2-20261113\",\"imagePullPolicy\":\"IfNotPresent\",\"name\":\"report\",\"resources\":{\"limits\":{\"cpu\":\"500m\",\"memory\":\"512Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"256Mi\"}}}],\"restartPolicy\":\"Never\"}}}},\"schedule\":\"10 0 * * *\",\"startingDeadlineSeconds\":600,\"successfulJobsHistoryLimit\":3,\"timeZone\":\"Asia/Shanghai\"}}\n"
+                },
+                "creationTimestamp": "2026-11-19T10:55:51Z",
+                "generation": 1,
+                "labels": {
+                    "app.kubernetes.io/component": "report",
+                    "app.kubernetes.io/name": "venue-booking"
+                },
+                "name": "venue-report-daily",
+                "namespace": "venue-booking-final",
+                "resourceVersion": "133515",
+                "uid": "f524f5ed-b5bb-4f85-9c31-bbe3aaa4a9a4"
+            },
+            "spec": {
+                "concurrencyPolicy": "Forbid",
+                "failedJobsHistoryLimit": 2,
+                "jobTemplate": {
+                    "metadata": {
+                        "labels": {
+                            "app.kubernetes.io/component": "report",
+                            "app.kubernetes.io/name": "venue-booking"
+                        }
+                    },
+                    "spec": {
+                        "activeDeadlineSeconds": 1800,
+                        "backoffLimit": 1,
+                        "completions": 1,
+                        "parallelism": 1,
+                        "template": {
+                            "metadata": {
+                                "labels": {
+                                    "app.kubernetes.io/component": "report",
+                                    "app.kubernetes.io/name": "venue-booking"
+                                }
+                            },
+                            "spec": {
+                                "automountServiceAccountToken": false,
+                                "containers": [
+                                    {
+                                        "args": [
+                                            "--spring.main.web-application-type=none",
+                                            "--report.run=true"
+                                        ],
+                                        "env": [
+                                            {
+                                                "name": "REPORT_JOB_ID",
+                                                "valueFrom": {
+                                                    "fieldRef": {
+                                                        "apiVersion": "v1",
+                                                        "fieldPath": "metadata.labels['batch.kubernetes.io/job-name']"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "name": "REPORT_SOURCE",
+                                                "value": "SCHEDULED"
+                                            },
+                                            {
+                                                "name": "REPORT_WINDOW_MODE",
+                                                "value": "PREVIOUS_DAY"
+                                            },
+                                            {
+                                                "name": "SPRING_DATASOURCE_URL",
+                                                "valueFrom": {
+                                                    "configMapKeyRef": {
+                                                        "key": "SPRING_DATASOURCE_URL",
+                                                        "name": "venue-config"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "name": "SPRING_DATASOURCE_USERNAME",
+                                                "valueFrom": {
+                                                    "secretKeyRef": {
+                                                        "key": "POSTGRES_USER",
+                                                        "name": "venue-db-credentials"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "name": "SPRING_DATASOURCE_PASSWORD",
+                                                "valueFrom": {
+                                                    "secretKeyRef": {
+                                                        "key": "POSTGRES_PASSWORD",
+                                                        "name": "venue-db-credentials"
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "image": "venue-booking-api:lab2-20261113",
+                                        "imagePullPolicy": "IfNotPresent",
+                                        "name": "report",
+                                        "resources": {
+                                            "limits": {
+                                                "cpu": "500m",
+                                                "memory": "512Mi"
+                                            },
+                                            "requests": {
+                                                "cpu": "100m",
+                                                "memory": "256Mi"
+                                            }
+                                        },
+                                        "terminationMessagePath": "/dev/termination-log",
+                                        "terminationMessagePolicy": "File"
+                                    }
+                                ],
+                                "dnsPolicy": "ClusterFirst",
+                                "restartPolicy": "Never",
+                                "schedulerName": "default-scheduler",
+                                "securityContext": {},
+                                "terminationGracePeriodSeconds": 30
+                            }
+                        }
+                    }
+                },
+                "schedule": "10 0 * * *",
+                "startingDeadlineSeconds": 600,
+                "successfulJobsHistoryLimit": 3,
+                "suspend": false,
+                "timeZone": "Asia/Shanghai"
+            },
+            "status": {}
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

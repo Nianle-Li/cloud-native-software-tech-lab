@@ -1,0 +1,65 @@
+{
+  "manual_report_date": "2026-11-21",
+  "scheduled_report_date": "2026-11-20",
+  "scheduled_demo_can_run_today": false,
+  "venues": {
+    "羽毛球馆 A": 1,
+    "多功能教室 B": 2,
+    "会议室 C": 3,
+    "排练室 D": 4,
+    "小型会议室 E": 5
+  },
+  "active_reservation_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7
+  ],
+  "cancelled_reservation_id": 6,
+  "expected_manual_counts": {
+    "羽毛球馆 A": [
+      2,
+      150
+    ],
+    "多功能教室 B": [
+      1,
+      120
+    ],
+    "会议室 C": [
+      0,
+      0
+    ],
+    "排练室 D": [
+      2,
+      150
+    ],
+    "小型会议室 E": [
+      0,
+      0
+    ]
+  },
+  "expected_scheduled_counts": {
+    "羽毛球馆 A": [
+      0,
+      0
+    ],
+    "多功能教室 B": [
+      0,
+      0
+    ],
+    "会议室 C": [
+      0,
+      0
+    ],
+    "排练室 D": [
+      0,
+      0
+    ],
+    "小型会议室 E": [
+      1,
+      60
+    ]
+  }
+}

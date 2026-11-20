@@ -1,0 +1,1 @@
+daemon set "node-check" successfully rolled out
