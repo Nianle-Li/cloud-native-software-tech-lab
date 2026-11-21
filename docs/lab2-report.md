@@ -10,7 +10,7 @@
 
 ### 1.1 Kubernetes 环境、版本、节点与镜像方式
 
-验收使用 Apple Silicon Mac 上的 Docker Desktop 作为容器引擎，并通过 kind CLI 创建 `venue-lab2` 集群。验收命令显式指定 `--context kind-venue-lab2`。三个节点是同一宿主机中的容器，不代表三台物理机器。
+部署及工作负载验收使用 Apple Silicon Mac 上的 Docker Desktop 作为容器引擎，并通过 kind CLI 创建 `venue-lab2` 集群。验收命令显式指定 `--context kind-venue-lab2`。三个节点是同一宿主机中的容器，不代表三台物理机器。
 
 | 项目 | 实际配置 |
 | --- | --- |
@@ -37,37 +37,12 @@
 
 ### 1.2 系统架构图与组件通信路径
 
-```mermaid
-flowchart LR
-    Browser[浏览器] -->|端口转发| FrontendSvc[frontend Service :80]
-    subgraph Cluster[venue-lab2 / venue-booking-final]
-        FrontendSvc --> FrontendPod[frontend Deployment / Nginx]
-        FrontendPod -->|同源 /api 代理| ApiSvc[api Service :8080]
-        ApiSvc --> ApiPod1[api Pod 1]
-        ApiSvc --> ApiPod2[api Pod 2]
-        ApiPod1 -->|JDBC| DbSvc[database Service :5432]
-        ApiPod2 -->|JDBC| DbSvc
-        ManualJob[手动报告 Job] -->|JDBC| DbSvc
-        Cron[CronJob 每日 / 演示] --> ScheduledJob[定时报告 Job]
-        ScheduledJob -->|JDBC| DbSvc
-        DbSvc --> DbPod[database-0 / StatefulSet]
-        DbPod --> PVC[PVC / PostgreSQL 数据]
-        Config[venue-config ConfigMap] -.-> ApiPod1
-        Config -.-> ApiPod2
-        Config -.-> ManualJob
-        Config -.-> ScheduledJob
-        Config -.-> DbPod
-        Secret[venue-db-credentials Secret] -.-> ApiPod1
-        Secret -.-> ApiPod2
-        Secret -.-> ManualJob
-        Secret -.-> ScheduledJob
-        Secret -.-> DbPod
-        Nodes[node-check DaemonSet] --> Worker1[worker 1 DNS 检查]
-        Nodes --> Worker2[worker 2 DNS 检查]
-    end
-```
+<figure>
+  <img src="lab2/附件/系统架构图.svg" alt="kind 集群中场地预约系统的组件、访问路径、报告任务、数据库存储和节点 DNS 检查架构图" width="100%">
+  <figcaption>系统架构与组件通信路径。图中展示命名空间内的访问入口、Service、工作负载、数据库存储和节点检查关系。</figcaption>
+</figure>
 
-图示为展示命名空间中的实际组件和访问路径。两个 API Pod 与手动、定时报告 Job 通过 `database` Service 访问同一 PostgreSQL；报告任务共用 API 镜像，但不提供 HTTP Service。DaemonSet 在两个可调度 worker 上运行。专项验收命名空间使用相同的工作负载结构和独立的数据存储。
+图示为展示命名空间的组件及其访问路径。前端和 API 方框分别合并表示 Service 及其后端 Deployment；`kubectl port-forward service/frontend` 按 Service 定位前端 Pod，浏览器不直接访问 ClusterIP。Nginx 将 `/api/` 请求代理到双副本 API；API 和两类报告 Job 经 `database` Service 访问 PostgreSQL。`database-headless` 只提供 StatefulSet 的稳定网络身份，不承担 JDBC 请求。手动 Job 由脚本创建，定时 Job 由 CronJob 创建；两者共用 API 镜像，不提供 HTTP Service。DaemonSet 在两个可调度 worker 上各运行一个 Pod，解析 `default` 命名空间中 Kubernetes Service 的完整 DNS 名称。ConfigMap 和 Secret 的用途见第 2.1—2.4 节；专项验收命名空间使用相同的工作负载结构和独立的数据存储。
 
 ### 1.3 系统运行与访问方式
 
@@ -89,43 +64,29 @@ kubectl --context kind-venue-lab2 -n venue-booking-final port-forward service/fr
 
 ### 2.1 资源清单与选择依据
 
-#### 2.1.1 数据库 StatefulSet、Service、ConfigMap、Secret 与 PVC
+| 资源类型 | 本组资源名称 | 承载的组件或任务 | 用途与选择理由 |
+| --- | --- | --- | --- |
+| Namespace | `venue-booking`、`venue-booking-final` | 资源隔离 | 分别承载专项验收与固定展示数据，避免写入和重建测试影响展示结果。 |
+| Deployment | `api`（2 副本） | Spring Boot API | 无状态实例可共享数据库处理请求；Deployment 管理副本和滚动更新。 |
+| Deployment | `frontend`（1 副本） | 前端页面与 Nginx | 持续提供页面及 API 代理；Deployment 管理无状态实例。 |
+| StatefulSet | `database`（1 副本） | PostgreSQL | 提供稳定的 Pod 身份，并使数据库实例关联固定 PVC。 |
+| Job | `venue-report-manual-<唯一后缀>` | 指定日期范围的报告 | 每次手动运行创建一次性任务，运行结束后退出；任务名用作报告 `job_id`。 |
+| CronJob | `venue-report-daily` | 定时报告 | 按计划创建 Job，适合周期性执行且完成后退出的任务。 |
+| DaemonSet | `node-check` | 节点 DNS 检查 | 在每个可调度节点运行一个检查 Pod，覆盖节点级环境。 |
+| Service | `frontend` | 页面入口 | ClusterIP 提供稳定入口；通过端口转发供浏览器访问。 |
+| Service | `api` | API 内部访问 | ClusterIP 的 `8080` 端口供前端 Nginx 代理访问，屏蔽 Pod IP 变化。 |
+| Service | `database` | 数据库内部访问 | ClusterIP 的 `5432` 端口供 API 和报告任务访问，不对外暴露数据库。 |
+| Service | `database-headless` | 数据库 Pod 身份 | 无头 Service 为 `database-0` 提供稳定 DNS 名称，配合 StatefulSet。 |
+| ConfigMap | `venue-config` | 后端与数据库配置 | 保存数据库名、数据目录和 JDBC 地址等非敏感配置。 |
+| ConfigMap | `frontend-nginx` | 前端代理配置 | 挂载 Nginx 配置，将 `/api/` 请求转发至 `api` Service。 |
+| Secret | `venue-db-credentials` | 数据库凭据 | 保存账号和密码，并通过键引用注入容器，避免凭据写入清单。 |
+| PVC | `postgres-data-database-0` | 数据库数据 | 由 StatefulSet 的卷声明模板创建，使用 `ReadWriteOnce` 本地卷，在 Pod 重建后复用。 |
 
-| 资源类型 | 名称 | 用途与选择理由 |
-| --- | --- | --- |
-| Namespace | `venue-booking` / `venue-booking-final` | 分隔专项验收与展示数据；展示配置由 Kustomize 指定命名空间。 |
-| StatefulSet | `database`，1 副本 | 管理有状态 PostgreSQL，提供稳定 Pod 身份并关联独立存储；不通过简单增加副本模拟数据库复制。 |
-| Service | `database` | ClusterIP，提供内部 `5432` 端口，供 API 与报告任务访问。 |
-| Service | `database-headless` | 无头 Service，为 `database-0` 提供稳定的 Pod DNS 身份。 |
-| ConfigMap | `venue-config` | 保存数据库名、数据目录和 JDBC Service 地址等非敏感配置。 |
-| Secret | `venue-db-credentials` | 保存数据库账号和密码，通过键引用注入容器。 |
-| PVC | `postgres-data-database-0` | 由 volumeClaimTemplates 创建，数据库 Pod 重建后复用。 |
+API 采用 2 副本，以核验 Service 对不同实例的访问和跨副本并发预约；两个无状态实例共享同一数据库。前端负责静态页面及 API 代理，现有功能验收无需并行实例，因此采用 1 副本；本实验未进行前端多副本负载或故障切换测试。数据库采用 1 副本，其本地 `ReadWriteOnce` 卷和当前 PostgreSQL 配置不构成数据库复制方案，因此不能通过增加副本实现高可用。
 
-Service 的 selector 同时匹配 `app.kubernetes.io/name=venue-booking` 和 `app.kubernetes.io/component=database`，不会误选 API 或报告 Pod。数据库服务不发布 NodePort 或宿主机端口；组件连接使用 `database` Service，配置中不依赖临时 Pod IP。对应实现见[数据库 Services](../k8s/base/database-services.yaml)和[StatefulSet](../k8s/base/database-statefulset.yaml)。
+浏览器经端口转发访问 `frontend` Service，Nginx 将 `/api/` 请求转发至 `api` Service。API 和报告任务经 `database` Service 连接数据库；无头 Service 提供数据库 Pod 的稳定身份。Job、CronJob 和 DaemonSet 不接收业务入站请求，因此不单独配置 Service。数据库 Service 的 selector 限定数据库组件，不会误选其他 Pod。手动 Job 按需创建，完整资源名称及运行结果见[验收记录](lab2/acceptance.md)。
 
-#### 2.1.2 API Deployment、Service 与一次性 Job
-
-| 资源类型 | 资源名称 | 用途与选择理由 |
-| --- | --- | --- |
-| Deployment | `api` | 运行两个无状态 Spring Boot API Pod；数据库持久化预约和报告，多副本可共同处理请求。 |
-| Service | `api` | ClusterIP，`8080 → 8080`；为前端 Nginx 提供稳定的内部访问名称。 |
-| Job | `venue-report-manual-<唯一后缀>` | 按给定日期范围执行一次报告后退出；Job 名称同时作为持久化报告的 `job_id`，无需独立 Service。 |
-
-API 与报告 Job 使用同一后端镜像，报告模式通过启动参数选择。报告表由 Flyway V4 迁移创建，不在 Job Pod 内保存结果。
-
-#### 2.1.3 前端与周期、节点任务
-
-| 资源类型 | 资源名称 | 用途与选择理由 |
-| --- | --- | --- |
-| Deployment | `frontend` | 运行无状态前端与 Nginx 代理，持续提供页面服务。 |
-| Service | `frontend` | 为浏览器访问提供稳定入口，端口转发至其 80 端口。 |
-| ConfigMap | `frontend-nginx` | 保存集群内的 Nginx 代理配置，使 `/api/` 请求到达 API Service。 |
-| CronJob | `venue-report-daily` | 定时执行报告程序；任务完成后退出，无须 Service。 |
-| DaemonSet | `node-check` | 在每个可调度节点运行 DNS 检查 Pod，无须 Service。 |
-
-前端和节点检查 Pod 均设置资源请求、上限和就绪探针；前端另设启动与存活探针。两者都不需要 Kubernetes API 凭据，因此关闭 ServiceAccount token 自动挂载。
-
-浏览器通过 `frontend` Service 访问页面，Nginx 再将 `/api/` 请求转发至 `api` Service。组件之间使用稳定的 Service 名称；非敏感配置存于 ConfigMap，数据库凭据由 Secret 提供。
+API 与手动、定时报告任务使用同一后端镜像，报告模式通过启动参数选择。报告结果写入数据库，不保存在 Job Pod 内。前端和节点检查 Pod 均设置资源请求、上限和就绪探针；前端另设启动与存活探针。两者都不需要 Kubernetes API 凭据，因此关闭 ServiceAccount token 自动挂载。
 
 ### 2.2 数据库、配置与 PVC 持久化
 
@@ -207,7 +168,7 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 
 展示命名空间使用[最终 Kustomize 配置](../k8s/final/kustomization.yaml)，包含双副本 API、单副本前端和数据库、报告 CronJob、覆盖两个 worker 的 DaemonSet，以及所需的 Service、ConfigMap、Secret 和 PVC。资源核查结果为 API 2/2、前端 1/1、数据库 1/1、DaemonSet 2/2，数据库 PVC 为 Bound；镜像与第 1.1 节一致。页面中有五个名称可读的场地和七条预约，其中六条有效、一条已取消。
 
-验收分为两个相互独立的数据范围：`venue-booking-final` 用于展示页面、核对手动与两次自动报告及工作负载状态；`venue-booking` 用于双 Pod 并发预约、同 ID 任务重试和数据库 Pod 重建。两者属于同一 kind 集群，但各有独立数据库与 PVC，统计结果不跨命名空间合并。集成测试验证异常状态，结果单独说明。下文的页面截图说明功能场景；任务状态、数值和资源结论以对应的 API、Job 和集群记录核对。
+工作负载验收分为两个独立的数据范围：`venue-booking-final` 用于展示页面、核对手动与两次自动报告及工作负载状态；`venue-booking` 用于双 Pod 并发预约、同 ID 任务重试和数据库 Pod 重建。两个命名空间各有独立数据库与 PVC，统计结果不跨命名空间合并。集成测试验证异常状态，结果单独说明。图 1—10 取自同一组固定展示数据，场地、预约、报告 Job ID 与图片摘要见[截图数据核对](lab2/evidence/report-screenshot-data.json)；工作负载结论以[最终验收记录](lab2/acceptance.md)中各自对应的原始输出核对。
 
 验收时先核对展示环境的节点、工作负载、镜像和 PVC，再经前端入口查看业务页面；以实际 Job ID 将一次性报告、两次自动 Job、API 响应和页面结果逐一对应，最后核对正式 CronJob 配置及两个 worker 的节点检查。并发、重试和数据库重建采用专项验收命名空间的独立证据，不在展示库重复写入或删除资源。完整的要求、判定与原始证据对应关系见[最终验收记录](lab2/acceptance.md)。
 
@@ -215,18 +176,16 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 
 用户可按“浏览或创建场地 → 创建预约 → 查询记录 → 取消预约”的顺序完成业务操作。专项验收通过真实集群入口覆盖这一流程，并验证同一场地、时段的重复预约得到冲突反馈。页面请求经前端 Service 到达真实 API。展示环境的场地、预约和取消详情也已通过只读页面核对。
 
-图 1 展示场地概览；图 2、3 对应同一场地时段的成功预约与再次提交时的冲突反馈；图 4 展示另一笔预约取消后的详情。画面用于说明交互方式；业务回归的原始结果见[最终验收记录](lab2/acceptance.md)，其余界面见附录。
+图 1 展示场地概览；图 2 显示已创建预约的详情，图 3 展示对同一场地时段再次提交时的冲突反馈；图 4 展示另一笔预约取消后的详情。创建、冲突与取消的业务回归结果见[最终验收记录](lab2/acceptance.md)，其余界面见附录。
 
 <figure>
   <img src="lab2/screenshots/场地概览.png" alt="场地概览显示五个场地及开放、停用数量" width="75%">
   <figcaption>图 1 场地概览与各场地的状态、位置、开放时段和容量。</figcaption>
 </figure>
 
-取消后的预约保留状态和取消时间，便于追溯。
-
 <figure>
-  <img src="lab2/screenshots/预约提交成功.png" alt="小型会议室 E 的预约提交成功提示" width="75%">
-  <figcaption>图 2 预约创建成功，页面返回预约编号。</figcaption>
+  <img src="lab2/screenshots/已创建预约详情.png" alt="羽毛球馆 A 的有效预约详情显示编号、日期和时间" width="75%">
+  <figcaption>图 2 已创建预约显示编号、场地、预约时段与状态。</figcaption>
 </figure>
 
 <figure>
@@ -271,7 +230,7 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 
 报告查询页通过 Job ID 读取已持久化的结果。展示环境中的一次性报告为 `MANUAL / SUCCEEDED`，五个场地的预约次数和分钟数与 API 逐行一致；已取消预约不计入统计。图 5 展示非零和零值行：羽毛球馆 A 与排练室 D 均为 2 次、150 分钟，多功能教室 B 为 1 次、120 分钟，另外两个场地为 0 次、0 分钟。这里的分钟数表示已预约时长，不表示实际到场时间或使用率。
 
-运行中、失败和请求异常等页面反馈由前端测试验证；集群页面验收使用实际成功报告。
+运行中、失败和请求异常等页面反馈由前端测试验证；图 5 所示 Job ID、统计范围与 API 明细见[截图数据核对](lab2/evidence/report-screenshot-data.json)。
 
 <figure>
   <img src="lab2/screenshots/手动报告查询页面.png" alt="一次性报告查询页面显示五个场地的预约次数与分钟数" width="75%">
@@ -287,7 +246,7 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 | 第一次 | `SUCCEEDED` | 小型会议室 E：1 次、60 分钟 | 其余四个场地：0 次、0 分钟 |
 | 第二次 | `SUCCEEDED` | 小型会议室 E：1 次、60 分钟 | 其余四个场地：0 次、0 分钟 |
 
-两份报告均包含全部五个场地，结果与实际预约数据一致。自动创建关系、Job 资源、报告响应及页面核对见[最终验收记录](lab2/acceptance.md)。图 6 展示其中一份自动报告的查询结果。
+两份报告均包含全部五个场地，结果与实际预约数据一致。自动创建关系、Job 资源及报告响应见[最终验收记录](lab2/acceptance.md)。图 6 显示自动报告的页面查询结果；图中 Job ID 和统计明细见[截图数据核对](lab2/evidence/report-screenshot-data.json)。
 
 手动报告统计指定日期区间；短周期自动报告统计运行当天，因此两类报告的日期范围和非零场地可以不同。
 
@@ -311,21 +270,23 @@ control-plane 带 `NoSchedule` 污点，不在本清单的覆盖范围内。因�
 
 ## 4. 小组分工与问题解决
 
-### 4.1 李佳凝：前端、CronJob 与 DaemonSet（A）
+### 4.1 李佳凝：前端功能与集群任务编排
 
-李佳凝负责前端与报告查询页面、前端 Deployment 和 Service、CronJob 及 DaemonSet。相应的运行结果见第 3 章。
+李佳凝负责预约与报告查询前端、响应校验和浏览器回归，以及前端 Nginx 配置、Deployment 和 Service；同时维护正式与演示用 CronJob 清单、节点检查 DaemonSet、DNS 检查脚本和就绪探针，并整理最终展示环境、可读样例数据、展示核验脚本及相关说明。
 
-节点检查的短名称 `kubernetes.default.svc` 在两个 worker 上无法解析。脚本和就绪探针统一查询 `kubernetes.default.svc.cluster.local` 后，两个 Pod 均就绪，日志均为 `dns=ok`，检查目标与就绪条件保持一致。
+前端验收覆盖业务页面、报告查询页面和集群入口。节点检查中，短名称 `kubernetes.default.svc` 在两个 worker 上无法解析，因此将脚本和就绪探针统一改为查询完整名称 `kubernetes.default.svc.cluster.local`；修复后两个 DaemonSet Pod 均就绪，日志均为 `dns=ok`，从而保证检查目标与就绪条件一致。相应运行结果见第 3 章。
 
-### 4.2 张玳瑗：后端 API、一次性 Job 与并发问题（B）
+### 4.2 张玳瑗：后端报告服务与并发控制
 
-张玳瑗负责保留预约 API 与事务规则，新增 Flyway V4 报告表、统计程序、报告查询和实例标识接口，以及双副本 API 与手动 Job 清单。API、手动 Job 和 CronJob 共用后端镜像。
+张玳瑗负责保留预约 API 与事务规则，新增 Flyway V4 报告表及 JPA 映射、统计程序、报告查询 API、实例标识 API、报告快照持久化和失败重试语义；同时负责双副本 API、一次性 Job 清单和手动触发脚本。API、手动 Job 和 CronJob 共用后端镜像。
 
 两个 API Pod 同时处理同一时段预约时，数据库场地行锁使冲突检查与写入保持一致，集群中仅产生一条有效预约。报告使用唯一约束、行锁和同 ID 成功短路保护已生成的快照；Job 重试及数据库 Pod 重建后结果保持不变。可捕获失败的 `FAILED` 状态由隔离集成测试验证。
 
-### 4.3 吴柯蝶：集群、数据库与存储问题（C）
+### 4.3 吴柯蝶：集群基础设施与持久化验收
 
-吴柯蝶负责 kind 集群、数据库与 PVC、ConfigMap 和 Secret 创建方式，复核 V4 迁移与约束，并执行集群部署和验证。镜像按宿主机 ARM64 架构构建、装载后核对节点缓存和实际 Pod，避免多架构缓存影响 kind 装载。数据库通过独立 PVC 保存业务与报告数据；Pod 重建后，原场地、预约和报告仍可查询。展示环境使用独立数据库和 PVC，使固定样例不受专项验收写入影响。
+吴柯蝶负责 kind 集群和有状态基础设施，包括数据库 StatefulSet、Service、PVC、ConfigMap、Secret、镜像装载及环境准备；复核 V4 迁移与约束，确保数据库、配置和存储资源能够按清单复现。
+
+吴柯蝶执行集群部署、最终展示环境部署、数据库 Pod 重建，以及 CronJob 和 DaemonSet 复测，并整理环境、存储和验收证据。镜像按宿主机 ARM64 架构构建并装载后，核对节点缓存和实际 Pod，避免多架构缓存影响 kind 装载。数据库通过独立 PVC 保存业务与报告数据；Pod 重建后，原场地、预约和报告仍可查询。展示环境使用独立数据库和 PVC，使固定样例不受专项验收写入影响。
 
 
 ## 5. 项目总结
