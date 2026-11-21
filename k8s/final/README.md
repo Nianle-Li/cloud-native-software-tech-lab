@@ -74,18 +74,19 @@ kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/final/demo | kubect
 kubectl --context kind-venue-lab2 -n venue-booking-final get jobs -l app.kubernetes.io/component=report -o wide
 ```
 
-对两个新 Job 分别确认 `Complete`、父资源为 `venue-report-daily`，并用 `kubectl --context kind-venue-lab2 -n venue-booking-final logs job/<job_id>` 核对日志；在页面和 API 中核对 `SCHEDULED`、当天日期、非零与零值统计。**完成两次核对后**恢复正式配置；若演示失败或中断，也立即恢复：
+对两个新 Job 分别确认 `Complete`、父资源为 `venue-report-daily`，并用 `kubectl --context kind-venue-lab2 -n venue-booking-final logs job/<job_id>` 核对日志；在页面和 API 中核对 `SCHEDULED`、当天日期、非零与零值统计。**完成两次核对后**恢复正式配置；若演示失败或中断，也立即恢复。恢复前重新渲染仓库中的正式清单，避免依赖首日留下的 `/tmp` 文件：
 
 ```sh
-kubectl --context kind-venue-lab2 apply -f /tmp/venue-booking-final.yaml
+kubectl kustomize --load-restrictor LoadRestrictionsNone k8s/final > /tmp/venue-booking-final-restore.yaml
+kubectl --context kind-venue-lab2 apply -f /tmp/venue-booking-final-restore.yaml
 kubectl --context kind-venue-lab2 -n venue-booking-final get cronjob venue-report-daily -o yaml
 ```
 
-恢复后应看到 `schedule: 10 0 * * *`、`timeZone: Asia/Shanghai`、`REPORT_WINDOW_MODE=PREVIOUS_DAY` 和 `concurrencyPolicy: Forbid`。短周期自动触发与正式配置恢复分别留证，不能把正式配置核对说成跨日自动触发实测。
+若渲染命令失败，不要继续执行 apply。恢复后应看到 `schedule: 10 0 * * *`、`timeZone: Asia/Shanghai`、`REPORT_WINDOW_MODE=PREVIOUS_DAY` 和 `concurrencyPolicy: Forbid`。短周期自动触发与正式配置恢复分别留证，不能把正式配置核对说成跨日自动触发实测。
 
 最终核对五个场地、七条预约、手动与自动报告的非零/零值明细、两个 API Pod、数据库 PVC、前端页面，以及 DaemonSet 在两个 worker 上各有一个就绪 Pod、两份日志均为 `dns=ok`。用于证明最终展示结果的截图、API 响应和日志应对应本命名空间；其他业务界面补充图只说明交互，不替代本命名空间的运行证据。会新增随机场地的浏览器回归应在隔离的专项验收环境执行。
 
-下面的核对脚本接收实际的三个 Job ID，检查报告数值、CronJob 父资源、正式调度、数据库 PVC 和两个节点的 DNS 日志。执行前保持上述端口转发：
+下面的核对脚本接收实际的三个 Job ID，检查三份 Job 均为 `Complete`、自动 Job 的 CronJob 父资源、报告数值、正式调度的周期/时区/并发策略、数据库 PVC 和两个节点的 DNS 日志。执行前保持上述端口转发：
 
 ```sh
 python3 scripts/verify-final-display.py \
