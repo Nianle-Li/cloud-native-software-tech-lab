@@ -207,41 +207,41 @@ Compose 显式向数据库传入三个 `POSTGRES_*` 变量，向 API 注入 `SPR
 
 ### 6.2 功能联调
 
-实际页面使用流程为：打开首页并查询场地，创建场地和预约后查询详情；对同一时段再次提交时，API 返回 `409 TIME_CONFLICT`；取消原预约后，该时段可以重新预约。Chrome 页面操作还核对了预约状态、取消入口和整日约满提示。页面请求经 Nginx 连接真实 API 与 PostgreSQL，详细结果见[最终验收记录](assets/lab1-report/finalize-acceptance.json)。
+实际页面使用流程为：打开首页并查询场地，创建场地和预约后查询详情；对同一时段再次提交时，API 返回 `409 TIME_CONFLICT`；取消原预约后，该时段可以重新预约。Chrome 页面操作还核对了预约状态、取消入口和整日约满提示。页面请求经 Nginx 连接真实 API 与 PostgreSQL，详细结果见[最终验收记录](lab1/evidence/finalize-acceptance.json)。
 
 ### 6.3 界面示例与用例展示
 
 以下为界面示例截图；实际验收结果见第 6.4 节。
 
-![场地概览与开放状态](assets/lab1-report/venue-list.png)
+![场地概览与开放状态](lab1/附件/venue-list.png)
 
 图 1：场地概览展示位置、容量、开放时段与状态，停用场地没有预约入口。
 
-![多功能报告厅详情面板](assets/lab1-report/venue-detail.png)
+![多功能报告厅详情面板](lab1/附件/venue-detail.png)
 
 图 2：场地详情面板展示场地编号和完整基本信息。
 
-![创建数字媒体实验室成功](assets/lab1-report/venue-created.png)
+![创建数字媒体实验室成功](lab1/附件/venue-created.png)
 
 图 3：创建场地成功后显示新场地编号及后续预约入口。
 
-![预约成功反馈](assets/lab1-report/booking-success.png)
+![预约成功反馈](lab1/附件/booking-success.png)
 
 图 4：预约成功后显示预约编号，并提供查看预约记录的入口。
 
-![预约时间冲突反馈](assets/lab1-report/booking-conflict.png)
+![预约时间冲突反馈](lab1/附件/booking-conflict.png)
 
 图 5：时间冲突时保留表单输入，显示已预约时段和后端返回的失败信息。
 
-![预约记录列表](assets/lab1-report/reservation-list.png)
+![预约记录列表](lab1/附件/reservation-list.png)
 
 图 6：预约列表按待开始、时段内、已结束和已取消分类，并支持筛选。
 
-![预约详情面板](assets/lab1-report/reservation-detail.png)
+![预约详情面板](lab1/附件/reservation-detail.png)
 
 图 7：预约详情展示场地、预约人、时段、当前展示状态与创建时间。
 
-![预约取消后的记录状态](assets/lab1-report/reservation-cancelled.png)
+![预约取消后的记录状态](lab1/附件/reservation-cancelled.png)
 
 图 8：取消成功后记录保留，状态更新为“已取消”。
 
@@ -288,7 +288,7 @@ docker compose up -d --wait --wait-timeout 180
 | Flyway 历史 | V1–V3 成功，校验和已记录 | 历史一致，无需重复迁移 |
 | 容器与命名卷 | 容器、镜像 ID 及 `postgres_data` 卷已记录 | 三个容器 ID 均变化，镜像 ID 均未变；继续使用同一卷 |
 
-重建后 API 与数据库健康状态仍为 `UP`。完整快照和检查结果见[持久化对比记录](assets/lab1-report/finalize-persistence.json)。
+重建后 API 与数据库健康状态仍为 `UP`。完整快照和检查结果见[持久化对比记录](lab1/evidence/finalize-persistence.json)。
 
 ## 8. 小组分工
 

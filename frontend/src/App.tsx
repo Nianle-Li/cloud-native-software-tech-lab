@@ -7,6 +7,7 @@ import { BookingPage } from './pages/BookingPage'
 import { CreateVenuePage } from './pages/CreateVenuePage'
 import { HomePage } from './pages/HomePage'
 import { ReservationsPage } from './pages/ReservationsPage'
+import { ReportsPage } from './pages/ReportsPage'
 import { ReservationDetailPage } from './pages/ReservationDetailPage'
 import { VenueDetailPage } from './pages/VenueDetailPage'
 import { emptyReservationDraft } from './reservationDraft'
@@ -167,7 +168,7 @@ export default function App() {
       : route.kind === 'createVenue' ? '创建场地'
         : route.kind === 'venueDetail' ? '场地详情'
           : route.kind === 'reservationDetail' ? '预约详情'
-        : route.kind === 'reservations' ? '预约记录' : route.kind === 'home' ? '场地概览' : '页面不存在'
+        : route.kind === 'reservations' ? '预约记录' : route.kind === 'reports' ? '报告查询' : route.kind === 'home' ? '场地概览' : '页面不存在'
     document.title = `${pageName} | 场地预约系统`
   }, [routeKey, bookingVenue?.name])
 
@@ -266,6 +267,7 @@ export default function App() {
           <a href="#/" aria-current={route.kind === 'home' ? 'page' : undefined} onClick={route.kind === 'home' ? scrollToPageTop : undefined}>场地概览</a>
           <a href="#/venues/new" aria-current={route.kind === 'createVenue' ? 'page' : undefined} onClick={route.kind === 'createVenue' ? scrollToPageTop : undefined}>创建场地</a>
           <a href="#/reservations" aria-current={route.kind === 'reservations' ? 'page' : undefined} onClick={route.kind === 'reservations' ? scrollToPageTop : undefined}>预约记录</a>
+          <a href="#/reports" aria-current={route.kind === 'reports' ? 'page' : undefined} onClick={route.kind === 'reports' ? scrollToPageTop : undefined}>报告查询</a>
         </nav>
       </header>
 
@@ -308,6 +310,8 @@ export default function App() {
             onCancel={cancelReservation}
           />
         )}
+
+        {route.kind === 'reports' && <ReportsPage />}
 
         {route.kind === 'notFound' && (
           <section className="panel not-found-panel">

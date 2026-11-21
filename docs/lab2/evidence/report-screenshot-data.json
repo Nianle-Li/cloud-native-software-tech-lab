@@ -1,0 +1,287 @@
+{
+  "captured_at": "2026-11-21T05:01:07.337Z",
+  "context": "kind-venue-lab2-a",
+  "namespace": "venue-booking-final",
+  "venues": [
+    {
+      "id": 1,
+      "name": "羽毛球馆 A",
+      "location": "体育中心 1 层",
+      "capacity": 8,
+      "open_time": "08:00",
+      "close_time": "22:00",
+      "status": "OPEN"
+    },
+    {
+      "id": 2,
+      "name": "多功能教室 B",
+      "location": "教学楼 2 层",
+      "capacity": 30,
+      "open_time": "09:00",
+      "close_time": "21:00",
+      "status": "OPEN"
+    },
+    {
+      "id": 3,
+      "name": "会议室 C",
+      "location": "行政楼 3 层",
+      "capacity": 12,
+      "open_time": "09:00",
+      "close_time": "18:00",
+      "status": "CLOSED"
+    },
+    {
+      "id": 4,
+      "name": "排练室 D",
+      "location": "艺术中心 2 层",
+      "capacity": 15,
+      "open_time": "09:00",
+      "close_time": "18:00",
+      "status": "OPEN"
+    },
+    {
+      "id": 5,
+      "name": "小型会议室 E",
+      "location": "图书馆 3 层",
+      "capacity": 12,
+      "open_time": "09:00",
+      "close_time": "18:00",
+      "status": "OPEN"
+    }
+  ],
+  "reservations": [
+    {
+      "id": 7,
+      "venue_id": 5,
+      "booked_by": "图书馆读书会",
+      "reservation_date": "2026-11-19",
+      "start_time": "17:00",
+      "end_time": "18:00",
+      "attendee_count": 8,
+      "purpose": "读书交流",
+      "status": "ACTIVE",
+      "created_at": "2026-11-19T14:58:34.319612+08:00",
+      "cancelled_at": null
+    },
+    {
+      "id": 6,
+      "venue_id": 1,
+      "booked_by": "羽毛球社",
+      "reservation_date": "2026-11-21",
+      "start_time": "12:00",
+      "end_time": "13:00",
+      "attendee_count": 4,
+      "purpose": "社团训练",
+      "status": "CANCELLED",
+      "created_at": "2026-11-19T14:58:34.112758+08:00",
+      "cancelled_at": "2026-11-19T14:58:34.190045+08:00"
+    },
+    {
+      "id": 5,
+      "venue_id": 4,
+      "booked_by": "学生会",
+      "reservation_date": "2026-11-21",
+      "start_time": "15:00",
+      "end_time": "16:30",
+      "attendee_count": 8,
+      "purpose": "活动彩排",
+      "status": "ACTIVE",
+      "created_at": "2026-11-19T14:58:34.07357+08:00",
+      "cancelled_at": null
+    },
+    {
+      "id": 4,
+      "venue_id": 4,
+      "booked_by": "舞蹈社",
+      "reservation_date": "2026-11-21",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "attendee_count": 10,
+      "purpose": "节目排练",
+      "status": "ACTIVE",
+      "created_at": "2026-11-19T14:58:34.029564+08:00",
+      "cancelled_at": null
+    },
+    {
+      "id": 3,
+      "venue_id": 2,
+      "booked_by": "软件工程班",
+      "reservation_date": "2026-11-21",
+      "start_time": "14:00",
+      "end_time": "16:00",
+      "attendee_count": 24,
+      "purpose": "课程讨论",
+      "status": "ACTIVE",
+      "created_at": "2026-11-19T14:58:33.982596+08:00",
+      "cancelled_at": null
+    },
+    {
+      "id": 2,
+      "venue_id": 1,
+      "booked_by": "学院教职工",
+      "reservation_date": "2026-11-21",
+      "start_time": "18:00",
+      "end_time": "19:00",
+      "attendee_count": 4,
+      "purpose": "羽毛球活动",
+      "status": "ACTIVE",
+      "created_at": "2026-11-19T14:58:33.894639+08:00",
+      "cancelled_at": null
+    },
+    {
+      "id": 1,
+      "venue_id": 1,
+      "booked_by": "羽毛球社",
+      "reservation_date": "2026-11-21",
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "attendee_count": 4,
+      "purpose": "社团训练",
+      "status": "ACTIVE",
+      "created_at": "2026-11-19T14:58:33.623114+08:00",
+      "cancelled_at": null
+    }
+  ],
+  "manual": {
+    "job_id": "venue-report-manual-20261119065842-57ace5",
+    "source": "MANUAL",
+    "start_date": "2026-11-21",
+    "end_date": "2026-11-21",
+    "status": "SUCCEEDED",
+    "started_at": "2026-11-19T14:59:12.972329+08:00",
+    "finished_at": "2026-11-19T14:59:13.30202+08:00",
+    "generated_at": "2026-11-19T14:59:13.30202+08:00",
+    "error_summary": null,
+    "items": [
+      {
+        "venue_id": 1,
+        "venue_name": "羽毛球馆 A",
+        "reservation_count": 2,
+        "reserved_minutes": 150
+      },
+      {
+        "venue_id": 2,
+        "venue_name": "多功能教室 B",
+        "reservation_count": 1,
+        "reserved_minutes": 120
+      },
+      {
+        "venue_id": 3,
+        "venue_name": "会议室 C",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 4,
+        "venue_name": "排练室 D",
+        "reservation_count": 2,
+        "reserved_minutes": 150
+      },
+      {
+        "venue_id": 5,
+        "venue_name": "小型会议室 E",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      }
+    ]
+  },
+  "scheduled": {
+    "job_id": "venue-report-daily-29917860",
+    "source": "SCHEDULED",
+    "start_date": "2026-11-19",
+    "end_date": "2026-11-19",
+    "status": "SUCCEEDED",
+    "started_at": "2026-11-19T15:00:29.622791+08:00",
+    "finished_at": "2026-11-19T15:00:29.825916+08:00",
+    "generated_at": "2026-11-19T15:00:29.825916+08:00",
+    "error_summary": null,
+    "items": [
+      {
+        "venue_id": 1,
+        "venue_name": "羽毛球馆 A",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 2,
+        "venue_name": "多功能教室 B",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 3,
+        "venue_name": "会议室 C",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 4,
+        "venue_name": "排练室 D",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 5,
+        "venue_name": "小型会议室 E",
+        "reservation_count": 1,
+        "reserved_minutes": 60
+      }
+    ]
+  },
+  "scheduledSecond": {
+    "job_id": "venue-report-daily-29917862",
+    "source": "SCHEDULED",
+    "start_date": "2026-11-19",
+    "end_date": "2026-11-19",
+    "status": "SUCCEEDED",
+    "started_at": "2026-11-19T15:02:31.033267+08:00",
+    "finished_at": "2026-11-19T15:02:31.337998+08:00",
+    "generated_at": "2026-11-19T15:02:31.337998+08:00",
+    "error_summary": null,
+    "items": [
+      {
+        "venue_id": 1,
+        "venue_name": "羽毛球馆 A",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 2,
+        "venue_name": "多功能教室 B",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 3,
+        "venue_name": "会议室 C",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 4,
+        "venue_name": "排练室 D",
+        "reservation_count": 0,
+        "reserved_minutes": 0
+      },
+      {
+        "venue_id": 5,
+        "venue_name": "小型会议室 E",
+        "reservation_count": 1,
+        "reserved_minutes": 60
+      }
+    ]
+  },
+  "screenshots": {
+    "场地概览.png": "a2549ad8638921a1f6508d9ce5b59d4e57bec56b2ca396555a84739143e00bb8",
+    "场地详情.png": "09403cca2f188478caa839170c565d96d1279a633699fb7ad6afdd28a6758dc0",
+    "创建场地表单.png": "6036fe05f5ff7f0fbd630670208f41244a623ffcabbba20a3ff7868f824aa9dc",
+    "预约记录列表.png": "2b304c0cf4d20d9f7d0f17a6f12a4acb598d620f920f5d872e4b05331f7679a4",
+    "已创建预约详情.png": "4feca504035f54769f63db29f5efeb50843d868dfd8f2edf2b4bec7d9c3a9f5e",
+    "已取消预约详情.png": "358b59f893cd7891c1ea313ca1e9ec502d8de25676dbc752827b562c57f7388a",
+    "预约表单与已预约时段.png": "a6466ac9ae923d9afc9b675415d37d65d4f53b6fb32312056be4540616715f43",
+    "重叠时段冲突.png": "364ec11d55480a2f2fc70278fd93eea253a62cd3a180c520eb244fc663dc7593",
+    "手动报告查询页面.png": "94143d3e65d9b4204026c34c4c519eb57ec80252d866ee853bc45533a18ca163",
+    "定时报告查询页面.png": "1623b7736713b513389cc8e69b2089cd1ef0dc8ae02e17aac75d41c9ffdb1c95"
+  },
+  "conflict_status": 409
+}

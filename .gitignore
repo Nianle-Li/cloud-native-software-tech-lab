@@ -1,23 +1,17 @@
 /云原生软件技术-Lab1-场地预约系统开发与Docker容器化.pdf
+/云原生软件技术-Lab2-场地预约系统Kubernetes工作负载编排.pdf
 /.env
 /.env.*
 !/.env.example
 __pycache__/
 *.pyc
 *.log
+/.lab2-evidence/
+/docs/lab2/evidence/**/.last-run.json
 /frontend/build.txt
 /frontend/full-test.txt
 /frontend/remaining.txt
 /frontend/test-output.txt
 
-# Local collaboration plans and development-stage audit notes
-/docs/team-plan.md
-/docs/contract.md
-/docs/acceptance.md
-/docs/frontend-create-venue-check.md
-/docs/frontend-requirements-audit.md
-/docs/frontend-test-audit.md
-
-# Local screenshots excluded from the final report
-/docs/assets/lab1-report/backend-compose-health.png
-/docs/assets/lab1-report/backend-testcontainers-passed.png
+# Local development-stage audit notes
+/docs/lab1/local/

@@ -1,0 +1,13 @@
+{
+  "status": "SUCCESS",
+  "checks": [
+    "Five readable venue names visible",
+    "Venue detail visible",
+    "Reservation list visible",
+    "Cancelled reservation detail visible",
+    "Manual report source/date and all five statistical rows match API"
+  ],
+  "manual_job": "venue-report-manual-20261119105626-364bf7",
+  "base_url": "http://127.0.0.1:49897",
+  "scope": "Read-only navigation and report query; no booking/create/cancel submissions"
+}

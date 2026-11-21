@@ -1,0 +1,91 @@
+{
+  "provenance": {
+    "archived_commit": "4c9f2f5",
+    "archived_batch": "b-execution-20261116-113439",
+    "executed_source_commit": "70c266e",
+    "original_record": "docs/assets/lab2/b-execution-20261116-113439/execution.json",
+    "method": "Original command, timestamp, exit code and response fields copied from the archived execution.json and instance-0/1/2.txt; no request was rerun."
+  },
+  "context": "kind-venue-lab2",
+  "namespace": "venue-booking",
+  "request_origin_pod": "api-d866875dd-jtlfr",
+  "service_url": "http://api:8080/api/instance",
+  "requests": [
+    {
+      "started_at_utc": "2026-11-16T03:36:05.167376+00:00",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "api-d866875dd-jtlfr",
+        "--",
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "10",
+        "http://api:8080/api/instance"
+      ],
+      "exit_code": 0,
+      "response": {
+        "instance_id": "api-d866875dd-ndq66"
+      }
+    },
+    {
+      "started_at_utc": "2026-11-16T03:36:05.346499+00:00",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "api-d866875dd-jtlfr",
+        "--",
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "10",
+        "http://api:8080/api/instance"
+      ],
+      "exit_code": 0,
+      "response": {
+        "instance_id": "api-d866875dd-ndq66"
+      }
+    },
+    {
+      "started_at_utc": "2026-11-16T03:36:05.433260+00:00",
+      "command": [
+        "kubectl",
+        "--context",
+        "kind-venue-lab2",
+        "-n",
+        "venue-booking",
+        "exec",
+        "api-d866875dd-jtlfr",
+        "--",
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        "10",
+        "http://api:8080/api/instance"
+      ],
+      "exit_code": 0,
+      "response": {
+        "instance_id": "api-d866875dd-jtlfr"
+      }
+    }
+  ],
+  "distinct_instance_ids": [
+    "api-d866875dd-jtlfr",
+    "api-d866875dd-ndq66"
+  ]
+}
