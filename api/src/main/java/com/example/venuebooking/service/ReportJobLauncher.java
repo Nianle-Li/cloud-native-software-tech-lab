@@ -26,12 +26,20 @@ public class ReportJobLauncher implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        ReportJobRequest request;
         try {
-            ReportJobRequest request = ReportJobRequest.fromEnvironment(System.getenv(), clock);
+            request = ReportJobRequest.fromEnvironment(System.getenv(), clock);
+        } catch (RuntimeException exception) {
+            log.error("Report job configuration rejected (type={})", exception.getClass().getSimpleName());
+            throw new ReportJobFailed();
+        }
+
+        try {
             reports.generate(request);
             log.info("Report job {} completed", request.jobId());
         } catch (RuntimeException exception) {
-            log.error("Report job failed; check configuration and database availability");
+            log.error("Report job {} failed during generation (type={})",
+                    request.jobId(), exception.getClass().getSimpleName());
             throw new ReportJobFailed();
         }
     }

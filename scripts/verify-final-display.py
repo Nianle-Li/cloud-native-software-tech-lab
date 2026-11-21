@@ -45,6 +45,29 @@ def report(base_url: str, job_id: str, source: str, expected: list[tuple[int, in
     return data
 
 
+def require_completed_job(job: dict, job_id: str, cron_parent: bool) -> None:
+    status = job.get("status", {})
+    complete = any(condition.get("type") == "Complete" and condition.get("status") == "True"
+                   for condition in status.get("conditions", []))
+    require(job["spec"].get("completions", 1) == 1 and status.get("succeeded") == 1 and complete,
+            f"{job_id}: Kubernetes Job 尚未 Complete")
+    owners = job["metadata"].get("ownerReferences", [])
+    has_cron_parent = any(owner.get("kind") == "CronJob"
+                          and owner.get("name") == "venue-report-daily" for owner in owners)
+    require(has_cron_parent == cron_parent,
+            f"{job_id}: {'缺少' if cron_parent else '不应具有'} venue-report-daily 父资源")
+
+
+def require_formal_cronjob(cron: dict) -> None:
+    spec = cron["spec"]
+    env = spec["jobTemplate"]["spec"]["template"]["spec"]["containers"][0]["env"]
+    mode = next((entry.get("value") for entry in env if entry["name"] == "REPORT_WINDOW_MODE"), None)
+    require(spec["schedule"] == "10 0 * * *"
+            and spec.get("timeZone") == "Asia/Shanghai"
+            and spec.get("concurrencyPolicy") == "Forbid"
+            and mode == "PREVIOUS_DAY", "CronJob 尚未恢复正式每日配置")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
@@ -86,18 +109,13 @@ def main() -> None:
     require(all(item["start_date"] == scheduled[0]["start_date"] for item in scheduled),
             "两次定时报告不是同一天")
     require(manual["start_date"] != scheduled[0]["start_date"], "手动和定时样例日期混淆")
+    require_completed_job(kubectl(args.context, args.namespace, "get", "job", args.manual_job),
+                          args.manual_job, cron_parent=False)
     for job_id in args.scheduled_jobs:
         job = kubectl(args.context, args.namespace, "get", "job", job_id)
-        owners = job["metadata"].get("ownerReferences", [])
-        require(any(o["kind"] == "CronJob" and o["name"] == "venue-report-daily" for o in owners),
-                f"{job_id}: 不是 CronJob 自动创建")
-        require(job["status"].get("succeeded") == 1, f"{job_id}: Kubernetes Job 尚未成功")
+        require_completed_job(job, job_id, cron_parent=True)
 
-    cron = kubectl(args.context, args.namespace, "get", "cronjob", "venue-report-daily")
-    env = cron["spec"]["jobTemplate"]["spec"]["template"]["spec"]["containers"][0]["env"]
-    mode = next(entry["value"] for entry in env if entry["name"] == "REPORT_WINDOW_MODE")
-    require(cron["spec"]["schedule"] == "10 0 * * *" and mode == "PREVIOUS_DAY",
-            "CronJob 尚未恢复正式每日配置")
+    require_formal_cronjob(kubectl(args.context, args.namespace, "get", "cronjob", "venue-report-daily"))
     for workload in ("deployment/api", "deployment/frontend", "statefulset/database"):
         resource = kubectl(args.context, args.namespace, "get", workload)
         require(resource["status"].get("readyReplicas") == resource["spec"]["replicas"],
