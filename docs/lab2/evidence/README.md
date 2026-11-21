@@ -5,7 +5,7 @@
 | 证据位置 | 范围与来源 | 保留内容 |
 | --- | --- | --- |
 | [环境与数据库核对](./) | `kind-venue-lab2`；数据库检查源码 `97bf795`，V4 独立复核源码 `aaa9a26` | 三节点与存储发现、Service 和数据库连接、V4 迁移约束的独立复核 |
-| [API 部署与迁移](api-deployment-migration/) | `kind-venue-lab2` / `venue-booking`；源码 `70c266e`；原批次 `SUCCESS` | API Pod 分布、两个实例响应、Flyway 版本与启动日志 |
+| [API 部署与迁移](api-deployment-migration/) | `kind-venue-lab2` / `venue-booking`；源码 `70c266e`；原批次 `SUCCESS` | API Pod 分布、经 `api` Service 请求的原始命令与响应、Flyway 版本与启动日志；[Service 请求记录](api-deployment-migration/service-distribution.json)从 Git 归档批次恢复，注明原提交和文件 |
 | [业务、报告与持久化](booking-report-persistence/) | `kind-venue-lab2` / `venue-booking`；源码 `ad93428`；原批次 `SUCCESS` | 并发冲突、Job 重试与幂等、数据库 Pod 重建前后的对象及 PVC 比较 |
 | [后端测试](backend-regression/) | 证据提交 `e79ccec`；隔离测试环境 | 报告集成测试和后端完整回归的原始 Maven 输出 |
 | [展示与手动报告](display-manual-report/) | `kind-venue-lab2` / `venue-booking-final`；源码 `dfde6c8`；原批次 `PARTIAL` | 固定展示数据、手动报告和页面核对；本批次尚未核对自动报告 |
