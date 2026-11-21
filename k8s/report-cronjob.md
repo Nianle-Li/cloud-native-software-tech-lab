@@ -1,5 +1,7 @@
 # 定时报告 CronJob
 
+本页后半部的直接 `kubectl apply` 命令只用于 `venue-booking` 专项验收命名空间。最终展示的 `venue-booking-final` 已有两次自动报告实测及恢复后的正式配置；日常查看无需切换调度，重新部署或验收时按 [最终展示说明](final/README.md)操作。两个命名空间中的 Job ID 和报告数值不得混用。
+
 正式清单为 [`base/report-cronjob.yaml`](base/report-cronjob.yaml)：北京时间
 每日 00:10 统计前一自然日。演示清单为
 [`demo/report-cronjob.yaml`](demo/report-cronjob.yaml)：每 2 分钟统计当天。
@@ -17,16 +19,16 @@ python3 scripts/test_lab2_cronjob.py
 实际结果见[Lab 2 报告](../docs/lab2-report.md)。
 
 CronJob 与 API Deployment、手动 Job 使用相同 API 镜像，当前标签为
-`venue-booking-api:lab2-20261113`。B 更换 API 镜像后，先对齐三处标签并在
-共同 kind 集群装载，随后运行上述测试；不得让定时任务使用旧版报告程序。
+`venue-booking-api:lab2-20261113`。API 镜像内容变化后，先对齐三处标签并在
+目标 kind 集群装载，随后运行上述测试；不得让定时任务使用旧版报告程序。
 每个定时 Job 从 Kubernetes Job 名称取得 `REPORT_JOB_ID`，来源固定为
 `SCHEDULED`，不传手动日期参数。容器仅追加报告模式参数，复用 API 镜像
 的 Java ENTRYPOINT。数据库账号由集群 Secret 注入，不写进清单。
 
 ## 部署前检查与正式任务
 
-先确认 C 的数据库/PVC 已就绪，B 的 API 两副本已完成迁移，且手动 Job
-能够生成可查询报告；再在承载共同集群的机器上执行：
+先确认数据库/PVC 已就绪、API 两副本已完成迁移，且手动 Job
+能够生成可查询报告；再在承载目标集群的机器上执行：
 
 ```sh
 kubectl --context kind-venue-lab2 -n venue-booking apply --dry-run=server \

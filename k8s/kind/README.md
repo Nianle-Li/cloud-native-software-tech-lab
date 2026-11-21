@@ -1,7 +1,6 @@
 # Lab 2 kind 集群
 
-集群名称为 `venue-lab2`，context 为 `kind-venue-lab2`。最终展示资源
-可部署到 `venue-booking-final` 命名空间，清单及步骤见
+集群名称为 `venue-lab2`，context 为 `kind-venue-lab2`。最终展示系统部署在 `venue-booking-final`，隔离的专项验收环境为 `venue-booking`；两者各有数据库和 PVC。最终展示清单及步骤见
 [最终展示部署说明](../final/README.md)。本目录使用独立 kind CLI，
 Docker Desktop 提供 Docker 引擎。
 

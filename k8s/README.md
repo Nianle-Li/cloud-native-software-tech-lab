@@ -1,9 +1,8 @@
-# Lab 2 Kubernetes 部署顺序与资源说明
+# Lab 2 专项验收环境操作说明
 
-共同集群中用于最终展示的独立命名空间和可读业务数据，按[最终展示环境说明](final/README.md)部署与核对。以下各节说明原有 `venue-booking` 命名空间中资源的依赖关系和常规操作。
+本页只说明目标集群中 `venue-booking` 专项验收命名空间的资源依赖与操作。最终展示的完整系统位于 `venue-booking-final`，查看或全新部署请从[最终展示环境说明](final/README.md)开始。两个命名空间复用基础清单，但各有独立 Secret、数据库、PVC 和业务数据；不要把本页的 Job、浏览器截图或数据库结果直接用于最终展示命名空间。
 
-共同环境为 kind 集群 `venue-lab2`、context `kind-venue-lab2`、命名空间
-`venue-booking`。命令从仓库根目录执行；不对整个 `k8s/` 目录执行 apply。
+共同环境为 kind 集群 `venue-lab2`、context `kind-venue-lab2`。本页命令固定操作 `venue-booking`，从仓库根目录执行；不对整个 `k8s/` 目录执行 apply，也不要为重跑验收删除已有 PVC。
 集群创建见 [kind 配置说明](kind/README.md)。本文件按数据库、API/手动 Job、
 前端、CronJob 与 DaemonSet 的依赖关系组织操作；系统设计和结果见
 [Lab 2 报告](../docs/lab2-report.md)。
@@ -101,7 +100,7 @@ StatefulSet 显式保留删除/缩容时的 PVC。StorageClass 的回收策略�
 设计参考 [Kubernetes StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 和 [PostgreSQL 官方镜像说明](https://github.com/docker-library/docs/blob/master/postgres/content.md)。
 
-## 4. C 的基础设施验证
+## 4. 数据库基础设施专项验证
 
 ```sh
 # 包含一次 database-0 删除重建，会短暂中断数据库；部署联调期间协调执行。
@@ -118,16 +117,11 @@ python3 scripts/verify-k8s-database.py --restart-database
 且不含 Secret 数据。失败时保留错误并检查 Pod、事件、PVC 和日志，不把未通过
 项写成成功；若清理失败，脚本会报错，应按输出中的独有资源名清理。
 
-## 5. 交给 B，再交给 A
+## 5. API 与其余资源的部署顺序
 
-C 交付 `database` 就绪、PVC Bound、Service 认证连接和 Pod 重建保留数据
-的证据。此时业务库可以尚无业务表：**Flyway 继续由 API 启动执行**，
-不在数据库初始化目录复制 V1–V4，也不由 C 手工建业务表。
+先确认 `database` 就绪、PVC Bound，且通过 Service 能认证连接。此时业务库可以尚无业务表：**Flyway 由 API 启动执行**，不要在数据库初始化目录复制 V1–V4 或手工建业务表。
 
-B 使用同一 `venue-config` 和 `venue-db-credentials`，先在该 Docker 环境
-构建单平台 API 镜像并装载；核对实际标签与 API、手动 Job、A 的 CronJob
-一致后，再部署 `api-service.yaml` 和 `api-deployment.yaml`。已有基线标签
-为 `venue-booking-api:lab2-20261113`；如内容改变，先使用新标签同步清单。
+在承载目标集群的 Docker 环境构建并装载单平台 API 镜像；核对 API Deployment、手动 Job 命令和 CronJob 使用同一标签后，再部署 `api-service.yaml` 和 `api-deployment.yaml`。当前清单标签为 `venue-booking-api:lab2-20261113`；镜像内容改变时先换标签并同步引用。
 
 ```sh
 kubectl --context kind-venue-lab2 -n venue-booking apply -f k8s/base/api-service.yaml
@@ -135,10 +129,10 @@ kubectl --context kind-venue-lab2 -n venue-booking apply -f k8s/base/api-deploym
 kubectl --context kind-venue-lab2 -n venue-booking rollout status deployment/api --timeout=180s
 ```
 
-以上命令用于重建 API 资源。部署后须确认 Flyway V1–V4 与
+以上命令用于在 `venue-booking` 创建或更新 API 资源。部署后须确认 Flyway V1–V4 与
 JPA validate 通过、两个 API Pod 就绪，再按 [手动 Job 说明](jobs/README.md)
 运行报告任务。API 两副本分流须由集群内客户端证明，不能用单个
 port-forward 会话代替。前端、CronJob 与 DaemonSet 的操作分别见下列说明。
 
-最终持久化验收仍须记录真实业务场地、预约及报告 ID，在数据库 Pod 重建后
-通过 API 查询原记录；C 的临时探针验证不能替代这项业务验收。
+业务持久化专项验证须记录真实业务场地、预约及报告 ID，在数据库 Pod 重建后
+通过 API 查询原记录；临时探针验证不能替代这项业务验收。
