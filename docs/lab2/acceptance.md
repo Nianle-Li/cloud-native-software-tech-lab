@@ -6,14 +6,14 @@
 
 ## 最终逐项验收结论
 
-**课程要求的业务功能和 Kubernetes 工作负载均已通过实测。**下表以需求为单位归并原始记录；必要时用记录①、记录②区分独立执行。节点架构、镜像摘要和业务数据均按各自原始记录核对，不跨批次拼接。
+**课程要求的业务功能和 Kubernetes 工作负载均已通过实测。**下表以需求为单位归并原始记录；记录①使用 `kind-venue-lab2`，记录②使用 `kind-venue-lab2-a`，两者是独立集群。每行另标注命名空间；节点架构、镜像摘要和业务数据均按各自原始记录核对，不跨批次拼接。
 
 展示部署的前端构建源码提交为 `dfde6c8`，浏览器补测时仓库提交为 `45b9b1f`；两者 `frontend` 目录的 Git tree 均为 `309bd450be2cb717b145f4636b5f93399b57e86a`。[源码一致性核对](evidence/frontend-display-regression/source-consistency.txt)确认展示部署、定时复核与核对时提交 `45b9b1f` 的 API、前端、清单、节点脚本和运行脚本无差异。补测所用的前端 Pod `imageID` 与其展示命名空间一致；镜像及节点信息见[原始环境记录](evidence/frontend-display-regression/environment.json)。
 
 | 验收要求 | 判定与实测结果 | 原始证据及范围 |
 | --- | --- | --- |
 | kind 环境、镜像和工作负载 | **通过。**三节点就绪；展示环境 API 2/2、前端 1/1、数据库 1/1、DaemonSet 2/2，PVC Bound，实际 Pod 镜像已核对。 | [集群环境](evidence/kind-environment.json)、[最终资源](evidence/scheduled-report-node-check/final-status.txt)、[镜像与节点](evidence/scheduled-report-node-check/pods-audit.json)；记录① `venue-booking-final`。 |
-| Service、ConfigMap、Secret 与 PVC | **通过。**前端经 Service 到 API，数据库可从另一 worker 经 Service 认证连接；配置、凭据引用和存储已部署。 | [数据库基础设施](evidence/database-infrastructure.json)、[展示资源](evidence/scheduled-report-node-check/final-status.txt)；记录①。证据不含凭据值。 |
+| Service、ConfigMap、Secret 与 PVC | **通过。**记录①的 `venue-booking` 中，数据库可从另一 worker 经 Service 认证连接；记录①的独立 `venue-booking-final` 中，前端经 Service 到 API，配置、凭据引用和存储已部署。 | [数据库基础设施](evidence/database-infrastructure.json)：`kind-venue-lab2 / venue-booking`；[展示资源](evidence/scheduled-report-node-check/final-status.txt)、[Pod 配置](evidence/scheduled-report-node-check/pods-audit.json)：`kind-venue-lab2 / venue-booking-final`。证据不含凭据值。 |
 | 原有业务与最终前端源码 | **通过。**真实 Chromium 经前端 Service 完成场地创建、预约、冲突、详情、取消及已保存报告查询，2/2 通过；报告中的业务截图与同批场地、预约 API 数据一致，冲突提交返回 409 且预约总数不变。 | [浏览器补测](evidence/frontend-display-regression/browser-e2e.txt)、[镜像对应](evidence/frontend-display-regression/environment.json)；记录② `venue-booking`。[截图与数据核对](evidence/report-screenshot-data.json)；记录② `venue-booking-final`。 |
 | API 双副本与并发冲突 | **通过。**两个 API 实例均处理请求；同一时段并发预约返回 201 和 409，仅保留一笔有效预约。 | [Pod 分布](evidence/api-deployment-migration/api-pods-wide.txt)、[实例 1](evidence/api-deployment-migration/api-response-worker2.txt)、[实例 2](evidence/api-deployment-migration/api-response-worker1.txt)、[并发核对](evidence/booking-report-persistence/concurrent-booking.txt)；记录① `venue-booking`。 |
 | Flyway 与数据库 Pod 重建 | **通过。**V1–V4 迁移成功；Pod UID 改变后 PVC/PV 不变，原场地、预约和报告响应一致。结论限于同集群 Pod 重建。 | [迁移版本](evidence/api-deployment-migration/flyway-version.txt)、[启动日志](evidence/api-deployment-migration/api-startup-flyway.txt)、[重建与比较](evidence/booking-report-persistence/database-rebuild-persistence.txt)；记录① `venue-booking`。 |

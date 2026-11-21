@@ -170,7 +170,7 @@ CronJob Pod 通过 `database` Service 读取预约数据，结果由报告程序
 
 展示命名空间使用[最终 Kustomize 配置](../k8s/final/kustomization.yaml)，包含双副本 API、单副本前端和数据库、报告 CronJob、覆盖两个 worker 的 DaemonSet，以及所需的 Service、ConfigMap、Secret 和 PVC。资源核查结果为 API 2/2、前端 1/1、数据库 1/1、DaemonSet 2/2，数据库 PVC 为 Bound；镜像与第 1.1 节一致。页面中有五个名称可读的场地和七条预约，其中六条有效、一条已取消。
 
-工作负载验收分为两个独立的数据范围：`venue-booking-final` 用于展示页面、核对手动与两次自动报告及工作负载状态；`venue-booking` 用于双 Pod 并发预约、同 ID 任务重试和数据库 Pod 重建。两个命名空间各有独立数据库与 PVC，统计结果不跨命名空间合并。集成测试验证异常状态，结果单独说明。图 1—10 取自同一组固定展示数据，场地、预约、报告 Job ID 与图片摘要见[截图数据核对](lab2/evidence/report-screenshot-data.json)；工作负载结论以[最终验收记录](lab2/acceptance.md)中各自对应的原始输出核对。
+工作负载验收分为两个独立的数据范围：`kind-venue-lab2 / venue-booking-final` 用于展示页面、核对手动与两次自动报告及工作负载状态；同一集群的 `venue-booking` 用于双 Pod 并发预约、同 ID 任务重试和数据库 Pod 重建。两个命名空间各有独立数据库与 PVC，统计结果不跨命名空间合并。集成测试验证异常状态，结果单独说明。图 1—10 取自 A 在另一集群 `kind-venue-lab2-a / venue-booking-final` 的同一组固定展示数据，场地、预约、报告 Job ID 与图片摘要见[截图数据核对](lab2/evidence/report-screenshot-data.json)；图片中的 Job ID 与 C 在 `kind-venue-lab2` 的工作负载验收 Job ID 不混用。工作负载结论以[最终验收记录](lab2/acceptance.md)中各自对应的原始输出核对。
 
 验收时先核对展示环境的节点、工作负载、镜像和 PVC，再经前端入口查看业务页面；以实际 Job ID 将一次性报告、两次自动 Job、API 响应和页面结果逐一对应，最后核对正式 CronJob 配置及两个 worker 的节点检查。并发、重试和数据库重建采用专项验收命名空间的独立证据，不在展示库重复写入或删除资源。完整的要求、判定与原始证据对应关系见[最终验收记录](lab2/acceptance.md)。
 
