@@ -73,14 +73,14 @@ kubectl --context kind-venue-lab2 -n venue-booking-final port-forward service/fr
 | Job | `venue-report-manual-<唯一后缀>` | 指定日期范围的报告 | 每次手动运行创建一次性任务，运行结束后退出；任务名用作报告 `job_id`。 |
 | CronJob | `venue-report-daily` | 定时报告 | 按计划创建 Job，适合周期性执行且完成后退出的任务。 |
 | DaemonSet | `node-check` | 节点 DNS 检查 | 在每个可调度节点运行一个检查 Pod，覆盖节点级环境。 |
-| Service | `frontend` | 页面入口 | ClusterIP 提供稳定入口；通过端口转发供浏览器访问。 |
+| Service | `frontend` | 页面入口 | ClusterIP 为前端提供稳定的集群内入口；验收时通过端口转发访问，无需长期对外发布端口。 |
 | Service | `api` | API 内部访问 | ClusterIP 的 `8080` 端口供前端 Nginx 代理访问，屏蔽 Pod IP 变化。 |
 | Service | `database` | 数据库内部访问 | ClusterIP 的 `5432` 端口供 API 和报告任务访问，不对外暴露数据库。 |
 | Service | `database-headless` | 数据库 Pod 身份 | 无头 Service 为 `database-0` 提供稳定 DNS 名称，配合 StatefulSet。 |
 | ConfigMap | `venue-config` | 后端与数据库配置 | 保存数据库名、数据目录和 JDBC 地址等非敏感配置。 |
 | ConfigMap | `frontend-nginx` | 前端代理配置 | 挂载 Nginx 配置，将 `/api/` 请求转发至 `api` Service。 |
 | Secret | `venue-db-credentials` | 数据库凭据 | 保存账号和密码，并通过键引用注入容器，避免凭据写入清单。 |
-| PVC | `postgres-data-database-0` | 数据库数据 | 由 StatefulSet 的卷声明模板创建，使用 `ReadWriteOnce` 本地卷，在 Pod 重建后复用。 |
+| PVC | `postgres-data-database-0` | 数据库数据 | 由 StatefulSet 的卷声明模板创建；单副本数据库使用 `ReadWriteOnce` 卷，Pod 重建时复用原卷以保留业务与报告数据。 |
 
 API 采用 2 副本，以核验 Service 对不同实例的访问和跨副本并发预约；两个无状态实例共享同一数据库。前端负责静态页面及 API 代理，现有功能验收无需并行实例，因此采用 1 副本；本实验未进行前端多副本负载或故障切换测试。数据库采用 1 副本，其本地 `ReadWriteOnce` 卷和当前 PostgreSQL 配置不构成数据库复制方案，因此不能通过增加副本实现高可用。
 
@@ -102,7 +102,9 @@ Secret 由 [create-k8s-db-secret.py](../scripts/create-k8s-db-secret.py) 在内�
 | PVC | 请求 1Gi、ReadWriteOnce，实际 Bound |
 | 回收策略 | StorageClass 为 Delete；StatefulSet 的 whenDeleted/whenScaled 均为 Retain |
 
-StatefulSet 的保留策略避免删除或缩容控制器时自动删除声明，但不保证手动删除 PVC 后仍保留数据。PV 具有本地节点关联，Pod 重建复用原卷；本实验只验证同一集群内 Pod 重建，不宣称跨节点、跨主机或删除 kind 集群后的恢复能力。
+选用当前 kind 集群默认的 `standard` 存储类，由 `rancher.io/local-path` 为 PVC 动态供卷。数据库只有一个实例，`ReadWriteOnce` 满足其挂载需求；申请的 1Gi 已用于本实验的业务与报告数据，并通过 Pod 重建验证了原卷复用。
+
+StatefulSet 的保留策略避免删除或缩容控制器时自动删除声明，但不保证手动删除 PVC 后仍保留数据。PV 具有本地节点关联；本实验只验证同一集群内 Pod 重建，不宣称跨节点、跨主机或删除 kind 集群后的恢复能力。
 
 数据库 requests 为 100m CPU/128Mi，limits 为 500m CPU/512Mi。startup、readiness、liveness 均用本地 TCP `pg_isready`；另通过其他 worker 的客户端验证 Service/DNS 和真实认证连接。Pod 关闭 ServiceAccount token 自动挂载。资源值是实验配置，不作为吞吐或高可用性能结论。
 
