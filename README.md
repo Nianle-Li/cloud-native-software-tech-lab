@@ -1,5 +1,12 @@
 # 场地预约系统 · 云原生软件技术课程项目
 
+交付标签：
+
+- `lab1` 对应 Docker Compose 场地预约系统的 Lab 1 完成版；
+- `lab2` 对应 Kubernetes 工作负载编排与报告功能的 Lab 2 完成版。
+
+两个标签分别固定各阶段的交付提交，便于查看或复现对应版本。
+
 本仓库的当前交付内容为 **Lab 2 Kubernetes 场地预约系统**。Lab 2 实验报告位于 [`docs/lab2-report.md`](docs/lab2-report.md)，逐项验收结论和原始证据位于 [`docs/lab2/acceptance.md`](docs/lab2/acceptance.md)。
 
 ## Lab 2：最终展示与验收
