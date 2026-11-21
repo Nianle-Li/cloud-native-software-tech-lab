@@ -47,4 +47,4 @@ docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 | `docs/lab2-report.md`、`docs/附件/` | Lab 2 实验报告与功能截图 |
 | `k8s/base/`、`k8s/final/` | 正式资源清单与用于共同集群的独立展示清单 |
 | `scripts/seed-final-display.py`、`scripts/verify-final-display.py` | 创建可读业务样例并核对最终展示结果 |
-| `docs/assets/lab1-report/` | 报告引用的截图与验收记录 |
+| `docs/lab1/` | 报告引用的截图与验收记录 |
