@@ -1,1 +1,0 @@
-PASS Five readable venue names visible; Venue detail visible; Reservation list visible; Cancelled reservation detail visible; Manual report source/date and all five statistical rows match API

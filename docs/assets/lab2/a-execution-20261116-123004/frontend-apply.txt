@@ -1,3 +1,0 @@
-configmap/frontend-nginx unchanged
-service/frontend unchanged
-deployment.apps/frontend unchanged

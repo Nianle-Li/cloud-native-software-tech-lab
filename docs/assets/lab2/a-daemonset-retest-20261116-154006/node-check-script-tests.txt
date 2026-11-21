@@ -1,1 +1,0 @@
-PASS: node identity, DNS success/failure, one-shot exit codes and missing identity

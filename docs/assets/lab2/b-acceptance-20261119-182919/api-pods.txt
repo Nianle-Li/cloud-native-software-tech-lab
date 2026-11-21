@@ -1,3 +1,0 @@
-NAME                  READY   STATUS    RESTARTS   AGE    IP            NODE                 NOMINATED NODE   READINESS GATES
-api-d866875dd-jtlfr   1/1     Running   0          3d6h   10.244.2.4    venue-lab2-worker    <none>           <none>
-api-d866875dd-ndq66   1/1     Running   0          3d6h   10.244.1.10   venue-lab2-worker2   <none>           <none>

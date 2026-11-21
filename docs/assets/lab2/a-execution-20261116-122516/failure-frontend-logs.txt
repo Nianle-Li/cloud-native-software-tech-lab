@@ -1,1 +1,0 @@
-error: error from server (NotFound): deployments.apps "frontend" not found in namespace "venue-booking"

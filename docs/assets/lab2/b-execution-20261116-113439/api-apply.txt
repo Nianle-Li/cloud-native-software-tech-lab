@@ -1,2 +1,0 @@
-service/api created
-deployment.apps/api created

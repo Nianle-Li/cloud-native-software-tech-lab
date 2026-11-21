@@ -1,0 +1,44 @@
+{
+    "checked_at":  "2026-11-21T10:57:34.7882565+08:00",
+    "context":  "kind-venue-lab2-a",
+    "source_commit":  "45b9b1f5464d49d50fafd1b240187f664cc0de38",
+    "frontend_tree":  "309bd450be2cb717b145f4636b5f93399b57e86a",
+    "display_build_source_commit":  "dfde6c8ed4bce013fe1e442f8e5ad6807903f0a5",
+    "display_build_frontend_tree":  "309bd450be2cb717b145f4636b5f93399b57e86a",
+    "kubernetes_server_version":  "v1.34.11",
+    "nodes":  [
+                  {
+                      "name":  "venue-lab2-a-control-plane",
+                      "architecture":  "amd64",
+                      "ready":  "True"
+                  },
+                  {
+                      "name":  "venue-lab2-a-worker",
+                      "architecture":  "amd64",
+                      "ready":  "True"
+                  },
+                  {
+                      "name":  "venue-lab2-a-worker2",
+                      "architecture":  "amd64",
+                      "ready":  "True"
+                  }
+              ],
+    "special_frontend":  {
+                             "namespace":  "venue-booking",
+                             "pod":  "frontend-5d84b8d95b-vdgr5",
+                             "image":  "venue-booking-frontend:lab2-report-query-02-amd64-local",
+                             "imageID":  "docker.io/library/import-2026-11-16@sha256:807566f4d0685b5bb047898e91751a71f2cf58eb1b081ecf7bf3785f0445477f"
+                         },
+    "display_frontend":  {
+                             "namespace":  "venue-booking-final",
+                             "pod":  "frontend-759cf94d9-8z7dj",
+                             "image":  "venue-booking-frontend:lab2-report-query-02",
+                             "imageID":  "docker.io/library/import-2026-11-16@sha256:807566f4d0685b5bb047898e91751a71f2cf58eb1b081ecf7bf3785f0445477f"
+                         },
+    "browser_report_job":  "venue-report-manual-20261116040000-84ea55",
+    "browser_test_exit_code":  0,
+    "display_verification_exit_code":  0,
+    "frontend_unit_test_files":  16,
+    "frontend_unit_tests_passed":  155,
+    "frontend_unit_test_exit_code":  0
+}

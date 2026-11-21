@@ -1,3 +1,0 @@
-configmap/frontend-nginx created
-service/frontend created
-deployment.apps/frontend created

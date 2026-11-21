@@ -1,1 +1,0 @@
-[{"job_id":"venue-report-daily-29919036","status":"PASS","source":"SCHEDULED","date":"2026-11-20","rows":5,"screenshot":"final-scheduled-report-1.png"},{"job_id":"venue-report-daily-29919038","status":"PASS","source":"SCHEDULED","date":"2026-11-20","rows":5,"screenshot":"final-scheduled-report-2.png"}]

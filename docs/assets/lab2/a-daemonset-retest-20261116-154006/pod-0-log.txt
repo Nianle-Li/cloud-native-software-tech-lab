@@ -1,6 +1,0 @@
-2026-11-16T07:40:15.502521004Z 2026-11-16T07:40:15Z node=venue-lab2-worker2 host_ip=172.20.0.4 dns=ok target=kubernetes.default.svc.cluster.local
-2026-11-16T07:40:15.502534754Z Server:		10.96.0.10
-2026-11-16T07:40:15.502535712Z Address:	10.96.0.10:53
-2026-11-16T07:40:15.502536170Z 
-2026-11-16T07:40:15.502537045Z Name:	kubernetes.default.svc.cluster.local
-2026-11-16T07:40:15.502537587Z Address: 10.96.0.1

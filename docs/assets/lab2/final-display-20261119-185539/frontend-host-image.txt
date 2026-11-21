@@ -1,1 +1,0 @@
-{"id":"sha256:6bdaabba9579a828bfd14f7b081565c33a7c9e14da1b0d9647a1eb50bf8eece5","os":"linux","architecture":"arm64","digests":["venue-booking-frontend@sha256:6bdaabba9579a828bfd14f7b081565c33a7c9e14da1b0d9647a1eb50bf8eece5"]}

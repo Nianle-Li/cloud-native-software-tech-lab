@@ -1,3 +1,0 @@
-configmap/frontend-nginx unchanged (server dry run)
-service/frontend unchanged (server dry run)
-deployment.apps/frontend unchanged (server dry run)

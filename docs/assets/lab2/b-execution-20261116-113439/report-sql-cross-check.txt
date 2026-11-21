@@ -1,1 +1,0 @@
-[{"venue_id":1,"venue_name":"羽毛球馆 A","reservation_count":0,"reserved_minutes":0}, {"venue_id":2,"venue_name":"多功能教室 B","reservation_count":0,"reserved_minutes":0}, {"venue_id":3,"venue_name":"会议室 C","reservation_count":0,"reserved_minutes":0}]

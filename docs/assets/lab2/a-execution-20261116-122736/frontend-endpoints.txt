@@ -1,2 +1,0 @@
-NAME             ADDRESSTYPE   PORTS   ENDPOINTS    AGE
-frontend-2dsp5   IPv4          80      10.244.2.7   6s

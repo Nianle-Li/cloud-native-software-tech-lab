@@ -2,7 +2,7 @@
 
 本仓库包含前端、Web API、PostgreSQL 及 Docker Compose 配置。系统设计、接口字段、业务规则、测试结果和验收记录见 [Lab 1 实验报告](docs/lab1-report.md)。
 
-Lab 2 在现有系统上增加 kind 集群的 Kubernetes 编排和场地预约时长报告，包含前端、API、数据库及 Job、CronJob、DaemonSet。用于共同集群的独立展示清单与可读业务数据见 [最终展示部署说明](k8s/final/README.md)；各资源的常规部署方式见 [Kubernetes 操作说明](k8s/README.md)，实验内容见 [Lab 2 报告](docs/lab2-report.md)。以下“运行”一节对应 Lab 1 的 Compose 环境。
+Lab 2 在现有系统上增加 kind 集群的 Kubernetes 编排和场地预约时长报告，包含前端、API、数据库及 Job、CronJob、DaemonSet。目标集群 `venue-lab2` 中，`venue-booking-final` 是完整系统的展示入口，`venue-booking` 是隔离的专项验收环境；两者各有数据库和 PVC，不共享业务数据。部署或查看最终系统从 [Lab 2 最终展示部署说明](k8s/final/README.md)开始，逐项结果与证据见 [Lab 2 最终验收记录](docs/lab2/acceptance.md)，系统分析见 [Lab 2 实验报告](docs/lab2-report.md)。[Kubernetes 专项验收操作说明](k8s/README.md)仅用于 `venue-booking`。以下“运行”一节只对应 Lab 1 的 Compose 环境。
 
 ## 运行
 
@@ -44,7 +44,7 @@ docker compose exec -T frontend wget -qO- http://api:8080/actuator/health
 | `compose.yaml`、`.env.example` | 三服务编排与本地配置模板 |
 | `scripts/verify-database.py` | 独立数据库迁移与约束验证 |
 | `docs/lab1-report.md` | 架构、数据库、接口、部署、验收及小组分工 |
-| `docs/lab2-report.md`、`docs/附件/` | Lab 2 实验报告与功能截图 |
-| `k8s/base/`、`k8s/final/` | 正式资源清单与用于共同集群的独立展示清单 |
+| `docs/lab2-report.md`、`docs/lab2/` | Lab 2 实验报告、功能截图与逐项验收证据 |
+| `k8s/base/`、`k8s/final/` | 可复用的 Kubernetes 资源清单与最终展示入口；`k8s/final/` 引用 `k8s/base/` |
 | `scripts/seed-final-display.py`、`scripts/verify-final-display.py` | 创建可读业务样例并核对最终展示结果 |
-| `docs/lab1/` | 报告引用的截图与验收记录 |
+| `docs/lab1/` | Lab 1 报告引用的截图与验收记录 |

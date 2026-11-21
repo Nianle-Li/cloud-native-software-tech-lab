@@ -1,1 +1,0 @@
-job.batch "venue-report-manual-20261119102922-01fd83" deleted from venue-booking namespace
