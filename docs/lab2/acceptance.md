@@ -10,6 +10,8 @@
 
 展示部署的前端构建源码提交为 `dfde6c8`，浏览器补测时仓库提交为 `45b9b1f`；两者 `frontend` 目录的 Git tree 均为 `309bd450be2cb717b145f4636b5f93399b57e86a`。[源码一致性核对](evidence/frontend-display-regression/source-consistency.txt)确认展示部署、定时复核与核对时提交 `45b9b1f` 的 API、前端、清单、节点脚本和运行脚本无差异。补测所用的前端 Pod `imageID` 与其展示命名空间一致；镜像及节点信息见[原始环境记录](evidence/frontend-display-regression/environment.json)。
 
+后续对 `ReportJobLauncher` 的故障日志增强属于验收镜像构建之后的源码改进；本表的集群 Job 与 Pod 结果仍对应记录中的原镜像及 `imageID`，不将新日志写成已在共同集群观测。若以更新后的源码重建 API 镜像，应按[最终部署说明](../../k8s/final/README.md)更换镜像标签、同步清单并重新核对实际 Pod。
+
 | 验收要求 | 判定与实测结果 | 原始证据及范围 |
 | --- | --- | --- |
 | kind 环境、镜像和工作负载 | **通过。**三节点就绪；展示环境 API 2/2、前端 1/1、数据库 1/1、DaemonSet 2/2，PVC Bound，实际 Pod 镜像已核对。 | [集群环境](evidence/kind-environment.json)、[最终资源](evidence/scheduled-report-node-check/final-status.txt)、[镜像与节点](evidence/scheduled-report-node-check/pods-audit.json)；记录① `venue-booking-final`。 |
